@@ -2,7 +2,7 @@ import tkinter as tk
 import numpy as np
 import matplotlib.pyplot as plt
 
-file_path = "signal1.txt"
+file_path = "signal1_T_AP_13.txt"
 x = []
 y = []
 z = []

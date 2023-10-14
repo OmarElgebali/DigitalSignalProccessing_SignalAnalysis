@@ -1,10 +1,11 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, simpledialog
 import numpy as np
 
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.ticker import FuncFormatter
 
 
 # digital 	        -> stairs
@@ -13,7 +14,16 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class GUI:
     def __init__(self):
+
         self.root = tk.Tk()
+
+        self.Ys_cos_sample = None
+        self.Ys_cos_analog = None
+        self.Ys_sin_sample = None
+        self.Ys_sin_analog = None
+        self.Xs_SinCos = None
+        self.Xs_ContDisc = []
+        self.Ys_ContDisc = []
 
         # self.root.geometry("800x800")
         self.root.title("DSP Tasks - CS6")
@@ -22,10 +32,9 @@ class GUI:
 
         self.menubar = tk.Menu(self.root)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.filemenu.add_command(label="1. Generate Cont. & Disc. Signals", command=self.task_1_1)
+        self.filemenu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.filemenu.add_separator()
-        self.filemenu.add_command(label="2.1. Generate Sin Signal", command=self.task_1_2_1)
-        self.filemenu.add_command(label="2.2. Generate Cos Signal", command=self.task_1_2_2)
+        self.filemenu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
 
         self.menubar.add_cascade(menu=self.filemenu, label="Task 1")
 
@@ -38,25 +47,24 @@ class GUI:
         self.root.mainloop()
 
     def task_1_1(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        # fig = plt.figure(figsize=(8, 4))
-
-        # file_path = filedialog.askopenfilename(title="Select a Signal Data File")
-        file_path = "Task 1/signal2.txt"
-
+        file_path = filedialog.askopenfilename(title="Select a Signal Data File")
         if not file_path:
             messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
             return
 
         x = []
         y = []
-        z = []
         signal_details = []
         x_label = 't'
+        domain = 'Time'
+        periodic = 'Aperiodic'
+        title = ''
+
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
         with open(file_path, 'r') as file:
             line_count = 0
@@ -73,24 +81,21 @@ class GUI:
                     # [3] Phase Shift
                     signal_details.append(int(line))
                     continue
-                elif (line_count - 3) == (signal_details[2] + 1):
-                    print("end")
+                elif signal_details[0] == 1 and (line_count - 3) == (signal_details[2] + 1):
                     signal_details.append(int(line))
                     continue
-                print(f"[{line_count}, {signal_details[2] + 1}]")
                 values = line.split()  # Separate by whitespace
                 x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
                 y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
 
-            print("#1")
             combined_lists = list(zip(x, y))
             combined_lists.sort(key=lambda l: l[0])
             x, y = zip(*combined_lists)
             x = list(x)
             y = list(y)
 
-            print("#2")
             if signal_details[1] == 1:      # [1] Period
+                periodic = 'Periodic'
                 start_of_cycle = 0
                 end_of_cycle = signal_details[2]
                 temp_y = y
@@ -100,87 +105,109 @@ class GUI:
                     x.extend(range(start_of_cycle, end_of_cycle))
                     y = y + temp_y
 
-            print("#3")
             if signal_details[0] == 1:      # [0] Frequency Domain
                 x_label = 'f'
+                domain = 'Frequency'
 
-            print("#4")
-            if signal_details[3]:      # [3] Phase Shift
-                x = [value + 3 for value in x]
-                print(x)
+            title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
+            if signal_details[0] == 1 and signal_details[3]:      # [3] Phase Shift
+                title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
+                plt.xlim(1, max(x) + abs(signal_details[3]))
+                x = [value + signal_details[3] for value in x]
 
-            print("#5")
 
-        plt.xlim(1, max(x) + 3)
-        plt.stem(x, y)
-        plt.plot(x, y, color='green')
+        self.Xs_ContDisc = x
+        self.Ys_ContDisc = y
+        plt.stem(self.Xs_ContDisc, self.Ys_ContDisc)
+        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='green')
         plt.xlabel(x_label)
         plt.ylabel('Amplitude')
-        plt.title('Task 1.1 Plot')
+        plt.title(title)
+        plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def task_1_2_1(self):
+    def task_1_2(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
 
-        print("Enter Signal Data ")
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        amplitude = float(input("Amplitude : "))
-        sampling_frequency = float(input("sampling frequency : "))
-        phase_shift = float(input("phase shift : "))
-        analog_frequency = float(input("analog frequency : "))
+        wave_type = simpledialog.askinteger("Wave Type", "Enter Type of Signal:\n1- Sin\n2- Cosine")
+        amplitude = simpledialog.askfloat("Amplitude", "Enter Amplitude:")
+        analog_frequency = simpledialog.askfloat("Analog Frequency", "Enter Analog Frequency:")
+        sampling_frequency = simpledialog.askfloat("Sampling Frequency", "Enter Sampling Frequency:")
+        phase_shift = simpledialog.askfloat("Phase Shift", "Enter Phase Shift:")
 
-        wave_type = input("Enter Type of Signal:\n1- Sin\n2- Cosine\n")
+        if not amplitude or not sampling_frequency or not phase_shift or not analog_frequency or not wave_type:
+            messagebox.showerror(title="Error", message="One of the values is Null")
+            return
 
-        if sampling_frequency >= 2*analog_frequency:
-            x_values = np.arange(0, 1, 1/sampling_frequency)
-            # y_values_1 = amplitude * np.sin(2 * np.pi * x_values + phase_shift)
+        if wave_type != 1 and wave_type != 2:
+            messagebox.showerror(title="Error", message="Wave Type is not either a Sin (1) or Cosine (2) signal type")
+            return
 
-            num_cycles_sample = sampling_frequency/360
-            num_cycles_analog = analog_frequency/360
+        if sampling_frequency < 2*analog_frequency:
+            messagebox.showerror(title="Error", message="Sampling Frequency MUST BE Greater Than 2*Analog Frequency")
+            return
 
-            y_values_sample = 0
-            y_values_analog = 0
-            name = ""
-            if wave_type == '1':
-                y_values_analog = amplitude * np.sin(2 * np.pi * num_cycles_sample * x_values + phase_shift)
-                y_values_sample = amplitude * np.sin(2 * np.pi * num_cycles_analog * x_values + phase_shift)
-                name ="Sin"
+        x_values = np.arange(0, 1, 1/sampling_frequency)
+        self.Xs_SinCos = x_values
 
-            else:
-                y_values_analog = amplitude * np.cos(2 * np.pi * num_cycles_analog * x_values + phase_shift)
-                y_values_sample = amplitude * np.cos(2 * np.pi * num_cycles_sample * x_values + phase_shift)
-                name = "Cosine"
+        num_cycles_sample = sampling_frequency/360
+        num_cycles_analog = analog_frequency/360
 
-            # plt.plot(x_values, y_values_1)
-            plt.plot(x_values, y_values_sample)
-            plt.plot(x_values, y_values_analog)
+        # Equation -> y = amplitude * np.sin(2 * np.pi * x + phase_shift)
+        self.Ys_sin_analog = amplitude * np.sin(2 * np.pi * num_cycles_analog * x_values + phase_shift)
+        self.Ys_sin_sample = amplitude * np.sin(2 * np.pi * num_cycles_sample * x_values + phase_shift)
+        # Equation -> y = amplitude * np.cos(2 * np.pi * x + phase_shift)
+        self.Ys_cos_analog = amplitude * np.cos(2 * np.pi * num_cycles_analog * x_values + phase_shift)
+        self.Ys_cos_sample = amplitude * np.cos(2 * np.pi * num_cycles_sample * x_values + phase_shift)
 
-            # plt.stem(x_values, y_values_sample)
-            # plt.stem(x_values, y_values_analog)
-
-            # Set the plot title, axis labels, and grid.
-            plt.title(f'{name} Wave Plot')
-            plt.xlabel('X-axis')
-            plt.ylabel('Y-axis')
-            plt.grid(True)
-
-            # Show the plot.
-            plt.show()
-
+        if wave_type == 1:
+            name = "Sin"
+            plt.plot(self.Xs_SinCos, self.Ys_sin_sample)
+            plt.plot(self.Xs_SinCos, self.Ys_sin_analog)
         else:
-            print("ERROR , Sampling Frequency MUST BE Greater Than 2*Analog Frequency")
+            name = "Cosine"
+            plt.plot(self.Xs_SinCos, self.Ys_cos_sample)
+            plt.plot(self.Xs_SinCos, self.Ys_cos_analog)
 
-    def task_1_2_2(self):
-        pass
+        # plt.stem(x_values, y_values_sample)
+        # plt.stem(x_values, y_values_analog)
+
+        """
+        def format_func(value, tick_number):
+            if int(value) == value:
+                return f'{int(value)}π'
+            return f'{int(value)}π/{int(1 / value % 1)}'
+
+        ax = plt.gca()
+        ax.xaxis.set_major_formatter(FuncFormatter(format_func))
+        plt.xlabel('Time (π radians)')
+        """
+
+        title = f"""{name} Wave Plot
+        Form: Y = A * {name.lower()}( W * X + Theta ) 
+        Equation: Y = ({amplitude}) * {name.lower()}( ({analog_frequency}) * X + ({phase_shift}) )
+        Sampling Frequency: {sampling_frequency}
+        Fs >= 2 * Fmax : ({sampling_frequency}) >= (2 * {analog_frequency})"""
+
+        plt.title(title)
+        plt.xlabel('Time')
+        plt.ylabel('Amplitude')
+        plt.grid(True)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
 
     def on_closing(self):
         if messagebox.askyesno(title="Quit", message="U really want 2 quit?"):
             print("Bye!")
             self.root.destroy()
-
-    def clear(self):
-        self.textbox.delete('1.0', tk.END)
 
 GUI()
