@@ -13,13 +13,13 @@ class GUI:
     def __init__(self):
         self.root = tk.Tk()
 
-        self.root.geometry("500x500")
+        # self.root.geometry("800x800")
         self.root.title("DSP Tasks - CS6")
 
         self.menubar = tk.Menu(self.root)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
         self.filemenu.add_command(label="1. Generate Cont. & Disc. Signals", command=self.task_1_1)
-        # self.filemenu.add_separator()
+        self.filemenu.add_separator()
         self.filemenu.add_command(label="2. Generate Sin & Cos Signals", command=self.task_1_2)
 
         self.menubar.add_cascade(menu=self.filemenu, label="Task 1")
@@ -37,7 +37,7 @@ class GUI:
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
 
-        fig = plt.figure(figsize=(5, 3))
+        fig = plt.figure()
 
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
 
@@ -49,6 +49,7 @@ class GUI:
         y = []
         z = []
         signal_details = []
+        x_label = 't'
 
         with open(file_path, 'r') as file:
             line_count = 0
@@ -61,18 +62,28 @@ class GUI:
                     # [1] Period
                     # if == 0 -> Aperiodic
                     # if == 1 -> Periodic
-                    # [2] N samples (pointless)
+                    # [2] N samples
                     signal_details.append(int(line))
                     continue
-                values = line.split()           # Separate by whitespace
-                x.append(float(values[0]))      # [T] Sample Index      [F] Frequency
-                y.append(float(values[1]))      # [T] Sample Amplitude  [F] Amplitude
-                if signal_details[0] == 1:
+                values = line.split()  # Separate by whitespace
+                x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
+                y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
+                if signal_details[0] == 1:  # [2] Domain
+                    x_label = 'f'
                     z.append(float(values[2]))  # [T] Shift = 0         [F] Phase Shift
+            if signal_details[1] == 1:  # [1] Period
+                start_of_cycle = 0
+                end_of_cycle = signal_details[2] + 1
+                temp_y = y
+                for i in range(1, 3):
+                    start_of_cycle += signal_details[2] + 1
+                    end_of_cycle += signal_details[2] + 1
+                    x.extend(range(start_of_cycle, end_of_cycle))
+                    y = y + temp_y
 
         plt.stem(x, y)
         plt.plot(x, y, color='green')
-        plt.xlabel('X')
+        plt.xlabel(x_label)
         plt.ylabel('Amplitude')
         plt.title('Task 1.1 Plot')
         # plt.show()
