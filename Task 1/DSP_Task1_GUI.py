@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
+import numpy as np
+
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -121,7 +123,54 @@ class GUI:
         canvas.get_tk_widget().pack()
 
     def task_1_2_1(self):
-        pass
+
+        print("Enter Signal Data ")
+
+        amplitude = float(input("Amplitude : "))
+        sampling_frequency = float(input("sampling frequency : "))
+        phase_shift = float(input("phase shift : "))
+        analog_frequency = float(input("analog frequency : "))
+
+        wave_type = input("Enter Type of Signal:\n1- Sin\n2- Cosine\n")
+
+        if sampling_frequency >= 2*analog_frequency:
+            x_values = np.arange(0, 1, 1/sampling_frequency)
+            # y_values_1 = amplitude * np.sin(2 * np.pi * x_values + phase_shift)
+
+            num_cycles_sample = sampling_frequency/360
+            num_cycles_analog = analog_frequency/360
+
+            y_values_sample = 0
+            y_values_analog = 0
+            name = ""
+            if wave_type == '1':
+                y_values_analog = amplitude * np.sin(2 * np.pi * num_cycles_sample * x_values + phase_shift)
+                y_values_sample = amplitude * np.sin(2 * np.pi * num_cycles_analog * x_values + phase_shift)
+                name ="Sin"
+
+            else:
+                y_values_analog = amplitude * np.cos(2 * np.pi * num_cycles_analog * x_values + phase_shift)
+                y_values_sample = amplitude * np.cos(2 * np.pi * num_cycles_sample * x_values + phase_shift)
+                name = "Cosine"
+
+            # plt.plot(x_values, y_values_1)
+            plt.plot(x_values, y_values_sample)
+            plt.plot(x_values, y_values_analog)
+
+            # plt.stem(x_values, y_values_sample)
+            # plt.stem(x_values, y_values_analog)
+
+            # Set the plot title, axis labels, and grid.
+            plt.title(f'{name} Wave Plot')
+            plt.xlabel('X-axis')
+            plt.ylabel('Y-axis')
+            plt.grid(True)
+
+            # Show the plot.
+            plt.show()
+
+        else:
+            print("ERROR , Sampling Frequency MUST BE Greater Than 2*Analog Frequency")
 
     def task_1_2_2(self):
         pass
