@@ -62,32 +62,17 @@ with open('signal1.txt', 'r') as file1:
         signal1_time.append(float(parts[0]))
         signal1_value.append(float(parts[1]))
 
-# Read the contents of the second text file
-with open('signal2.txt', 'r') as file2:
-    lines = file2.readlines()
-    signal2_time = []
-    signal2_value = []
-    for line in lines:
-        parts = line.split()
-        signal2_time.append(float(parts[0]))
-        signal2_value.append(float(parts[1]))
 
-# Check the sizes of the signals
-signal1_size = len(signal1_value)
-signal2_size = len(signal2_value)
-
-# Check if the sizes match
-if signal1_size != signal2_size:
-    print("Error: The signals have different sizes.")
-else:
-    # Add the corresponding signal values together
-    result_value = np.array(signal1_value) + np.array(signal2_value)
-    plt.stem(signal2_time, result_value)
-    # plt.plot(x, y, color='green')
-    plt.xlabel("signal2_time")
+    Square = np.array(signal1_value) * np.array(signal1_value)
+    print(Square)
+    plt.stem(signal1_time, Square)
+    plt.xlabel("signal_time")
     plt.ylabel('Amplitude')
-    plt.title('ِِAdding')
+    plt.title('ِِSquaring')
     plt.show()
+
+
+
 
 
 
