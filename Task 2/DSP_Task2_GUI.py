@@ -525,6 +525,22 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        accumulate_signal = [sum(signal_value[:i+1]) for i in range(len(signal_value))]
+        print(signal_value)
+        print(accumulate_signal)
+
+        # plt.plot(signal_time, square_signal, color='orange')
+        plt.stem(signal_time, accumulate_signal)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 2.7 - Accumulated Signal')
+
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()

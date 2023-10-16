@@ -21,14 +21,6 @@ from matplotlib.ticker import FuncFormatter
 #     print("= " * 30)
 
 
-# Your original array of 5 values
 original_array = [1, 2, 3, 4, 5]
-
-# Define the desired length of the extended array
-desired_length = 5
-
-# Create a new array with the desired length filled with 0s
-extended_array = original_array + [0] * (desired_length - len(original_array))
-
-# Print the extended array
-print(extended_array)
+new_array = [sum(original_array[:i+1]) for i in range(len(original_array))]
+print(new_array)
