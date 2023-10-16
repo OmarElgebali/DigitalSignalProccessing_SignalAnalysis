@@ -220,7 +220,85 @@ class GUI:
         canvas.get_tk_widget().pack()
 
     def task_2_1_addition(self):
-        pass
+        file_path = filedialog.askopenfilename(title="Select a Signal Data File")
+        if not file_path:
+            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+            return
+
+        x = []
+        y = []
+        signal_details = []
+        x_label = 't'
+        domain = 'Time'
+        periodic = 'Aperiodic'
+
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        with open(file_path, 'r') as file:
+            line_count = 0
+            for line in file:
+                line_count += 1
+                if line_count <= 3:
+                    # [0] Domain
+                    # if == 0 -> Time Domain (x= time_in_secs, y= Amplitude)
+                    # if == 1 -> Freq Domain (x= bin_num, y= Amplitude, z= phase_shift)
+                    # [1] Period
+                    # if == 0 -> Aperiodic
+                    # if == 1 -> Periodic
+                    # [2] N samples
+                    # [3] Phase Shift
+                    signal_details.append(int(line))
+                    continue
+                elif signal_details[0] == 1 and (line_count - 3) == (signal_details[2] + 1):
+                    signal_details.append(int(line))
+                    continue
+                values = line.split()  # Separate by whitespace
+                x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
+                y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
+
+            combined_lists = list(zip(x, y))
+            combined_lists.sort(key=lambda l: l[0])
+            x, y = zip(*combined_lists)
+            x = list(x)
+            y = list(y)
+
+            if signal_details[1] == 1:      # [1] Period
+                periodic = 'Periodic'
+                start_of_cycle = 0
+                end_of_cycle = signal_details[2]
+                temp_y = y
+                for i in range(1, 3):
+                    start_of_cycle += signal_details[2]
+                    end_of_cycle += signal_details[2]
+                    x.extend(range(start_of_cycle, end_of_cycle))
+                    y = y + temp_y
+
+            if signal_details[0] == 1:      # [0] Frequency Domain
+                x_label = 'f'
+                domain = 'Frequency'
+
+            title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
+            if signal_details[0] == 1 and signal_details[3]:      # [3] Phase Shift
+                title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
+                plt.xlim(1, max(x) + abs(signal_details[3]))
+                x = [value + signal_details[3] for value in x]
+
+        self.Xs_ContDisc = x
+        self.Ys_ContDisc = y
+        plt.stem(self.Xs_ContDisc, self.Ys_ContDisc)
+        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='green')
+        plt.xlabel(x_label)
+        plt.ylabel('Amplitude')
+        plt.title(title)
+        plt.grid(True)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
 
     def task_2_2_subtraction(self):
         pass
