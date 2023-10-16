@@ -333,7 +333,7 @@ class GUI:
         """
         result_addition_signal = np.sum(signal_values, axis=0)
 
-        plt.plot(signal_times[0], result_addition_signal, color='orange')
+        # plt.plot(signal_times[0], result_addition_signal, color='orange')
         plt.stem(signal_times[0], result_addition_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
@@ -383,7 +383,7 @@ class GUI:
         """
         result_subtraction_signal = np.subtract(signal_1_value, signal_2_value)
 
-        plt.plot(signal_1_time, result_subtraction_signal, color='orange')
+        # plt.plot(signal_1_time, result_subtraction_signal, color='orange')
         plt.stem(signal_1_time, result_subtraction_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
@@ -401,7 +401,6 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_file_path:
             messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
@@ -411,16 +410,15 @@ class GUI:
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
 
-        result = np.array(signal_value) * np.array(factor)
-        signal_time , result  = self.sort_2_lists(signal_time, result)
+        signal_value_multiplied = np.array(signal_value) * np.array(factor)
+        signal_time, signal_value_multiplied = self.sort_2_lists(signal_time, signal_value_multiplied)
 
-        plt.stem(signal_time, result)
-        # plt.plot(signal_time, result, color='orange')
+        # plt.plot(signal_time, signal_value_multiplied, color='orange')
+        plt.stem(signal_time, signal_value_multiplied)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title(f'Task 2.3 - Multiplication Signal by Factor = {factor}')
         plt.grid(True)
-
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -440,7 +438,7 @@ class GUI:
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         square_signal = np.array(signal_value) * np.array(signal_value)
-        plt.plot(signal_time, square_signal, color='orange')
+        # plt.plot(signal_time, square_signal, color='orange')
         plt.stem(signal_time, square_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
@@ -472,7 +470,7 @@ class GUI:
         new_max_time = max(shifted_signal)
 
         plt.xlim(min(old_min_time, new_min_time) - 1, max(old_max_time, new_max_time) + 1)
-        plt.plot(shifted_signal, signal_value, color='orange')
+        # plt.plot(shifted_signal, signal_value, color='orange')
         plt.stem(shifted_signal, signal_value)
         plt.xlabel("Shifted Time")
         plt.ylabel('Amplitude')
@@ -509,8 +507,8 @@ class GUI:
 
         normalized_signal = scaler.fit_transform(np.array(signal_value))
         normalized_result = normalized_signal.flatten()
+        plt.plot(signal_time, normalized_result, color='orange')
         plt.stem(signal_time, normalized_result)
-        # plt.plot(x, y, color='green')
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 6 - Normalized Signal')
