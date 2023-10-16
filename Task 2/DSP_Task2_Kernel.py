@@ -1,7 +1,8 @@
 import tkinter as tk
 import numpy as np
 import matplotlib.pyplot as plt
-
+from sklearn import preprocessing
+from sklearn.preprocessing import MinMaxScaler
 # file_path = "signal1_T_AP_13.txt"
 # x = []
 # y = []
@@ -80,14 +81,54 @@ signal2_size = len(signal2_value)
 if signal1_size != signal2_size:
     print("Error: The signals have different sizes.")
 else:
-    # Add the corresponding signal values together
     result_value = np.array(signal1_value) + np.array(signal2_value)
+    print(type(result_value))
     plt.stem(signal2_time, result_value)
     # plt.plot(x, y, color='green')
     plt.xlabel("signal2_time")
     plt.ylabel('Amplitude')
     plt.title('ِِAdding')
     plt.show()
+
+
+
+
+### Nomralization
+
+
+def normalization():
+
+    with open('signal1.txt', 'r') as file1:
+        lines = file1.readlines()
+        signal1_time = []
+        signal1_value = []
+        for line in lines:
+            parts = line.split()
+            signal1_time.append(float(parts[0]))
+            signal1_value.append(float(parts[1]))
+
+
+    signal1_value = np.reshape(signal1_value, (-1, 1))
+    scaler_value = int(input("1- press one for (0:1)\n2- for (-1:1)\n"))
+    scaler = MinMaxScaler(feature_range=(0,1))
+    if scaler_value == 1:
+        scaler = MinMaxScaler(feature_range=(0,1))
+    else:
+        scaler = MinMaxScaler(feature_range=(-1,1))
+
+    normalized_signal = scaler.fit_transform(np.array(signal1_value))
+    normalized_result = normalized_signal.flatten()
+    print(normalized_result)
+    plt.stem(signal1_time, normalized_result)
+    # plt.plot(x, y, color='green')
+    plt.xlabel("signal1_time")
+    plt.ylabel('Amplitude')
+    plt.title('ِِAdding')
+    plt.show()
+
+
+normalization()
+
 
 
 
