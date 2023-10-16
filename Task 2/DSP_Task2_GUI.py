@@ -401,6 +401,27 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
+        if not signal_file_path:
+            messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
+            return
+
+        factor = simpledialog.askinteger("Factor", "Enter Factor:")
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+
+        result = np.array(signal_value) * np.array(factor)
+        signal_time , result  = self.sort_2_lists(signal_time, result)
+
+        plt.stem(signal_time, result)
+        # plt.plot(signal_time, result, color='orange')
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 2.3 - Multiplication Signal by Factor = {factor}')
+        plt.grid(True)
+
+
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
