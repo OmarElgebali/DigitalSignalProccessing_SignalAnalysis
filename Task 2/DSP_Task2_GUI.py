@@ -421,6 +421,28 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        old_min_time = min(signal_time)
+        old_max_time = max(signal_time)
+        shift_value = simpledialog.askfloat("Shifting Value", "Enter Shift Value (+ve or -ve):")
+        shifted_signal = np.array(signal_time) + shift_value
+        shifted_signal, signal_value = self.sort_2_lists(shifted_signal, signal_value)
+        new_min_time = min(shifted_signal)
+        new_max_time = max(shifted_signal)
+
+        plt.xlim(min(old_min_time, new_min_time) - 1, max(old_max_time, new_max_time) + 1)
+        plt.plot(shifted_signal, signal_value, color='orange')
+        plt.stem(shifted_signal, signal_value)
+        plt.xlabel("Shifted Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 2.5 - Shifted Signal')
+        plt.grid(True)
+
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
