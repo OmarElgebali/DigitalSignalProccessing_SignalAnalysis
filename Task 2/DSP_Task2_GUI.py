@@ -98,7 +98,7 @@ class GUI:
     def task_1_1(self):
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
         if not file_path:
-            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
         x = []
@@ -161,8 +161,8 @@ class GUI:
 
         self.Xs_ContDisc = x
         self.Ys_ContDisc = y
-        plt.stem(self.Xs_ContDisc, self.Ys_ContDisc)
         plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='green')
+        plt.stem(self.Xs_ContDisc, self.Ys_ContDisc)
         plt.xlabel(x_label)
         plt.ylabel('Amplitude')
         plt.title(title)
@@ -271,7 +271,7 @@ class GUI:
         """
         file_paths = list(filedialog.askopenfilenames(title="Select Signal Data Files"))
         if not file_paths[0]:
-            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+            messagebox.showerror(title="Error", message="There is a Signal Data File Not Found!")
             return
 
         signal_number = 0
@@ -331,8 +331,8 @@ class GUI:
         """
         result_addition_signal = np.sum(signal_values, axis=0)
 
-        plt.stem(signal_times[0], result_addition_signal)
         plt.plot(signal_times[0], result_addition_signal, color='orange')
+        plt.stem(signal_times[0], result_addition_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.1 - Addition Signal')
@@ -351,12 +351,12 @@ class GUI:
 
         signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_1_file_path:
-            messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
+            messagebox.showerror(title="Error", message="Signal Data File (S1) Not Found!")
             return
 
         signal_2_file_path = filedialog.askopenfilename(title="Select Signal Data File (S2)")
         if not signal_2_file_path:
-            messagebox.showwarning(title="Warning", message="Signal Data File (S2) Not Found!")
+            messagebox.showerror(title="Error", message="Signal Data File (S2) Not Found!")
             return
 
         signal_1_time, signal_1_value = self.read_only_signal(signal_1_file_path)
@@ -381,8 +381,8 @@ class GUI:
         """
         result_subtraction_signal = np.subtract(signal_1_value, signal_2_value)
 
-        plt.stem(signal_1_time, result_subtraction_signal)
         plt.plot(signal_1_time, result_subtraction_signal, color='orange')
+        plt.stem(signal_1_time, result_subtraction_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.2 - Subtraction Signal')
