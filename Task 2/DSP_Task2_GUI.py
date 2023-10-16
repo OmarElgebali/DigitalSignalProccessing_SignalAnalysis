@@ -5,6 +5,8 @@ from comparesignals import SignalSamplesAreEqual
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.ticker import FuncFormatter
+from sklearn import preprocessing
+from sklearn.preprocessing import MinMaxScaler
 
 
 class GUI:
@@ -466,6 +468,32 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
+
+        if scaler_value != 1 and scaler_value != 2:
+            messagebox.showerror(title="Error", message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
+            return
+
+        signal_value = np.reshape(signal_value, (-1, 1))
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        if scaler_value == 2:
+            scaler = MinMaxScaler(feature_range=(-1, 1))
+
+        normalized_signal = scaler.fit_transform(np.array(signal_value))
+        normalized_result = normalized_signal.flatten()
+        plt.stem(signal_time, normalized_result)
+        # plt.plot(x, y, color='green')
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 6 - Normalized Signal')
+        plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
