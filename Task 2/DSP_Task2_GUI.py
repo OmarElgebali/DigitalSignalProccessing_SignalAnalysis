@@ -410,6 +410,19 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        square_signal = np.array(signal_value) * np.array(signal_value)
+        plt.plot(signal_time, square_signal, color='orange')
+        plt.stem(signal_time, square_signal)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 2.4 - Squared Signal')
+
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
@@ -440,7 +453,7 @@ class GUI:
         plt.stem(shifted_signal, signal_value)
         plt.xlabel("Shifted Time")
         plt.ylabel('Amplitude')
-        plt.title('Task 2.5 - Shifted Signal')
+        plt.title(f'Task 2.5 - Shifted Signal by ({shift_value})')
         plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
