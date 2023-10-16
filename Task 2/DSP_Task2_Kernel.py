@@ -48,10 +48,6 @@ import matplotlib.pyplot as plt
 # plt.title('Time Domain Plot')
 # plt.show()
 
-
-
-
-
 # Read the contents of the first text file
 with open('signal1.txt', 'r') as file1:
     lines = file1.readlines()

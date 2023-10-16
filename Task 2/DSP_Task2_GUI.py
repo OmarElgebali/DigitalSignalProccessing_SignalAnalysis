@@ -34,19 +34,19 @@ class GUI:
         self.menubar.add_cascade(menu=self.task_1_menu, label="Task 1")
 
         self.task_2_menu = tk.Menu(self.menubar, tearoff=1)
-        self.task_2_menu.add_command(label="(2.1) Addition", command=self.task_2_1_addition)
+        self.task_2_menu.add_command(label="(2.1) Addition [∑ S's]", command=self.task_2_1_addition)
         self.task_2_menu.add_separator()
-        self.task_2_menu.add_command(label="(2.2) Subtraction", command=self.task_2_2_subtraction)
+        self.task_2_menu.add_command(label="(2.2) Subtraction [S1 - S2]", command=self.task_2_2_subtraction)
         self.task_2_menu.add_separator()
-        self.task_2_menu.add_command(label="(2.3) Multiplication", command=self.task_2_3_multiplication)
+        self.task_2_menu.add_command(label="(2.3) Multiplication [S * C]", command=self.task_2_3_multiplication)
         self.task_2_menu.add_separator()
-        self.task_2_menu.add_command(label="(2.4) Squaring", command=self.task_2_4_squaring)
+        self.task_2_menu.add_command(label="(2.4) Squaring [S * S]", command=self.task_2_4_squaring)
         self.task_2_menu.add_separator()
-        self.task_2_menu.add_command(label="(2.5) Shifting", command=self.task_2_5_shifting)
+        self.task_2_menu.add_command(label="(2.5) Shifting [Ø +- C]", command=self.task_2_5_shifting)
         self.task_2_menu.add_separator()
-        self.task_2_menu.add_command(label="(2.6) Normalization", command=self.task_2_6_normalization)
+        self.task_2_menu.add_command(label="(2.6) Normalization [-1, 1 | 0, 1]", command=self.task_2_6_normalization)
         self.task_2_menu.add_separator()
-        self.task_2_menu.add_command(label="(2.7) Accumulation=", command=self.task_2_7_accumulation)
+        self.task_2_menu.add_command(label="(2.7) Accumulation [∑ x(k)] ", command=self.task_2_7_accumulation)
 
         self.menubar.add_cascade(menu=self.task_2_menu, label="Task 2")
 
@@ -57,6 +57,43 @@ class GUI:
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.mainloop()
+
+    def sort_2_lists(self, list_1, list_2):
+        combined_lists = list(zip(list_1, list_2))
+        combined_lists.sort(key=lambda l: l[0])
+        x, y = zip(*combined_lists)
+        x = list(x)
+        y = list(y)
+        return x, y
+
+    def extend_signal_calculation(self, signal_t, signal_val, new_max_length):
+        signal_val = signal_val + [0] * (new_max_length - len(signal_val))
+        signal_t.extend(range(len(signal_t), new_max_length))
+        return signal_t, signal_val
+
+    def extend_signals(self, list_signal_times, list_signal_values):
+        signal_lengths = [len(signal) for signal in list_signal_times]
+        max_len = max(signal_lengths)
+        number_of_signals = len(signal_lengths)
+        current_signal = 0
+        while current_signal <= number_of_signals - 1:
+            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(list_signal_values[current_signal], list_signal_times[current_signal], max_len)
+            current_signal += 1
+        return list_signal_times, list_signal_values
+
+    def read_only_signal(self, signal_file_path):
+        with open(signal_file_path, 'r') as file:
+            file.readline()
+            file.readline()
+            file.readline()
+            lines = file.readlines()
+            signal_time = []
+            signal_value = []
+            for line in lines:
+                parts = line.split()
+                signal_time.append(float(parts[0]))
+                signal_value.append(float(parts[1]))
+        return signal_time, signal_value
 
     def task_1_1(self):
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
@@ -99,11 +136,7 @@ class GUI:
                 x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
                 y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
 
-            combined_lists = list(zip(x, y))
-            combined_lists.sort(key=lambda l: l[0])
-            x, y = zip(*combined_lists)
-            x = list(x)
-            y = list(y)
+            x, y = self.sort_2_lists(x, y)
 
             if signal_details[1] == 1:      # [1] Period
                 periodic = 'Periodic'
@@ -220,80 +253,89 @@ class GUI:
         canvas.get_tk_widget().pack()
 
     def task_2_1_addition(self):
-        file_path = filedialog.askopenfilename(title="Select a Signal Data File")
-        if not file_path:
-            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
-            return
-
-        x = []
-        y = []
-        signal_details = []
-        x_label = 't'
-        domain = 'Time'
-        periodic = 'Aperiodic'
-
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        with open(file_path, 'r') as file:
-            line_count = 0
-            for line in file:
-                line_count += 1
-                if line_count <= 3:
-                    # [0] Domain
-                    # if == 0 -> Time Domain (x= time_in_secs, y= Amplitude)
-                    # if == 1 -> Freq Domain (x= bin_num, y= Amplitude, z= phase_shift)
-                    # [1] Period
-                    # if == 0 -> Aperiodic
-                    # if == 1 -> Periodic
-                    # [2] N samples
-                    # [3] Phase Shift
-                    signal_details.append(int(line))
-                    continue
-                elif signal_details[0] == 1 and (line_count - 3) == (signal_details[2] + 1):
-                    signal_details.append(int(line))
-                    continue
-                values = line.split()  # Separate by whitespace
-                x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
-                y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
+        # Select Multiple Files
+        """
+        file_paths = [filedialog.askopenfilename(title="Select a Signal Data File")]
+        if not file_paths[0]:
+            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+            return
 
-            combined_lists = list(zip(x, y))
-            combined_lists.sort(key=lambda l: l[0])
-            x, y = zip(*combined_lists)
-            x = list(x)
-            y = list(y)
+        while messagebox.askyesno(title="File Upload", message="Select another file (Signal)?"):
+            file_paths.append(filedialog.askopenfilename(title="Select a Signal Data File"))
+        """
+        file_paths = list(filedialog.askopenfilenames(title="Select Signal Data Files"))
+        if not file_paths[0]:
+            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+            return
 
-            if signal_details[1] == 1:      # [1] Period
-                periodic = 'Periodic'
-                start_of_cycle = 0
-                end_of_cycle = signal_details[2]
-                temp_y = y
-                for i in range(1, 3):
-                    start_of_cycle += signal_details[2]
-                    end_of_cycle += signal_details[2]
-                    x.extend(range(start_of_cycle, end_of_cycle))
-                    y = y + temp_y
+        signal_number = 0
+        lengths_equal = 1
+        signal_times = []
+        signal_values = []
+        """
+        signal_times & signal_values -> List Description
+        [
+            [], Signal #1
+            [], Signal #2
+            [], Signal #3
+            .
+            .
+            .
+            []  Signal #N
+        ]
+        """
 
-            if signal_details[0] == 1:      # [0] Frequency Domain
-                x_label = 'f'
-                domain = 'Frequency'
+        signal_time_temp, signal_value_temp = self.read_only_signal(file_paths[0])
+        signal_times.append(signal_time_temp)
+        signal_values.append(signal_value_temp)
+        file_paths.pop(0)
 
-            title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
-            if signal_details[0] == 1 and signal_details[3]:      # [3] Phase Shift
-                title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
-                plt.xlim(1, max(x) + abs(signal_details[3]))
-                x = [value + signal_details[3] for value in x]
+        for file_path in file_paths:
+            signal_number += 1
+            signal_time_temp, signal_value_temp = self.read_only_signal(file_path)
+            signal_times.append(signal_time_temp)
+            signal_values.append(signal_value_temp)
+            if len(signal_times[0]) != len(signal_times[signal_number]):
+                lengths_equal = 0
+            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number], signal_values[signal_number])
 
-        self.Xs_ContDisc = x
-        self.Ys_ContDisc = y
-        plt.stem(self.Xs_ContDisc, self.Ys_ContDisc)
-        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='green')
-        plt.xlabel(x_label)
+        # Not Equal Length Check
+        """
+        signal_lengths = [len(signal) for signal in signal_times]
+        if len(set(signal_lengths)) != 1:
+        """
+        if not lengths_equal:
+            """
+            current_signal = 0
+            while current_signal <= signal_number:
+                signal_values[current_signal] = signal_values[current_signal] + [0] * (len(signal_values[max_signal_len_number]) - len(signal_values[current_signal]))
+                signal_times[current_signal].extend(range(len(signal_times[current_signal]), len(signal_values[max_signal_len_number])))
+                current_signal += 1
+            """
+            signal_times, signal_values = self.extend_signals(signal_times, signal_values)
+            messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
+
+        # Add Signals
+        """
+        result_addition_signal = np.array(signal_values[0])
+        current_signal = 0
+        while current_signal <= (signal_number-1):
+            result_addition_signal = result_addition_signal + np.array(signal_values[current_signal + 1])
+            current_signal += 1
+        """
+        result_addition_signal = np.sum(signal_values, axis=0)
+
+        plt.stem(signal_times[0], result_addition_signal)
+        plt.plot(signal_times[0], result_addition_signal, color='orange')
+        plt.xlabel("Time")
         plt.ylabel('Amplitude')
-        plt.title(title)
+        plt.title('Task 2.1 - Addition Signal')
         plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
@@ -301,10 +343,65 @@ class GUI:
         canvas.get_tk_widget().pack()
 
     def task_2_2_subtraction(self):
-        pass
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
+        if not signal_1_file_path:
+            messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
+            return
+
+        signal_2_file_path = filedialog.askopenfilename(title="Select Signal Data File (S2)")
+        if not signal_2_file_path:
+            messagebox.showwarning(title="Warning", message="Signal Data File (S2) Not Found!")
+            return
+
+        signal_1_time, signal_1_value = self.read_only_signal(signal_1_file_path)
+        signal_2_time, signal_2_value = self.read_only_signal(signal_2_file_path)
+
+        signal_1_time, signal_1_value = self.sort_2_lists(signal_1_time, signal_1_value)
+        signal_2_time, signal_2_value = self.sort_2_lists(signal_2_time, signal_2_value)
+
+        # Not Equal Length Check
+        if len(signal_1_time) < len(signal_2_time):
+            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value, len(signal_2_value))
+            messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
+        elif len(signal_1_time) > len(signal_2_time):
+            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value, len(signal_1_value))
+            messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
+
+        # Subtract Signals
+        """
+        signal_1_value = np.array(signal_1_value)
+        signal_2_value = np.array(signal_2_value)
+        result_subtraction_signal_ = signal_1_value - signal_2_value
+        """
+        result_subtraction_signal = np.subtract(signal_1_value, signal_2_value)
+
+        plt.stem(signal_1_time, result_subtraction_signal)
+        plt.plot(signal_1_time, result_subtraction_signal, color='orange')
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 2.2 - Subtraction Signal')
+        plt.grid(True)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
 
     def task_2_3_multiplication(self):
-        pass
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
 
     def task_2_4_squaring(self):
         pass
