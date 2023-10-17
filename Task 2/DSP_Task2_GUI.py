@@ -381,7 +381,7 @@ class GUI:
         signal_2_value = np.array(signal_2_value)
         result_subtraction_signal_ = signal_1_value - signal_2_value
         """
-        result_subtraction_signal = np.subtract(signal_1_value, signal_2_value)
+        result_subtraction_signal = np.subtract(signal_2_value, signal_1_value)
 
         # plt.plot(signal_1_time, result_subtraction_signal, color='orange')
         plt.stem(signal_1_time, result_subtraction_signal)
