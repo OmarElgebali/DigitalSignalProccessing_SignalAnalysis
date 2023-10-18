@@ -163,8 +163,8 @@ class GUI:
 
         self.Xs_ContDisc = x
         self.Ys_ContDisc = y
-        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='green')
-        plt.stem(self.Xs_ContDisc, self.Ys_ContDisc)
+        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='orange')
+        plt.scatter(self.Xs_ContDisc, self.Ys_ContDisc)
         plt.xlabel(x_label)
         plt.ylabel('Amplitude')
         plt.title(title)
@@ -200,44 +200,40 @@ class GUI:
         #     return
 
         if sampling_frequency == 0:
-            x_values = np.arange(0, 1, 1/analog_frequency)
+            x_values = np.linspace(0, 10, analog_frequency)
             self.Xs_SinCos = x_values
             self.Ys_sin_analog = amplitude * np.sin(2 * np.pi * analog_frequency * x_values + phase_shift)
             self.Ys_cos_analog = amplitude * np.cos(2 * np.pi * analog_frequency * x_values + phase_shift)
             if wave_type == 1:
                 name = "Sin"
                 plt.plot(self.Xs_SinCos, self.Ys_sin_analog)
-                SignalSamplesAreEqual("SinOutput.txt", sampling_frequency, self.Ys_sin_analog)
 
             else:
                 name = "Cosine"
                 plt.plot(self.Xs_SinCos, self.Ys_cos_analog)
-                SignalSamplesAreEqual("CosOutput.txt", sampling_frequency, self.Ys_cos_analog)
         else:
-            x_values = np.arange(0, 1, 1/sampling_frequency)
+            x_values = np.linspace(0, 10, sampling_frequency)
             self.Xs_SinCos = x_values
 
             # num_cycles_sample = sampling_frequency/360
             # num_cycles_analog = analog_frequency/360
 
             # Equation -> y = amplitude * np.sin(2 * np.pi * x + phase_shift)
-            self.Ys_sin_analog = amplitude * np.sin(2 * np.pi * analog_frequency   * x_values + phase_shift)
+            self.Ys_sin_analog = amplitude * np.sin(2 * np.pi * analog_frequency * x_values + phase_shift)
             self.Ys_sin_sample = amplitude * np.sin(2 * np.pi * sampling_frequency * x_values + phase_shift)
 
             # Equation -> y = amplitude * np.cos(2 * np.pi * x + phase_shift)
-            self.Ys_cos_analog = amplitude * np.cos(2 * np.pi * analog_frequency   * x_values + phase_shift)
+            self.Ys_cos_analog = amplitude * np.cos(2 * np.pi * analog_frequency * x_values + phase_shift)
             self.Ys_cos_sample = amplitude * np.cos(2 * np.pi * sampling_frequency * x_values + phase_shift)
 
             # else :
             if wave_type == 1:
                 name = "Sin"
                 plt.plot(self.Xs_SinCos, self.Ys_sin_sample)
-                SignalSamplesAreEqual("SinOutput.txt", sampling_frequency, self.Ys_sin_analog)
 
             else:
                 name = "Cosine"
                 plt.plot(self.Xs_SinCos, self.Ys_cos_sample)
-                SignalSamplesAreEqual("CosOutput.txt", sampling_frequency, self.Ys_cos_analog)
 
         title = f"""{name} Wave Plot
         Form: Y = A * {name.lower()}( W * X + Theta ) 
@@ -261,23 +257,43 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+        # Select Multiple Files
+        """
+        file_paths = [filedialog.askopenfilename(title="Select a Signal Data File")]
+        if not file_paths[0]:
+            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+            return
 
-        output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\signal1+signal3.txt"
-        signal_2_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal3.txt"
-        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 - S2)\nNo  -> Signal 3 (S1 - S3)"):
-            output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\Signal1+signal2.txt"
-            signal_2_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal2.txt"
+        while messagebox.askyesno(title="File Upload", message="Select another file (Signal)?"):
+            file_paths.append(filedialog.askopenfilename(title="Select a Signal Data File"))
+        """
+        file_paths = list(filedialog.askopenfilenames(title="Select Signal Data Files"))
+        if not file_paths[0]:
+            messagebox.showerror(title="Error", message="There is a Signal Data File Not Found!")
+            return
 
-        signal_1_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal1.txt"
-        file_paths = [signal_1_file_path, signal_2_file_path]
         signal_number = 0
         lengths_equal = 1
         signal_times = []
         signal_values = []
+        """
+        signal_times & signal_values -> List Description
+        [
+            [], Signal #1
+            [], Signal #2
+            [], Signal #3
+            .
+            .
+            .
+            []  Signal #N
+        ]
+        """
+
         signal_time_temp, signal_value_temp = self.read_only_signal(file_paths[0])
         signal_times.append(signal_time_temp)
         signal_values.append(signal_value_temp)
         file_paths.pop(0)
+
         for file_path in file_paths:
             signal_number += 1
             signal_time_temp, signal_value_temp = self.read_only_signal(file_path)
@@ -287,16 +303,34 @@ class GUI:
                 lengths_equal = 0
             signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number], signal_values[signal_number])
 
+        # Not Equal Length Check
+        """
+        signal_lengths = [len(signal) for signal in signal_times]
+        if len(set(signal_lengths)) != 1:
+        """
         if not lengths_equal:
+            """
+            current_signal = 0
+            while current_signal <= signal_number:
+                signal_values[current_signal] = signal_values[current_signal] + [0] * (len(signal_values[max_signal_len_number]) - len(signal_values[current_signal]))
+                signal_times[current_signal].extend(range(len(signal_times[current_signal]), len(signal_values[max_signal_len_number])))
+                current_signal += 1
+            """
             signal_times, signal_values = self.extend_signals(signal_times, signal_values)
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
+        # Add Signals
+        """
+        result_addition_signal = np.array(signal_values[0])
+        current_signal = 0
+        while current_signal <= (signal_number-1):
+            result_addition_signal = result_addition_signal + np.array(signal_values[current_signal + 1])
+            current_signal += 1
+        """
         result_addition_signal = np.sum(signal_values, axis=0)
 
-        SignalSamplesAreEqual(output_path, None, result_addition_signal)
-
         # plt.plot(signal_times[0], result_addition_signal, color='orange')
-        plt.stem(signal_times[0], result_addition_signal)
+        plt.scatter(signal_times[0], result_addition_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.1 - Addition Signal')
@@ -313,17 +347,20 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\signal1-signal3.txt"
-        signal_2_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal3.txt"
-        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 - S2)\nNo  -> Signal 3 (S1 - S3)"):
-            output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\signal1-signal2.txt"
-            signal_2_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal2.txt"
+        signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
+        if not signal_1_file_path:
+            messagebox.showerror(title="Error", message="Signal Data File (S1) Not Found!")
+            return
 
-        signal_1_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal1.txt"
+        signal_2_file_path = filedialog.askopenfilename(title="Select Signal Data File (S2)")
+        if not signal_2_file_path:
+            messagebox.showerror(title="Error", message="Signal Data File (S2) Not Found!")
+            return
+
         signal_1_time, signal_1_value = self.read_only_signal(signal_1_file_path)
-        signal_1_time, signal_1_value = self.sort_2_lists(signal_1_time, signal_1_value)
-
         signal_2_time, signal_2_value = self.read_only_signal(signal_2_file_path)
+
+        signal_1_time, signal_1_value = self.sort_2_lists(signal_1_time, signal_1_value)
         signal_2_time, signal_2_value = self.sort_2_lists(signal_2_time, signal_2_value)
 
         # Not Equal Length Check
@@ -334,12 +371,16 @@ class GUI:
             signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value, len(signal_1_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
+        # Subtract Signals
+        """
+        signal_1_value = np.array(signal_1_value)
+        signal_2_value = np.array(signal_2_value)
+        result_subtraction_signal_ = signal_1_value - signal_2_value
+        """
         result_subtraction_signal = np.subtract(signal_2_value, signal_1_value)
 
-        SignalSamplesAreEqual(output_path, None, result_subtraction_signal)
-
         # plt.plot(signal_1_time, result_subtraction_signal, color='orange')
-        plt.stem(signal_1_time, result_subtraction_signal)
+        plt.scatter(signal_1_time, result_subtraction_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.2 - Subtraction Signal')
@@ -356,21 +397,20 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\MultiplySignalByConstant-signal2 - by 10.txt"
-        signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal2.txt"
-        factor = 10
-        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1 (Factor = 5)\nNo  -> Signal 2 (Factor = 10)"):
-            output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\MultiplySignalByConstant-Signal1 - by 5.txt"
-            signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal1.txt"
-            factor = 5
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
+        if not signal_file_path:
+            messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
+            return
+
+        factor = simpledialog.askinteger("Factor", "Enter Factor:")
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
+
         signal_value_multiplied = np.array(signal_value) * np.array(factor)
         signal_time, signal_value_multiplied = self.sort_2_lists(signal_time, signal_value_multiplied)
-        SignalSamplesAreEqual(output_path, None, signal_value_multiplied)
 
         # plt.plot(signal_time, signal_value_multiplied, color='orange')
-        plt.stem(signal_time, signal_value_multiplied)
+        plt.scatter(signal_time, signal_value_multiplied)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title(f'Task 2.3 - Multiplication Signal by Factor = {factor}')
@@ -387,13 +427,15 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal1.txt"
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         square_signal = np.array(signal_value) * np.array(signal_value)
-        SignalSamplesAreEqual("D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\Output squaring signal 1.txt", None, square_signal)
-
         # plt.plot(signal_time, square_signal, color='orange')
-        plt.stem(signal_time, square_signal)
+        plt.scatter(signal_time, square_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.4 - Squared Signal')
@@ -409,25 +451,23 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Input Shifting.txt"
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         old_min_time = min(signal_time)
         old_max_time = max(signal_time)
-        shift_value = -500
-        output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\output shifting by minus 500.txt"
-        if messagebox.askyesno(title="Shifting Value", message="Yes -> +500\nNo  -> -500"):
-            shift_value = 500
-            output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\output shifting by add 500.txt"
+        shift_value = simpledialog.askfloat("Shifting Value", "Enter Shift Value (+ve or -ve):")
         shifted_signal = np.array(signal_time) + shift_value
         shifted_signal, signal_value = self.sort_2_lists(shifted_signal, signal_value)
-        SignalSamplesAreEqual(output_path, None, signal_value)
-
         new_min_time = min(shifted_signal)
         new_max_time = max(shifted_signal)
 
         plt.xlim(min(old_min_time, new_min_time) - 1, max(old_max_time, new_max_time) + 1)
         # plt.plot(shifted_signal, signal_value, color='orange')
-        plt.stem(shifted_signal, signal_value)
+        plt.scatter(shifted_signal, signal_value)
         plt.xlabel("Shifted Time")
         plt.ylabel('Amplitude')
         plt.title(f'Task 2.5 - Shifted Signal by ({shift_value})')
@@ -444,21 +484,27 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\\normlize signal 2 -- output.txt"
-        signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal2.txt"
-        scaler = MinMaxScaler(feature_range=(0, 1))
-        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1\nNo  -> Signal 2"):
-            output_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\\normalize of signal 1 -- output.txt"
-            signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal1.txt"
-            scaler = MinMaxScaler(feature_range=(-1, 1))
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
         signal_time, signal_value = self.read_only_signal(signal_file_path)
+        scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
+
+        if scaler_value != 1 and scaler_value != 2:
+            messagebox.showerror(title="Error", message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
+            return
+
         signal_value = np.reshape(signal_value, (-1, 1))
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        if scaler_value == 2:
+            scaler = MinMaxScaler(feature_range=(-1, 1))
+
         normalized_signal = scaler.fit_transform(np.array(signal_value))
         normalized_result = normalized_signal.flatten()
-        SignalSamplesAreEqual(output_path, None, normalized_result)
-
         plt.plot(signal_time, normalized_result, color='orange')
-        plt.stem(signal_time, normalized_result)
+        plt.scatter(signal_time, normalized_result)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 6 - Normalized Signal')
@@ -475,13 +521,18 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = "D:\Problems\Problems_Py_Pycharm\DSP\Task 2\input_signals\Signal1.txt"
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         accumulate_signal = [sum(signal_value[:i+1]) for i in range(len(signal_value))]
-        SignalSamplesAreEqual("D:\Problems\Problems_Py_Pycharm\DSP\Task 2\output_signals\output accumulation for signal1.txt", None, accumulate_signal)
+        print(signal_value)
+        print(accumulate_signal)
 
         # plt.plot(signal_time, square_signal, color='orange')
-        plt.stem(signal_time, accumulate_signal)
+        plt.scatter(signal_time, accumulate_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.7 - Accumulated Signal')

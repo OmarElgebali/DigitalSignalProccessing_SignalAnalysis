@@ -1,12 +1,3 @@
-import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog
-import numpy as np
-from comparesignals import SignalSamplesAreEqual
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.ticker import FuncFormatter
-
-
 # file_paths = list(filedialog.askopenfilenames(title="Select Signal Data Files"))
 #
 # print(file_paths)

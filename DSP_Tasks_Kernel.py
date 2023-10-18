@@ -54,7 +54,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 # Read the contents of the first text file
-with open('signal1.txt', 'r') as file1:
+with open('Task 2/signal1.txt', 'r') as file1:
     lines = file1.readlines()
     signal1_time = []
     signal1_value = []
@@ -64,7 +64,7 @@ with open('signal1.txt', 'r') as file1:
         signal1_value.append(float(parts[1]))
 
 # Read the contents of the second text file
-with open('signal2.txt', 'r') as file2:
+with open('Task 2/signal2.txt', 'r') as file2:
     lines = file2.readlines()
     signal2_time = []
     signal2_value = []
@@ -98,7 +98,7 @@ else:
 
 def normalization():
 
-    with open('signal1.txt', 'r') as file1:
+    with open('Task 2/signal1.txt', 'r') as file1:
         lines = file1.readlines()
         signal1_time = []
         signal1_value = []
