@@ -244,7 +244,7 @@ class GUI:
 
         output_path = "Task 2/output_signals/signal1+signal3.txt"
         signal_2_file_path = "Task 2/input_signals/signal3.txt"
-        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 - S2)\nNo  -> Signal 3 (S1 - S3)"):
+        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 + S2)\nNo  -> Signal 3 (S1 + S3)"):
             output_path = "Task 2/output_signals/Signal1+signal2.txt"
             signal_2_file_path = "Task 2/input_signals/Signal2.txt"
 
