@@ -553,31 +553,30 @@ class GUI:
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
 
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-
-        signal_file_path = "Task 3\Test 2\Quan2_input.txt"
-        # signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        # if not signal_file_path:
-        #     messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-        #     return
+        # signal_file_path = "Task 3\Test 2\Quan2_input.txt"
+        # signal_file_path = "Task 3\Test 1\Quan1_input.txt"
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
-        #
-        # if messagebox.askyesno(title="Levels or Bits used for Quantization",
-        #                        message="Yes -> # of Levels\nNo  -> # of Bits"):
-        #     L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
-        #     if L < 0:
-        #         messagebox.showerror(title="Error", message="#ofLevels are -ve")
-        #         return
-        # else:
-        #     bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
-        #     if bits < 0:
-        #         messagebox.showerror(title="Error", message="#ofBits are -ve")
-        #         return
-        #     L = pow(2, bits)
 
-        bits = 2
+        if messagebox.askyesno(title="Levels or Bits used for Quantization",
+                               message="Yes -> # of Levels\nNo  -> # of Bits"):
+            L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
+            if L < 0:
+                messagebox.showerror(title="Error", message="#ofLevels are -ve")
+                return
+        else:
+            bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
+            if bits < 0:
+                messagebox.showerror(title="Error", message="#ofBits are -ve")
+                return
+            L = pow(2, bits)
+
+        bits = 3
         L = pow(2, bits)  # Used for testing input for example test 2
         rounding_parameter = 3
         minimum = min(signal_value)
@@ -609,18 +608,32 @@ class GUI:
         quantized_signal = []
         interval_index = []
         error_square = []
+        errors = []
 
         for s_value in signal_value:
             for index, interval in enumerate(rounded_intervals):
                 if interval[0] <= s_value <= interval[1]:
                     quantized_signal.append(rounded_mid_points[index])
                     interval_index.append(index + 1)
+                    errors.append(round((quantized_signal[-1] - s_value), rounding_parameter))
                     error_square.append(round(((quantized_signal[-1] - s_value) ** 2), rounding_parameter))
                     break
 
-        number_of_samples = len(error_square)
+        number_of_samples = len(signal_value)
+
+        print(f"Signal Values    : {signal_value}")
+        print(f"Interval Indices : {interval_index}")
+        print(f"Quantized Values : {quantized_signal}")
+        print(f"Errors           : {errors}")
+        print(f"Power Errors     : {error_square}")
+        print("=" * 200)
 
         mse = (np.sum(error_square) * 1.00) / number_of_samples
+
+        print(f"Sum Errors: {np.sum(error_square)}")
+        print(f"Len (N)   : {len(signal_value)}")
+        print(f"MSE       : {mse}")
+        print("="*200)
 
         binary_values = [bin(index-1)[2:] for index in interval_index]
         encoded_signal = []
@@ -651,9 +664,13 @@ class GUI:
 
         # Add data to the table
         for i in range(number_of_samples):
+            print((
+                i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
+                encoded_signal[i]))
             tree.insert("", i, values=(
                 i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
                 encoded_signal[i]))
+        print("=" * 200)
 
         tree.pack()
 
@@ -672,7 +689,8 @@ class GUI:
         ax2.set_ylabel('Amplitude')
         ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
 
-        QuanTest2("Task 3\Test 2\Quan2_input.txt")
+        # QuantizationTest2("Task 3\Test 2\Quan2_Out.txt", interval_index, encoded_signal, quantized_signal, errors)
+        # QuantizationTest1("Task 3\Test 1\Quan1_Out.txt", encoded_signal, quantized_signal)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

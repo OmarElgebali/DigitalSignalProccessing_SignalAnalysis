@@ -18,7 +18,7 @@ def QuantizationTest1(file_name,Your_EncodedValues,Your_QuantizedValues):
                 line = f.readline()
             else:
                 break
-    if(len(Your_EncodedValues)!=9 or len(Your_QuantizedValues)!=9):
+    if(len(Your_EncodedValues)!=11 or len(Your_QuantizedValues)!=11):
         print("QuantizationTest1 Test case failed, your signal have different length from the expected one")
         return
     for i in range(len(Your_EncodedValues)):
