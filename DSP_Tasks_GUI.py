@@ -581,7 +581,7 @@ class GUI:
         rounding_parameter = 3
         minimum = min(signal_value)
         maximum = max(signal_value)
-        delta = (maximum - minimum) * 1.00 / L
+        delta = round((maximum - minimum) * 1.00 / L , rounding_parameter)
         intervals = [(minimum, minimum + delta)]
         for i in range(L - 1):
             intervals.append((intervals[-1][1], intervals[-1][1] + delta))
@@ -603,6 +603,43 @@ class GUI:
         print(f"Mid Points         : {mid_points}")
         print(f"Rounded Mid Points : {rounded_mid_points}")
         print("="*200)
+
+        index=0
+        points_midPoint = []
+        interval_index=[]
+        error_square=[]
+        #-1.22
+        #1.5
+        """
+        i=0
+        i=1
+        i=2
+        """
+        for s_value in signal_value:
+            index = 0
+            for interval_Index in rounded_intervals:
+                if(s_value >= interval_Index[0] and s_value <= interval_Index[1]):
+                    points_midPoint.append(rounded_mid_points[index])
+                    interval_index.append(index+1)
+                    error_square.append(round(((points_midPoint[-1] - s_value)**2),rounding_parameter))
+
+                    break
+                index += 1
+
+
+        MSE = (np.sum(error_square) * 1.00 )/ len(error_square)
+        print("-"*20)
+        print(points_midPoint)
+        print("-"*20)
+        print(interval_index)
+        print("-"*20)
+        print(error_square)
+        print("-"*20)
+        print(MSE)
+
+
+
+
 
         # plt.plot(signal_time, accumulate_signal, color='orange')
         # plt.scatter(signal_time, quantized_signal)
