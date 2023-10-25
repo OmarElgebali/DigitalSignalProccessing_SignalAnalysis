@@ -606,15 +606,30 @@ class GUI:
         print(f"Rounded Mid Points : {rounded_mid_points}")
         print("=" * 200)
 
+        quantized_signal = []
+        interval_index = []
+        error_square = []
 
-        binary_values = [bin(index)[2:] for index in quantized_signal_indices]
+        for s_value in signal_value:
+            for index, interval in enumerate(rounded_intervals):
+                if interval[0] <= s_value <= interval[1]:
+                    quantized_signal.append(rounded_mid_points[index])
+                    interval_index.append(index + 1)
+                    error_square.append(round(((quantized_signal[-1] - s_value) ** 2), rounding_parameter))
+                    break
+
+        number_of_samples = len(error_square)
+
+        mse = (np.sum(error_square) * 1.00) / number_of_samples
+
+        binary_values = [bin(index-1)[2:] for index in interval_index]
         encoded_signal = []
         for bin_value in binary_values:
             if len(bin_value) < bits:
                 bin_value = '0' * (bits - len(bin_value)) + bin_value
             encoded_signal.append(bin_value)
 
-        print(f"Interval Indices : {quantized_signal_indices_printable}")
+        print(f"Interval Indices : {interval_index}")
         print(f"Binary Values    : {binary_values}")
         print(f"Encoded Signal   : {encoded_signal}")
         print("=" * 200)
@@ -637,7 +652,7 @@ class GUI:
         # Add data to the table
         for i in range(number_of_samples):
             tree.insert("", i, values=(
-                i, signal_value[i], quantized_signal_indices_printable[i], quantized_signal[i], power_errors[i],
+                i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
                 encoded_signal[i]))
 
         tree.pack()
@@ -656,6 +671,8 @@ class GUI:
         ax2.set_xlabel("Time")
         ax2.set_ylabel('Amplitude')
         ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
+
+        QuanTest2("Task 3\Test 2\Quan2_input.txt")
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
