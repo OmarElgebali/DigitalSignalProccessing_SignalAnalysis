@@ -555,27 +555,43 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        # signal_file_path = "Task 3\Test 2\Quan2_input.txt"
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-            return
+        signal_file_path = "Task 3\Test 2\Quan2_input.txt"
+        # signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        # if not signal_file_path:
+        #     messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+        #     return
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        #
+        # if messagebox.askyesno(title="Levels or Bits used for Quantization",
+        #                        message="Yes -> # of Levels\nNo  -> # of Bits"):
+        #     L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
+        #     if L < 0:
+        #         messagebox.showerror(title="Error", message="#ofLevels are -ve")
+        #         return
+        # else:
+        #     bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
+        #     if bits < 0:
+        #         messagebox.showerror(title="Error", message="#ofBits are -ve")
+        #         return
+        #     L = pow(2, bits)
 
-        if messagebox.askyesno(title="Levels or Bits used for Quantization",
-                               message="Yes -> # of Levels\nNo  -> # of Bits"):
-            L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
-            if L < 0:
-                messagebox.showerror(title="Error", message="#ofLevels are -ve")
-                return
-        else:
-            bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
-            if bits < 0:
-                messagebox.showerror(title="Error", message="#ofBits are -ve")
-                return
-            L = pow(2, bits)
+        L = 4 # Used for testing input for example test 2
+        minimum = min(signal_value)
+        maximum = max(signal_value)
+        delta = (maximum - minimum) * 1.00 / L
+        intervals = [(minimum, minimum + delta)]
+        for i in range(L - 1):
+            intervals.append((intervals[-1][1], intervals[-1][1] + delta))
+        rounded_intervals = [(round(start, 2), round(end, 2)) for start, end in intervals]
+
+        print(f"Levels = {L}")
+        print(f"Min = {minimum}")
+        print(f"Max = {maximum}")
+        print(f"Delta = {delta}")
+        print(f"Intervals : {intervals}")
+        print("Rounded Intervals:", rounded_intervals)
 
         # plt.plot(signal_time, accumulate_signal, color='orange')
         # plt.scatter(signal_time, quantized_signal)
