@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog
+from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
@@ -577,38 +577,85 @@ class GUI:
         #         return
         #     L = pow(2, bits)
 
-        L = 4 # Used for testing input for example test 2
+        bits = 2
+        L = pow(2, bits)  # Used for testing input for example test 2
         rounding_parameter = 3
         minimum = min(signal_value)
         maximum = max(signal_value)
-        delta = (maximum - minimum) * 1.00 / L
+        delta = round((maximum - minimum) * 1.00 / L, rounding_parameter)
         intervals = [(minimum, minimum + delta)]
         for i in range(L - 1):
             intervals.append((intervals[-1][1], intervals[-1][1] + delta))
-        rounded_intervals = [(round(start, rounding_parameter), round(end, rounding_parameter)) for start, end in intervals]
+        rounded_intervals = [(round(start, rounding_parameter), round(end, rounding_parameter)) for start, end in
+                             intervals]
 
-        print("="*200)
+        print("=" * 200)
         print(f"Levels : {L}")
         print(f"Min    : {minimum}")
         print(f"Max    : {maximum}")
         print(f"Delta  : {delta}")
-        print("="*200)
+        print("=" * 200)
         print(f"Intervals         : {intervals}")
         print(f"Rounded Intervals : {rounded_intervals}")
-        print("="*200)
+        print("=" * 200)
 
         mid_points = [(interval[0] + interval[1]) / 2.00 for interval in rounded_intervals]
         rounded_mid_points = [round(mid, rounding_parameter) for mid in mid_points]
 
         print(f"Mid Points         : {mid_points}")
         print(f"Rounded Mid Points : {rounded_mid_points}")
-        print("="*200)
+        print("=" * 200)
 
-        # plt.plot(signal_time, accumulate_signal, color='orange')
-        # plt.scatter(signal_time, quantized_signal)
-        # plt.xlabel("Time")
-        # plt.ylabel('Amplitude')
-        # plt.title('Task 3 - Quantized Signal')
+
+        binary_values = [bin(index)[2:] for index in quantized_signal_indices]
+        encoded_signal = []
+        for bin_value in binary_values:
+            if len(bin_value) < bits:
+                bin_value = '0' * (bits - len(bin_value)) + bin_value
+            encoded_signal.append(bin_value)
+
+        print(f"Interval Indices : {quantized_signal_indices_printable}")
+        print(f"Binary Values    : {binary_values}")
+        print(f"Encoded Signal   : {encoded_signal}")
+        print("=" * 200)
+
+        # Create a new popup window
+        popup = tk.Toplevel()
+        popup.title("Quantization & Encoding Table")
+
+        tree = ttk.Treeview(popup, columns=(
+            "N", "Signal_Values", "Interval_Indices", "Quantized_Values", "Power_Errors", "Encoded_Signal"))
+
+        # Define column headings
+        tree.heading("#1", text="N")
+        tree.heading("#2", text="Signal Values")
+        tree.heading("#3", text="Interval Indices")
+        tree.heading("#4", text="Quantized Values")
+        tree.heading("#5", text="Power Errors")
+        tree.heading("#6", text="Encoded Signal")
+
+        # Add data to the table
+        for i in range(number_of_samples):
+            tree.insert("", i, values=(
+                i, signal_value[i], quantized_signal_indices_printable[i], quantized_signal[i], power_errors[i],
+                encoded_signal[i]))
+
+        tree.pack()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        ax1.plot(signal_time, signal_value, color='orange')
+        ax1.scatter(signal_time, signal_value, color='blue')
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title('Original Signal')
+
+        ax2.plot(signal_time, quantized_signal, color='green')
+        ax2.scatter(signal_time, quantized_signal, color='blue')
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
