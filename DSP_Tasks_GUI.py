@@ -664,13 +664,9 @@ class GUI:
 
         # Add data to the table
         for i in range(number_of_samples):
-            print((
-                i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
-                encoded_signal[i]))
             tree.insert("", i, values=(
                 i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
                 encoded_signal[i]))
-        print("=" * 200)
 
         tree.pack()
 

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog
+from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from numpy import outer
 
@@ -27,17 +27,16 @@ class GUI:
         self.Xs_ContDisc = []
         self.Ys_ContDisc = []
 
-        # self.root.geometry("800x800")
         self.root.title("DSP Tasks - CS6")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
+        self.root.geometry(f"{self.screen_width}x{self.screen_height}")
 
         self.menubar = tk.Menu(self.root)
         self.task_1_menu = tk.Menu(self.menubar, tearoff=0)
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
-
         self.menubar.add_cascade(menu=self.task_1_menu, label="Task 1")
 
         self.task_2_menu = tk.Menu(self.menubar, tearoff=1)
@@ -54,15 +53,18 @@ class GUI:
         self.task_2_menu.add_command(label="(2.6) Normalization [-1, 1 | 0, 1]", command=self.task_2_6_normalization)
         self.task_2_menu.add_separator()
         self.task_2_menu.add_command(label="(2.7) Accumulation [∑ x(k)] ", command=self.task_2_7_accumulation)
-
         self.menubar.add_cascade(menu=self.task_2_menu, label="Task 2")
+
+        self.task_3_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_3_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
+        self.menubar.add_cascade(menu=self.task_3_menu, label="Task 3")
 
         self.root.config(menu=self.menubar)
 
         self.plots_frame = tk.Frame(self.root)
         self.plots_frame.grid(row=0, column=0)
 
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.mainloop()
 
     def sort_2_lists(self, list_1, list_2):
@@ -472,6 +474,143 @@ class GUI:
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
+
+    def task_3_quantize(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+
+        signal_file_path = "Task 3\Test 2\Quan2_input.txt"
+        output_path = "Task 3\Test 2\Quan2_Out.txt"
+        bits = 2
+
+        is_test_1 = messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1\nNo  -> Signal 2")
+        if is_test_1:
+            signal_file_path = "Task 3\Test 1\Quan1_input.txt"
+            output_path = "Task 3\Test 1\Quan1_Out.txt"
+            bits = 3
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        L = pow(2, bits)  # Used for testing input for example test 2
+        rounding_parameter = 3
+        minimum = min(signal_value)
+        maximum = max(signal_value)
+        delta = round((maximum - minimum) * 1.00 / L, rounding_parameter)
+        intervals = [(minimum, minimum + delta)]
+        for i in range(L - 1):
+            intervals.append((intervals[-1][1], intervals[-1][1] + delta))
+        rounded_intervals = [(round(start, rounding_parameter), round(end, rounding_parameter)) for start, end in
+                             intervals]
+
+        print("=" * 200)
+        print(f"Levels : {L}")
+        print(f"Min    : {minimum}")
+        print(f"Max    : {maximum}")
+        print(f"Delta  : {delta}")
+        print("=" * 200)
+        print(f"Intervals         : {intervals}")
+        print(f"Rounded Intervals : {rounded_intervals}")
+        print("=" * 200)
+
+        mid_points = [(interval[0] + interval[1]) / 2.00 for interval in rounded_intervals]
+        rounded_mid_points = [round(mid, rounding_parameter) for mid in mid_points]
+
+        print(f"Mid Points         : {mid_points}")
+        print(f"Rounded Mid Points : {rounded_mid_points}")
+        print("=" * 200)
+
+        quantized_signal = []
+        interval_index = []
+        error_square = []
+        errors = []
+
+        for s_value in signal_value:
+            for index, interval in enumerate(rounded_intervals):
+                if interval[0] <= s_value <= interval[1]:
+                    quantized_signal.append(rounded_mid_points[index])
+                    interval_index.append(index + 1)
+                    errors.append(round((quantized_signal[-1] - s_value), rounding_parameter))
+                    error_square.append(round(((quantized_signal[-1] - s_value) ** 2), rounding_parameter))
+                    break
+
+        number_of_samples = len(signal_value)
+
+        print(f"Signal Values    : {signal_value}")
+        print(f"Interval Indices : {interval_index}")
+        print(f"Quantized Values : {quantized_signal}")
+        print(f"Errors           : {errors}")
+        print(f"Power Errors     : {error_square}")
+        print("=" * 200)
+
+        mse = (np.sum(error_square) * 1.00) / number_of_samples
+
+        print(f"Sum Errors: {np.sum(error_square)}")
+        print(f"Len (N)   : {len(signal_value)}")
+        print(f"MSE       : {mse}")
+        print("="*200)
+
+        binary_values = [bin(index-1)[2:] for index in interval_index]
+        encoded_signal = []
+        for bin_value in binary_values:
+            if len(bin_value) < bits:
+                bin_value = '0' * (bits - len(bin_value)) + bin_value
+            encoded_signal.append(bin_value)
+
+        print(f"Interval Indices : {interval_index}")
+        print(f"Binary Values    : {binary_values}")
+        print(f"Encoded Signal   : {encoded_signal}")
+        print("=" * 200)
+
+        # Create a new popup window
+        popup = tk.Toplevel()
+        popup.title("Quantization & Encoding Table")
+
+        tree = ttk.Treeview(popup, columns=(
+            "N", "Signal_Values", "Interval_Indices", "Quantized_Values", "Power_Errors", "Encoded_Signal"))
+
+        # Define column headings
+        tree.heading("#1", text="N")
+        tree.heading("#2", text="Signal Values")
+        tree.heading("#3", text="Interval Indices")
+        tree.heading("#4", text="Quantized Values")
+        tree.heading("#5", text="Power Errors")
+        tree.heading("#6", text="Encoded Signal")
+
+        # Add data to the table
+        for i in range(number_of_samples):
+            tree.insert("", i, values=(
+                i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
+                encoded_signal[i]))
+
+        tree.pack()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        ax1.plot(signal_time, signal_value, color='orange')
+        ax1.scatter(signal_time, signal_value, color='blue')
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title('Original Signal')
+
+        ax2.plot(signal_time, quantized_signal, color='green')
+        ax2.scatter(signal_time, quantized_signal, color='blue')
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
+
+        if is_test_1:
+            QuantizationTest1(output_path, encoded_signal, quantized_signal)
+        else:
+            QuantizationTest2(output_path, interval_index, encoded_signal, quantized_signal, errors)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
 
     def on_closing(self):
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
