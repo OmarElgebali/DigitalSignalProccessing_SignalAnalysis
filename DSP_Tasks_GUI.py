@@ -578,20 +578,31 @@ class GUI:
         #     L = pow(2, bits)
 
         L = 4 # Used for testing input for example test 2
+        rounding_parameter = 3
         minimum = min(signal_value)
         maximum = max(signal_value)
         delta = (maximum - minimum) * 1.00 / L
         intervals = [(minimum, minimum + delta)]
         for i in range(L - 1):
             intervals.append((intervals[-1][1], intervals[-1][1] + delta))
-        rounded_intervals = [(round(start, 2), round(end, 2)) for start, end in intervals]
+        rounded_intervals = [(round(start, rounding_parameter), round(end, rounding_parameter)) for start, end in intervals]
 
-        print(f"Levels = {L}")
-        print(f"Min = {minimum}")
-        print(f"Max = {maximum}")
-        print(f"Delta = {delta}")
-        print(f"Intervals : {intervals}")
-        print("Rounded Intervals:", rounded_intervals)
+        print("="*200)
+        print(f"Levels : {L}")
+        print(f"Min    : {minimum}")
+        print(f"Max    : {maximum}")
+        print(f"Delta  : {delta}")
+        print("="*200)
+        print(f"Intervals         : {intervals}")
+        print(f"Rounded Intervals : {rounded_intervals}")
+        print("="*200)
+
+        mid_points = [(interval[0] + interval[1]) / 2.00 for interval in rounded_intervals]
+        rounded_mid_points = [round(mid, rounding_parameter) for mid in mid_points]
+
+        print(f"Mid Points         : {mid_points}")
+        print(f"Rounded Mid Points : {rounded_mid_points}")
+        print("="*200)
 
         # plt.plot(signal_time, accumulate_signal, color='orange')
         # plt.scatter(signal_time, quantized_signal)
