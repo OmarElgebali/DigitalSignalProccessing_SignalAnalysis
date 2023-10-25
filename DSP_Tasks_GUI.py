@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox, filedialog, simpledialog
 import numpy as np
 from comparesignals import SignalSamplesAreEqual
+from QuanTest1 import QuantizationTest1
+from QuanTest2 import QuantizationTest2
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.ticker import FuncFormatter
@@ -22,7 +24,7 @@ class GUI:
         self.Xs_ContDisc = []
         self.Ys_ContDisc = []
 
-        # self.root.geometry("800x800")
+        # self.root.geometry("200x10")
         self.root.title("DSP Tasks - CS6")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
@@ -32,7 +34,6 @@ class GUI:
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
-
         self.menubar.add_cascade(menu=self.task_1_menu, label="Task 1")
 
         self.task_2_menu = tk.Menu(self.menubar, tearoff=1)
@@ -49,11 +50,10 @@ class GUI:
         self.task_2_menu.add_command(label="(2.6) Normalization [-1, 1 | 0, 1]", command=self.task_2_6_normalization)
         self.task_2_menu.add_separator()
         self.task_2_menu.add_command(label="(2.7) Accumulation [∑ x(k)] ", command=self.task_2_7_accumulation)
-
         self.menubar.add_cascade(menu=self.task_2_menu, label="Task 2")
 
         self.task_3_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_2_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
+        self.task_3_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
         self.menubar.add_cascade(menu=self.task_3_menu, label="Task 3")
 
         self.root.config(menu=self.menubar)

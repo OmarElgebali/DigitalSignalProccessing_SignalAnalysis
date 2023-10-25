@@ -4,6 +4,9 @@ import numpy as np
 from numpy import outer
 
 from comparesignals import SignalSamplesAreEqual
+from QuanTest1 import QuantizationTest1
+from QuanTest2 import QuantizationTest2
+
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.ticker import FuncFormatter
