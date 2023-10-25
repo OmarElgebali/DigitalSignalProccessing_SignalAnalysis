@@ -52,6 +52,10 @@ class GUI:
 
         self.menubar.add_cascade(menu=self.task_2_menu, label="Task 2")
 
+        self.task_3_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_2_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
+        self.menubar.add_cascade(menu=self.task_3_menu, label="Task 3")
+
         self.root.config(menu=self.menubar)
 
         self.plots_frame = tk.Frame(self.root)
@@ -507,7 +511,7 @@ class GUI:
         plt.scatter(signal_time, normalized_result)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
-        plt.title('Task 6 - Normalized Signal')
+        plt.title('Task 2.6 - Normalized Signal')
         plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
@@ -528,14 +532,36 @@ class GUI:
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         accumulate_signal = [sum(signal_value[:i+1]) for i in range(len(signal_value))]
-        print(signal_value)
-        print(accumulate_signal)
 
         # plt.plot(signal_time, square_signal, color='orange')
         plt.scatter(signal_time, accumulate_signal)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 2.7 - Accumulated Signal')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_3_quantize(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+
+        # plt.plot(signal_time, accumulate_signal, color='orange')
+        # plt.scatter(signal_time, accumulate_signal)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 3 - Quantized Signal')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
