@@ -24,10 +24,10 @@ class GUI:
         self.Xs_ContDisc = []
         self.Ys_ContDisc = []
 
-        # self.root.geometry("200x10")
         self.root.title("DSP Tasks - CS6")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
+        self.root.geometry(f"{self.screen_width}x{self.screen_height}")
 
         self.menubar = tk.Menu(self.root)
         self.task_1_menu = tk.Menu(self.menubar, tearoff=0)
@@ -61,7 +61,7 @@ class GUI:
         self.plots_frame = tk.Frame(self.root)
         self.plots_frame.grid(row=0, column=0)
 
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.mainloop()
 
     def sort_2_lists(self, list_1, list_2):
@@ -83,7 +83,8 @@ class GUI:
         number_of_signals = len(signal_lengths)
         current_signal = 0
         while current_signal <= number_of_signals - 1:
-            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(list_signal_values[current_signal], list_signal_times[current_signal], max_len)
+            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(
+                list_signal_values[current_signal], list_signal_times[current_signal], max_len)
             current_signal += 1
         return list_signal_times, list_signal_values
 
@@ -144,7 +145,7 @@ class GUI:
 
             x, y = self.sort_2_lists(x, y)
 
-            if signal_details[1] == 1:      # [1] Period
+            if signal_details[1] == 1:  # [1] Period
                 periodic = 'Periodic'
                 start_of_cycle = 0
                 end_of_cycle = signal_details[2]
@@ -155,12 +156,12 @@ class GUI:
                     x.extend(range(start_of_cycle, end_of_cycle))
                     y = y + temp_y
 
-            if signal_details[0] == 1:      # [0] Frequency Domain
+            if signal_details[0] == 1:  # [0] Frequency Domain
                 x_label = 'f'
                 domain = 'Frequency'
 
             title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
-            if signal_details[0] == 1 and signal_details[3]:      # [3] Phase Shift
+            if signal_details[0] == 1 and signal_details[3]:  # [3] Phase Shift
                 title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
                 plt.xlim(1, max(x) + abs(signal_details[3]))
                 x = [value + signal_details[3] for value in x]
@@ -305,7 +306,8 @@ class GUI:
             signal_values.append(signal_value_temp)
             if len(signal_times[0]) != len(signal_times[signal_number]):
                 lengths_equal = 0
-            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number], signal_values[signal_number])
+            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number],
+                                                                                          signal_values[signal_number])
 
         # Not Equal Length Check
         """
@@ -369,10 +371,12 @@ class GUI:
 
         # Not Equal Length Check
         if len(signal_1_time) < len(signal_2_time):
-            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value, len(signal_2_value))
+            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value,
+                                                                           len(signal_2_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
         elif len(signal_1_time) > len(signal_2_time):
-            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value, len(signal_1_value))
+            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value,
+                                                                           len(signal_1_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
         # Subtract Signals
@@ -497,7 +501,8 @@ class GUI:
         scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
 
         if scaler_value != 1 and scaler_value != 2:
-            messagebox.showerror(title="Error", message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
+            messagebox.showerror(title="Error",
+                                 message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
             return
 
         signal_value = np.reshape(signal_value, (-1, 1))
@@ -531,7 +536,7 @@ class GUI:
             return
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
-        accumulate_signal = [sum(signal_value[:i+1]) for i in range(len(signal_value))]
+        accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
 
         # plt.plot(signal_time, square_signal, color='orange')
         plt.scatter(signal_time, accumulate_signal)
@@ -550,18 +555,33 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+        # signal_file_path = "Task 3\Test 2\Quan2_input.txt"
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        if messagebox.askyesno(title="Levels or Bits used for Quantization",
+                               message="Yes -> # of Levels\nNo  -> # of Bits"):
+            L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
+            if L < 0:
+                messagebox.showerror(title="Error", message="#ofLevels are -ve")
+                return
+        else:
+            bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
+            if bits < 0:
+                messagebox.showerror(title="Error", message="#ofBits are -ve")
+                return
+            L = pow(2, bits)
 
         # plt.plot(signal_time, accumulate_signal, color='orange')
-        # plt.scatter(signal_time, accumulate_signal)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 3 - Quantized Signal')
+        # plt.scatter(signal_time, quantized_signal)
+        # plt.xlabel("Time")
+        # plt.ylabel('Amplitude')
+        # plt.title('Task 3 - Quantized Signal')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -571,5 +591,6 @@ class GUI:
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
             print("Bye! :\" ")
             self.root.destroy()
+
 
 GUI()
