@@ -1,7 +1,9 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog, simpledialog
+from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from comparesignals import SignalSamplesAreEqual
+from QuanTest1 import QuantizationTest1
+from QuanTest2 import QuantizationTest2
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.ticker import FuncFormatter
@@ -22,17 +24,16 @@ class GUI:
         self.Xs_ContDisc = []
         self.Ys_ContDisc = []
 
-        # self.root.geometry("800x800")
         self.root.title("DSP Tasks - CS6")
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
+        self.root.geometry(f"{self.screen_width}x{self.screen_height}")
 
         self.menubar = tk.Menu(self.root)
         self.task_1_menu = tk.Menu(self.menubar, tearoff=0)
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
-
         self.menubar.add_cascade(menu=self.task_1_menu, label="Task 1")
 
         self.task_2_menu = tk.Menu(self.menubar, tearoff=1)
@@ -49,15 +50,18 @@ class GUI:
         self.task_2_menu.add_command(label="(2.6) Normalization [-1, 1 | 0, 1]", command=self.task_2_6_normalization)
         self.task_2_menu.add_separator()
         self.task_2_menu.add_command(label="(2.7) Accumulation [∑ x(k)] ", command=self.task_2_7_accumulation)
-
         self.menubar.add_cascade(menu=self.task_2_menu, label="Task 2")
+
+        self.task_3_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_3_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
+        self.menubar.add_cascade(menu=self.task_3_menu, label="Task 3")
 
         self.root.config(menu=self.menubar)
 
         self.plots_frame = tk.Frame(self.root)
         self.plots_frame.grid(row=0, column=0)
 
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.mainloop()
 
     def sort_2_lists(self, list_1, list_2):
@@ -79,7 +83,8 @@ class GUI:
         number_of_signals = len(signal_lengths)
         current_signal = 0
         while current_signal <= number_of_signals - 1:
-            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(list_signal_values[current_signal], list_signal_times[current_signal], max_len)
+            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(
+                list_signal_values[current_signal], list_signal_times[current_signal], max_len)
             current_signal += 1
         return list_signal_times, list_signal_values
 
@@ -140,7 +145,7 @@ class GUI:
 
             x, y = self.sort_2_lists(x, y)
 
-            if signal_details[1] == 1:      # [1] Period
+            if signal_details[1] == 1:  # [1] Period
                 periodic = 'Periodic'
                 start_of_cycle = 0
                 end_of_cycle = signal_details[2]
@@ -151,12 +156,12 @@ class GUI:
                     x.extend(range(start_of_cycle, end_of_cycle))
                     y = y + temp_y
 
-            if signal_details[0] == 1:      # [0] Frequency Domain
+            if signal_details[0] == 1:  # [0] Frequency Domain
                 x_label = 'f'
                 domain = 'Frequency'
 
             title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
-            if signal_details[0] == 1 and signal_details[3]:      # [3] Phase Shift
+            if signal_details[0] == 1 and signal_details[3]:  # [3] Phase Shift
                 title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
                 plt.xlim(1, max(x) + abs(signal_details[3]))
                 x = [value + signal_details[3] for value in x]
@@ -301,7 +306,8 @@ class GUI:
             signal_values.append(signal_value_temp)
             if len(signal_times[0]) != len(signal_times[signal_number]):
                 lengths_equal = 0
-            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number], signal_values[signal_number])
+            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number],
+                                                                                          signal_values[signal_number])
 
         # Not Equal Length Check
         """
@@ -365,10 +371,12 @@ class GUI:
 
         # Not Equal Length Check
         if len(signal_1_time) < len(signal_2_time):
-            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value, len(signal_2_value))
+            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value,
+                                                                           len(signal_2_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
         elif len(signal_1_time) > len(signal_2_time):
-            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value, len(signal_1_value))
+            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value,
+                                                                           len(signal_1_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
         # Subtract Signals
@@ -493,7 +501,8 @@ class GUI:
         scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
 
         if scaler_value != 1 and scaler_value != 2:
-            messagebox.showerror(title="Error", message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
+            messagebox.showerror(title="Error",
+                                 message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
             return
 
         signal_value = np.reshape(signal_value, (-1, 1))
@@ -507,7 +516,7 @@ class GUI:
         plt.scatter(signal_time, normalized_result)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
-        plt.title('Task 6 - Normalized Signal')
+        plt.title('Task 2.6 - Normalized Signal')
         plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
@@ -527,9 +536,7 @@ class GUI:
             return
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
-        accumulate_signal = [sum(signal_value[:i+1]) for i in range(len(signal_value))]
-        print(signal_value)
-        print(accumulate_signal)
+        accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
 
         # plt.plot(signal_time, square_signal, color='orange')
         plt.scatter(signal_time, accumulate_signal)
@@ -541,9 +548,154 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
+    def task_3_quantize(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        # signal_file_path = "Task 3\Test 2\Quan2_input.txt"
+        # signal_file_path = "Task 3\Test 1\Quan1_input.txt"
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        if messagebox.askyesno(title="Levels or Bits used for Quantization",
+                               message="Yes -> # of Levels\nNo  -> # of Bits"):
+            L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
+            if L < 0:
+                messagebox.showerror(title="Error", message="#ofLevels are -ve")
+                return
+        else:
+            bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
+            if bits < 0:
+                messagebox.showerror(title="Error", message="#ofBits are -ve")
+                return
+            L = pow(2, bits)
+
+        bits = 3
+        L = pow(2, bits)  # Used for testing input for example test 2
+        rounding_parameter = 3
+        minimum = min(signal_value)
+        maximum = max(signal_value)
+        delta = round((maximum - minimum) * 1.00 / L, rounding_parameter)
+        intervals = [(minimum, minimum + delta)]
+        for i in range(L - 1):
+            intervals.append((intervals[-1][1], intervals[-1][1] + delta))
+        rounded_intervals = [(round(start, rounding_parameter), round(end, rounding_parameter)) for start, end in
+                             intervals]
+
+        print("=" * 200)
+        print(f"Levels : {L}")
+        print(f"Min    : {minimum}")
+        print(f"Max    : {maximum}")
+        print(f"Delta  : {delta}")
+        print("=" * 200)
+        print(f"Intervals         : {intervals}")
+        print(f"Rounded Intervals : {rounded_intervals}")
+        print("=" * 200)
+
+        mid_points = [(interval[0] + interval[1]) / 2.00 for interval in rounded_intervals]
+        rounded_mid_points = [round(mid, rounding_parameter) for mid in mid_points]
+
+        print(f"Mid Points         : {mid_points}")
+        print(f"Rounded Mid Points : {rounded_mid_points}")
+        print("=" * 200)
+
+        quantized_signal = []
+        interval_index = []
+        error_square = []
+        errors = []
+
+        for s_value in signal_value:
+            for index, interval in enumerate(rounded_intervals):
+                if interval[0] <= s_value <= interval[1]:
+                    quantized_signal.append(rounded_mid_points[index])
+                    interval_index.append(index + 1)
+                    errors.append(round((quantized_signal[-1] - s_value), rounding_parameter))
+                    error_square.append(round(((quantized_signal[-1] - s_value) ** 2), rounding_parameter))
+                    break
+
+        number_of_samples = len(signal_value)
+
+        print(f"Signal Values    : {signal_value}")
+        print(f"Interval Indices : {interval_index}")
+        print(f"Quantized Values : {quantized_signal}")
+        print(f"Errors           : {errors}")
+        print(f"Power Errors     : {error_square}")
+        print("=" * 200)
+
+        mse = (np.sum(error_square) * 1.00) / number_of_samples
+
+        print(f"Sum Errors: {np.sum(error_square)}")
+        print(f"Len (N)   : {len(signal_value)}")
+        print(f"MSE       : {mse}")
+        print("="*200)
+
+        binary_values = [bin(index-1)[2:] for index in interval_index]
+        encoded_signal = []
+        for bin_value in binary_values:
+            if len(bin_value) < bits:
+                bin_value = '0' * (bits - len(bin_value)) + bin_value
+            encoded_signal.append(bin_value)
+
+        print(f"Interval Indices : {interval_index}")
+        print(f"Binary Values    : {binary_values}")
+        print(f"Encoded Signal   : {encoded_signal}")
+        print("=" * 200)
+
+        # Create a new popup window
+        popup = tk.Toplevel()
+        popup.title("Quantization & Encoding Table")
+
+        tree = ttk.Treeview(popup, columns=(
+            "N", "Signal_Values", "Interval_Indices", "Quantized_Values", "Power_Errors", "Encoded_Signal"))
+
+        # Define column headings
+        tree.heading("#1", text="N")
+        tree.heading("#2", text="Signal Values")
+        tree.heading("#3", text="Interval Indices")
+        tree.heading("#4", text="Quantized Values")
+        tree.heading("#5", text="Power Errors")
+        tree.heading("#6", text="Encoded Signal")
+
+        # Add data to the table
+        for i in range(number_of_samples):
+            tree.insert("", i, values=(
+                i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
+                encoded_signal[i]))
+
+        tree.pack()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        ax1.plot(signal_time, signal_value, color='orange')
+        ax1.scatter(signal_time, signal_value, color='blue')
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title('Original Signal')
+
+        ax2.plot(signal_time, quantized_signal, color='green')
+        ax2.scatter(signal_time, quantized_signal, color='blue')
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
+
+        # QuantizationTest2("Task 3\Test 2\Quan2_Out.txt", interval_index, encoded_signal, quantized_signal, errors)
+        # QuantizationTest1("Task 3\Test 1\Quan1_Out.txt", encoded_signal, quantized_signal)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
     def on_closing(self):
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
             print("Bye! :\" ")
             self.root.destroy()
+
 
 GUI()
