@@ -9,7 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.ticker import FuncFormatter
 from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
-
+from math import log2
 
 class GUI:
     def __init__(self):
@@ -553,8 +553,6 @@ class GUI:
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
 
-        # signal_file_path = "Task 3\Test 2\Quan2_input.txt"
-        # signal_file_path = "Task 3\Test 1\Quan1_input.txt"
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
@@ -569,6 +567,7 @@ class GUI:
             if L < 0:
                 messagebox.showerror(title="Error", message="#ofLevels are -ve")
                 return
+            bits = int(log2(L))
         else:
             bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
             if bits < 0:
@@ -576,8 +575,6 @@ class GUI:
                 return
             L = pow(2, bits)
 
-        bits = 3
-        L = pow(2, bits)  # Used for testing input for example test 2
         rounding_parameter = 3
         minimum = min(signal_value)
         maximum = max(signal_value)
@@ -588,22 +585,8 @@ class GUI:
         rounded_intervals = [(round(start, rounding_parameter), round(end, rounding_parameter)) for start, end in
                              intervals]
 
-        print("=" * 200)
-        print(f"Levels : {L}")
-        print(f"Min    : {minimum}")
-        print(f"Max    : {maximum}")
-        print(f"Delta  : {delta}")
-        print("=" * 200)
-        print(f"Intervals         : {intervals}")
-        print(f"Rounded Intervals : {rounded_intervals}")
-        print("=" * 200)
-
         mid_points = [(interval[0] + interval[1]) / 2.00 for interval in rounded_intervals]
         rounded_mid_points = [round(mid, rounding_parameter) for mid in mid_points]
-
-        print(f"Mid Points         : {mid_points}")
-        print(f"Rounded Mid Points : {rounded_mid_points}")
-        print("=" * 200)
 
         quantized_signal = []
         interval_index = []
@@ -620,20 +603,7 @@ class GUI:
                     break
 
         number_of_samples = len(signal_value)
-
-        print(f"Signal Values    : {signal_value}")
-        print(f"Interval Indices : {interval_index}")
-        print(f"Quantized Values : {quantized_signal}")
-        print(f"Errors           : {errors}")
-        print(f"Power Errors     : {error_square}")
-        print("=" * 200)
-
         mse = (np.sum(error_square) * 1.00) / number_of_samples
-
-        print(f"Sum Errors: {np.sum(error_square)}")
-        print(f"Len (N)   : {len(signal_value)}")
-        print(f"MSE       : {mse}")
-        print("="*200)
 
         binary_values = [bin(index-1)[2:] for index in interval_index]
         encoded_signal = []
@@ -642,19 +612,10 @@ class GUI:
                 bin_value = '0' * (bits - len(bin_value)) + bin_value
             encoded_signal.append(bin_value)
 
-        print(f"Interval Indices : {interval_index}")
-        print(f"Binary Values    : {binary_values}")
-        print(f"Encoded Signal   : {encoded_signal}")
-        print("=" * 200)
-
-        # Create a new popup window
         popup = tk.Toplevel()
         popup.title("Quantization & Encoding Table")
-
         tree = ttk.Treeview(popup, columns=(
             "N", "Signal_Values", "Interval_Indices", "Quantized_Values", "Power_Errors", "Encoded_Signal"))
-
-        # Define column headings
         tree.heading("#1", text="N")
         tree.heading("#2", text="Signal Values")
         tree.heading("#3", text="Interval Indices")
@@ -662,7 +623,6 @@ class GUI:
         tree.heading("#5", text="Power Errors")
         tree.heading("#6", text="Encoded Signal")
 
-        # Add data to the table
         for i in range(number_of_samples):
             tree.insert("", i, values=(
                 i, signal_value[i], interval_index[i], quantized_signal[i], error_square[i],
@@ -684,9 +644,6 @@ class GUI:
         ax2.set_xlabel("Time")
         ax2.set_ylabel('Amplitude')
         ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
-
-        # QuantizationTest2("Task 3\Test 2\Quan2_Out.txt", interval_index, encoded_signal, quantized_signal, errors)
-        # QuantizationTest1("Task 3\Test 1\Quan1_Out.txt", encoded_signal, quantized_signal)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

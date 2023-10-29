@@ -1,4 +1,5 @@
 import tkinter as tk
+from math import log2
 from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from numpy import outer
@@ -483,18 +484,21 @@ class GUI:
 
         signal_file_path = "Task 3\Test 2\Quan2_input.txt"
         output_path = "Task 3\Test 2\Quan2_Out.txt"
-        bits = 2
+        # bits = 2
+        L = 4
 
         is_test_1 = messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1\nNo  -> Signal 2")
         if is_test_1:
             signal_file_path = "Task 3\Test 1\Quan1_input.txt"
             output_path = "Task 3\Test 1\Quan1_Out.txt"
-            bits = 3
+            # bits = 3
+            L = 8
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
-        L = pow(2, bits)  # Used for testing input for example test 2
+        # L = pow(2, bits)  # Used for testing input for example test 2
+        bits = int(log2(L))
         rounding_parameter = 3
         minimum = min(signal_value)
         maximum = max(signal_value)
@@ -507,6 +511,7 @@ class GUI:
 
         print("=" * 200)
         print(f"Levels : {L}")
+        print(f"Bits   : {bits}")
         print(f"Min    : {minimum}")
         print(f"Max    : {maximum}")
         print(f"Delta  : {delta}")
