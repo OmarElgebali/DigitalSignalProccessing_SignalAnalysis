@@ -716,7 +716,7 @@ class GUI:
                 current_value += (value * pow(math.e, ((1j * 2 * math.pi * n * k) / signal_length)))
                 print(f'value {k} : {current_value}')
             print("-" * 50)
-            IDFT_component.append(self.round_complex(current_value) * (1 / signal_length))
+            IDFT_component.append(self.round_complex(current_value).real * (1 / signal_length))
 
         print(f'signal_value : {signal_value}')
         print(f'IDF : {IDFT_component}')
@@ -737,6 +737,23 @@ class GUI:
             data_tuples.append(data_tuple)
 
         return data_tuples
+
+    def fourier_transform(self, signal_value, img_factor):
+        rounding_parameter = 3
+        harmonics = []
+        N = len(signal_value)
+        for k in range(N):
+            x_k_n = 0
+            for n, x_n in enumerate(signal_value):
+                power_term = 2 * k * n / N
+                pi_factor = power_term * math.pi
+                img_term = math.cos(pi_factor) + img_factor * complex(0, math.sin(pi_factor))
+                x_k_n += x_n * img_term
+            rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
+                                    int(round(x_k_n.imag, rounding_parameter)))
+            if img_factor > 0:
+                rounded_x_k_n = rounded_x_k_n.real / N
+            harmonics.append(rounded_x_k_n)
 
     def task_4_dft(self):
         # Clear the previous plot
