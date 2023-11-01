@@ -129,38 +129,41 @@ def normalization():
 
 
 # normalization()
-def round_complex(c):
-    real = round(c.real,2)
-    imag = round(c.imag,2)
-    return complex(real,imag)
+# def round_complex(c):
+#     real = round(c.real,2)
+#     imag = round(c.imag,2)
+#     return complex(real,imag)
+#
+# signal_value = [6, -2+2j, -2, -2-2j]
+#
+# IDFT_component = []
+#
+# signal_length = len(signal_value)
+#
+#
+# k_values = [i for i in range(0, signal_length)]
+# n_values = [i for i in range(0, signal_length)]
+#
+# # IDFT_component.append(sum(signal_value))
+#
+# for n in n_values:
+#     current_value = 0
+#     for k, value in enumerate(signal_value):
+#         current_value += (value * pow(math.e, ((1j * 2 * math.pi*n*k)/signal_length)))
+#         print(f'value {k} : {current_value}')
+#     print("-" *50)
+#     IDFT_component.append(round_complex(current_value) * (1/signal_length))
+#
+#
+# print(f'signal_value : {signal_value}')
+# print(f'IDF : {IDFT_component}')
+# print(f'len : {len(IDFT_component)}')
+# print(f'first value in IDFT: {abs(IDFT_component[0])}')
+# print(f'first value in IDFT: {abs(IDFT_component[1])}')
+# print(f'first value in IDFT: {abs(IDFT_component[2])}')
+# print(f'first value in IDFT: {abs(IDFT_component[3])}')
+#
+# print()
 
-signal_value = [6, -2+2j, -2, -2-2j]
-
-IDFT_component = []
-
-signal_length = len(signal_value)
-
-
-k_values = [i for i in range(0, signal_length)]
-n_values = [i for i in range(0, signal_length)]
-
-# IDFT_component.append(sum(signal_value))
-
-for n in n_values:
-    current_value = 0
-    for k, value in enumerate(signal_value):
-        current_value += (value * pow(math.e, ((1j * 2 * math.pi*n*k)/signal_length)))
-        print(f'value {k} : {current_value}')
-    print("-" *50)
-    IDFT_component.append(round_complex(current_value) * (1/signal_length))
-
-
-print(f'signal_value : {signal_value}')
-print(f'IDF : {IDFT_component}')
-print(f'len : {len(IDFT_component)}')
-print(f'first value in IDFT: {abs(IDFT_component[0])}')
-print(f'first value in IDFT: {abs(IDFT_component[1])}')
-print(f'first value in IDFT: {abs(IDFT_component[2])}')
-print(f'first value in IDFT: {abs(IDFT_component[3])}')
-
-print()
+x_indices = [i for i in range(len(5)+1)]
+print(x_indices)
