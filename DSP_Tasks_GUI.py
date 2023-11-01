@@ -12,6 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 from math import log2
 import math
 import cmath
+import os
 
 
 class GUI:
@@ -115,6 +116,7 @@ class GUI:
         real = round(c.real, 2)
         imag = round(c.imag, 2)
         return complex(real, imag)
+
     def task_1_1(self):
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
         if not file_path:
@@ -662,15 +664,40 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
+    def save_freq_domain_signal(self, amplitudes, phase_shifts, signal_file_path):
+        freq_domain_signal = [(amp, phase) for amp, phase in zip(amplitudes, phase_shifts)]
+        """
+        freq_domain_signal = [(amplitudes[i], phase_shifts[i]) for i in range(len(amplitudes))]
+        """
+        with open(signal_file_path, 'w') as file:
+            for amp, phase in freq_domain_signal:
+                file.write(f"{amp} {phase}\n")
+
     def dft(self, time_domain_signal):
-        """
-        send to the function time domain signal and then evaluate the array of polar forms
-        -> Make a function to read a polar form txt file signal like -> (read_onlu_signal method)
-        :param time_domain_signal:
-        :return: freq domain signal -> x(k) -> array of tuples which each tuple is in polar form (amplitude, phase shift)
-        """
-        freq_domain_signal = time_domain_signal
-        return freq_domain_signal
+        rounding_parameter = 3
+        harmonics = []
+        N = len(time_domain_signal)
+        for k in range(N):
+            x_k_n = 0
+            for n, x_n in enumerate(time_domain_signal):
+                power_term = 2 * k * n / N
+                pi_factor = power_term * math.pi
+                img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
+                x_k_n += x_n * img_term
+            rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
+                                    int(round(x_k_n.imag, rounding_parameter)))
+            harmonics.append(rounded_x_k_n)
+
+        amplitudes = [round(abs(x_k_n), rounding_parameter) for x_k_n in harmonics]
+        phase_shifts = [math.degrees(cmath.phase(x_k_n)) for x_k_n in harmonics]
+        print("=" * 200)
+        print(f"N : {N}")
+        print(f"Signal Values   X(n): {time_domain_signal}")
+        print(f"Harmonics       X(k): {harmonics}")
+        print(f"Amplitudes         A: {amplitudes}")
+        print(f"Phase Shifts       Ø: {phase_shifts}")
+        print("=" * 200)
+        return amplitudes, phase_shifts
 
     def idft(self, freq_domain_signal):
         signal_value = []
@@ -729,43 +756,18 @@ class GUI:
         # signal_time, signal_value = self.read_only_signal(signal_file_path)
         # signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
-        sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in 9Hz):")
-        if sampling_frequency < 0:
-            messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
-            return
-
-        # sampling_frequency = 4000
+        sampling_frequency = 4000
+        # sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
+        # if sampling_frequency < 0:
+        #     messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
+        #     return
 
         rounding_parameter = 3
-        sampling_frequency_in_kHz = sampling_frequency / 1000
-        harmonics = []
         N = len(signal_value)
+        sampling_frequency_in_kHz = sampling_frequency / 1000
 
-        print("=" * 200)
-        print(f"N       : {N}")
-        print(f"Fs (Hz) : {sampling_frequency}")
-        print(f"Fs (kHz): {sampling_frequency}")
-        print("=" * 200)
-
-        for k in range(N):
-            x_k_n = 0
-            for n, x_n in enumerate(signal_value):
-                power_term = 2 * k * n / N
-                pi_factor = power_term * math.pi
-                img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
-                x_k_n += x_n * img_term
-            rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
-                                    int(round(x_k_n.imag, rounding_parameter)))
-            harmonics.append(rounded_x_k_n)
-
-        amplitudes = [round(abs(x_k_n), rounding_parameter) for x_k_n in harmonics]
-        phase_shifts = [math.degrees(cmath.phase(x_k_n)) for x_k_n in harmonics]
-
-        print(f"Signal Values : {signal_value}")
-        print(f"Harmonics     : {harmonics}")
-        print(f"Amplitudes    : {amplitudes}")
-        print(f"Phase Shifts  : {phase_shifts}")
-        print("=" * 200)
+        amplitudes, phase_shifts = self.dft(signal_value)
+        self.save_freq_domain_signal(amplitudes, phase_shifts, "Task 4\Test_in.txt")
 
         fundamental_frequency = round((2 * math.pi * sampling_frequency_in_kHz) / N, rounding_parameter)
         print(f"Fundamental Frequency : {fundamental_frequency}")
@@ -791,6 +793,68 @@ class GUI:
         ax2.set_xlabel("Frequency Index")
         ax2.set_ylabel('Phase Shift (in Degrees)')
         ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+
+        popup = tk.Toplevel()
+        popup.title("Modification of Frequency Domain Signal")
+        modification_frame = tk.Frame(popup)
+        modification_frame.columnconfigure(0, weight=1)
+        modification_frame.columnconfigure(1, weight=1)
+        lbl_freq_index = tk.Label(modification_frame, text="Frequency Index (0, N-1)", font=('Arial', 16))
+        lbl_freq_index.grid(row=0, column=0, sticky=tk.W + tk.E)
+        txt_freq_index = tk.Entry(modification_frame)
+        txt_freq_index.grid(row=0, column=1, sticky=tk.W + tk.E)
+        lbl_amplitude = tk.Label(modification_frame, text="Amplitude (A)", font=('Arial', 16))
+        lbl_amplitude.grid(row=1, column=0, sticky=tk.W + tk.E)
+        txt_amplitude = tk.Entry(modification_frame)
+        txt_amplitude.grid(row=1, column=1, sticky=tk.W + tk.E)
+        lbl_phase_shift = tk.Label(modification_frame, text="Phase Shift (Ø)", font=('Arial', 16))
+        lbl_phase_shift.grid(row=2, column=0, sticky=tk.W + tk.E)
+        txt_phase_shift = tk.Entry(modification_frame)
+        txt_phase_shift.grid(row=2, column=1, sticky=tk.W + tk.E)
+
+        def apply_modification():
+            amplitudes[int(txt_freq_index.get())] = float(txt_amplitude.get())
+            phase_shifts[int(txt_freq_index.get())] = float(txt_phase_shift.get())
+            for widget in self.plots_frame.winfo_children():
+                widget.destroy()
+
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+            fig.subplots_adjust(hspace=0.3)
+            ax1.stem(x_axis, amplitudes)
+            ax1.set_xticks(x_axis)
+            ax1.set_xticklabels(x_axis)
+            ax1.set_xlabel("Frequency Index")
+            ax1.set_ylabel('Amplitude')
+            ax1.set_title('Task 4 - Amplitude vs Frequencies')
+
+            ax2.stem(x_axis, phase_shifts)
+            ax2.set_xticks(x_axis)
+            ax2.set_xticklabels(x_axis)
+            ax2.set_xlabel("Frequency Index")
+            ax2.set_ylabel('Phase Shift (in Degrees)')
+            ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+            # Embed the Matplotlib plot in the Tkinter window
+            canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+            canvas.get_tk_widget().pack()
+            messagebox.showinfo(title="Successful", message="Amplitude & Phase Shift Updated Successfully")
+
+        btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14), command=apply_modification)
+        btn_apply_mod.grid(row=3, column=0, columnspan=2, sticky=tk.W + tk.E)
+
+        lbl_file_name = tk.Label(modification_frame, text="File Name", font=('Arial', 16))
+        lbl_file_name.grid(row=4, column=0, sticky=tk.W + tk.E)
+        txt_file_name = tk.Entry(modification_frame)
+        txt_file_name.grid(row=4, column=1, sticky=tk.W + tk.E)
+
+        def save_modified_signal():
+            with open(txt_file_name.get(), 'w') as file:
+                for i in range(len(amplitudes)):
+                    file.write(f'{amplitudes[i]}, {phase_shifts[i]}\n')
+            messagebox.showinfo(title="Successful", message="Signal Saved Successfully")
+
+        btn_save_signal = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14), command=save_modified_signal)
+        btn_save_signal.grid(row=5, column=0, columnspan=2, sticky=tk.W + tk.E)
+        modification_frame.pack(fill='x')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
