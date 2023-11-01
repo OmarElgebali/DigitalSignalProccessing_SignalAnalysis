@@ -705,7 +705,7 @@ class GUI:
             rad_theta = math.radians(theta)
             real_part = a * cmath.cos(rad_theta)
             imaginary_part = a * cmath.sin(rad_theta)
-            signal_value.append(complex(real_part ,imaginary_part))
+            signal_value.append(complex(real_part, imaginary_part))
 
         IDFT_component = []
         signal_length = len(signal_value)
@@ -727,8 +727,7 @@ class GUI:
         print(f'first value in IDFT: {abs(IDFT_component[3])}')
         return IDFT_component
 
-
-    def read_signalT4(self,path):
+    def read_signalT4(self, path):
         with open(path, 'r') as file:
             lines = file.readlines()
         data_tuples = []
@@ -748,19 +747,14 @@ class GUI:
         fig.subplots_adjust(hspace=0.3)
 
 
-        # signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        # if not signal_file_path:
-        #     messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-        #     return
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
-        # signal_time, signal_value = self.read_only_signal(signal_file_path)
-        # signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
-
-        sampling_frequency = 4000
-        # sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
-        # if sampling_frequency < 0:
-        #     messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
-        #     return
+        # sampling_frequency = 4000
+        sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
+        if sampling_frequency < 0:
+            messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
+            return
 
         rounding_parameter = 3
         N = len(signal_value)
@@ -838,7 +832,8 @@ class GUI:
             canvas.get_tk_widget().pack()
             messagebox.showinfo(title="Successful", message="Amplitude & Phase Shift Updated Successfully")
 
-        btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14), command=apply_modification)
+        btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14),
+                                  command=apply_modification)
         btn_apply_mod.grid(row=3, column=0, columnspan=2, sticky=tk.W + tk.E)
 
         lbl_file_name = tk.Label(modification_frame, text="File Name", font=('Arial', 16))
@@ -849,10 +844,11 @@ class GUI:
         def save_modified_signal():
             with open(txt_file_name.get(), 'w') as file:
                 for i in range(len(amplitudes)):
-                    file.write(f'{amplitudes[i]}, {phase_shifts[i]}\n')
+                    file.write(f'{amplitudes[i]} {phase_shifts[i]}\n')
             messagebox.showinfo(title="Successful", message="Signal Saved Successfully")
 
-        btn_save_signal = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14), command=save_modified_signal)
+        btn_save_signal = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14),
+                                    command=save_modified_signal)
         btn_save_signal.grid(row=5, column=0, columnspan=2, sticky=tk.W + tk.E)
         modification_frame.pack(fill='x')
 
@@ -866,19 +862,22 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        # polar = filedialog.askopenfilename(title="Select Signal Data File")
-        # if not signal_file_path:
-        #     messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-        #     return
-        polar = self.read_signalT4('Task 4/test_polar_form_in.txt')
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+        polar = self.read_signalT4(signal_file_path)
         Signal_time_domain = self.idft(polar)
-        x_indices = [i for i in range(1,len(Signal_time_domain)+1)]
-# Plot the discrete values
-        plt.stem(x_indices, Signal_time_domain, markerfmt='bo', linefmt='k-', basefmt='k-')  # 'ro' for red circles, 'r-' for red line
+        x_indices = [i for i in range(1, len(Signal_time_domain) + 1)]
+
+        # Plot the discrete values
+        plt.stem(x_indices, Signal_time_domain, markerfmt='bo', linefmt='k-',
+                 basefmt='k-')  # 'ro' for red circles, 'r-' for red line
         plt.xlabel('Index')
         plt.ylabel('Value')
         plt.title('IDFT')
-        plt.show()
+
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()

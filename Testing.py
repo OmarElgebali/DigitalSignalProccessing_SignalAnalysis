@@ -12,12 +12,12 @@
 #     print("= " * 30)
 import cmath
 import math
-#
-c = -2 + 2j
-print(c)
-print(type(c))
-print(cmath.phase(c))
-print(math.degrees(cmath.phase(c)))
+# #
+# c = -2 + 2j
+# print(c)
+# print(type(c))
+# print(cmath.phase(c))
+# print(math.degrees(cmath.phase(c)))
 
 
 """
@@ -35,7 +35,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Step 1: Discretize the Signal (Example signal)
-signal = [0, 1, 2, 3]
+signal = [7, 15, 26, 88]
 
 # Step 2: Compute the Discrete Fourier Transform (DFT)
 dft_result = np.fft.fft(signal)
@@ -65,5 +65,3 @@ plt.ylabel('Phase (radians)')
 
 plt.tight_layout()
 plt.show()
-
-""""""
