@@ -664,6 +664,16 @@ class GUI:
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
 
+        signal_value = [0, 1, 2, 3]
+        # signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        # if not signal_file_path:
+        #     messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+        #     return
+
+        # signal_time, signal_value = self.read_only_signal(signal_file_path)
+        # signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        fundamental_frequency = 4000
+
         # ax1.plot(signal_time, signal_value, color='orange')
         # ax1.scatter(signal_time, signal_value, color='blue')
         # ax1.set_xlabel("Time")
@@ -686,6 +696,15 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_value = [0, 1, 2, 3]
+        # signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        # if not signal_file_path:
+        #     messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+        #     return
+
+        # signal_time, signal_value = self.read_only_signal(signal_file_path)
+        # signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
