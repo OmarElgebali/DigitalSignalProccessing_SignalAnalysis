@@ -764,7 +764,6 @@ class GUI:
         ax2.set_ylabel('Phase Shift (in Degrees)')
         ax2.set_title('Task 4 - Phase Shift vs Frequencies')
 
-
         popup = tk.Toplevel()
         popup.title("Modification of Frequency Domain Signal")
         modification_frame = tk.Frame(popup)
@@ -783,22 +782,48 @@ class GUI:
         txt_phase_shift = tk.Entry(modification_frame)
         txt_phase_shift.grid(row=2, column=1, sticky=tk.W + tk.E)
 
-        signal_file_path = "emad.txt"
+        def apply_modification():
+            amplitudes[int(txt_freq_index.get())] = float(txt_amplitude.get())
+            phase_shifts[int(txt_freq_index.get())] = float(txt_phase_shift.get())
+            for widget in self.plots_frame.winfo_children():
+                widget.destroy()
+
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+            fig.subplots_adjust(hspace=0.3)
+            ax1.stem(x_axis, amplitudes)
+            ax1.set_xticks(x_axis)
+            ax1.set_xticklabels(x_axis)
+            ax1.set_xlabel("Frequency Index")
+            ax1.set_ylabel('Amplitude')
+            ax1.set_title('Task 4 - Amplitude vs Frequencies')
+
+            ax2.stem(x_axis, phase_shifts)
+            ax2.set_xticks(x_axis)
+            ax2.set_xticklabels(x_axis)
+            ax2.set_xlabel("Frequency Index")
+            ax2.set_ylabel('Phase Shift (in Degrees)')
+            ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+            # Embed the Matplotlib plot in the Tkinter window
+            canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+            canvas.get_tk_widget().pack()
+            messagebox.showinfo(title="Successful", message="Amplitude & Phase Shift Updated Successfully")
+
+        btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14), command=apply_modification)
+        btn_apply_mod.grid(row=3, column=0, columnspan=2, sticky=tk.W + tk.E)
+
+        lbl_file_name = tk.Label(modification_frame, text="File Name", font=('Arial', 16))
+        lbl_file_name.grid(row=4, column=0, sticky=tk.W + tk.E)
+        txt_file_name = tk.Entry(modification_frame)
+        txt_file_name.grid(row=4, column=1, sticky=tk.W + tk.E)
 
         def save_modified_signal():
-            with open(signal_file_path , 'w') as file:
+            with open(txt_file_name.get(), 'w') as file:
                 for i in range(len(amplitudes)):
                     file.write(f'{amplitudes[i]}, {phase_shifts[i]}\n')
+            messagebox.showinfo(title="Successful", message="Signal Saved Successfully")
 
-
-        def apply_modification():
-            amplitudes[int(txt_freq_index.get())] = int(txt_amplitude.get())
-            phase_shifts[int(txt_freq_index.get())] = int(txt_phase_shift.get())
-
-        lbl1 = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14), command=apply_modification)
-        lbl1.grid(row=3, column=0, columnspan=2, sticky=tk.W + tk.E)
-        lbl2 = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14) , command = save_modified_signal)
-        lbl2.grid(row=4, column=0, columnspan=2, sticky=tk.W + tk.E)
+        btn_save_signal = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14), command=save_modified_signal)
+        btn_save_signal.grid(row=5, column=0, columnspan=2, sticky=tk.W + tk.E)
         modification_frame.pack(fill='x')
 
         # Embed the Matplotlib plot in the Tkinter window
@@ -855,5 +880,6 @@ class GUI:
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
             print("Bye! :\" ")
             self.root.destroy()
+
 
 GUI()
