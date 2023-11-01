@@ -11,6 +11,7 @@ from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
 from math import log2
 
+
 class GUI:
     def __init__(self):
 
@@ -55,6 +56,12 @@ class GUI:
         self.task_3_menu = tk.Menu(self.menubar, tearoff=2)
         self.task_3_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
         self.menubar.add_cascade(menu=self.task_3_menu, label="Task 3")
+
+        self.task_4_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_4_menu.add_command(label="(4.1) Fourier Transform [DFT]", command=self.task_4_dft)
+        self.task_4_menu.add_separator()
+        self.task_4_menu.add_command(label="(4.2) Inverse Fourier Transform [IDFT]", command=self.task_4_idft)
+        self.menubar.add_cascade(menu=self.task_4_menu, label="Task 4")
 
         self.root.config(menu=self.menubar)
 
@@ -605,7 +612,7 @@ class GUI:
         number_of_samples = len(signal_value)
         mse = (np.sum(error_square) * 1.00) / number_of_samples
 
-        binary_values = [bin(index-1)[2:] for index in interval_index]
+        binary_values = [bin(index - 1)[2:] for index in interval_index]
         encoded_signal = []
         for bin_value in binary_values:
             if len(bin_value) < bits:
@@ -644,6 +651,41 @@ class GUI:
         ax2.set_xlabel("Time")
         ax2.set_ylabel('Amplitude')
         ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_4_dft(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        # ax1.plot(signal_time, signal_value, color='orange')
+        # ax1.scatter(signal_time, signal_value, color='blue')
+        # ax1.set_xlabel("Time")
+        # ax1.set_ylabel('Amplitude')
+        # ax1.set_title('Original Signal')
+        #
+        # ax2.plot(signal_time, quantized_signal, color='green')
+        # ax2.scatter(signal_time, quantized_signal, color='blue')
+        # ax2.set_xlabel("Time")
+        # ax2.set_ylabel('Amplitude')
+        # ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_4_idft(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
