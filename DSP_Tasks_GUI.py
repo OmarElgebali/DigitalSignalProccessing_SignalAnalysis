@@ -746,6 +746,12 @@ class GUI:
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
 
+        # signal_value = [0, 1, 2, 3]
+        # signal_value = [7, 15, 26, 88]
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
