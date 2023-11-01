@@ -10,6 +10,8 @@ from matplotlib.ticker import FuncFormatter
 from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
 from math import log2
+import math
+import cmath
 
 
 class GUI:
@@ -656,6 +658,26 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
+    def dft(self, time_domain_signal):
+        """
+        send to the function time domain signal and then evaluate the array of polar forms
+        -> Make a function to read a polar form txt file signal like -> (read_onlu_signal method)
+        :param time_domain_signal:
+        :return: freq domain signal -> x(k) -> array of tuples which each tuple is in polar form (amplitude, phase shift)
+        """
+        freq_domain_signal = time_domain_signal
+        return freq_domain_signal
+
+    def idft(self, freq_domain_signal):
+        """
+        send to the function the array of polar forms and then evaluate the time domain signal
+        -> Make a function to read a polar form txt file signal like -> (read_onlu_signal method)
+        :param freq_domain_signal: array of tuples which each tuple is in polar form (amplitude, phase shift) -> x(k)
+        :return: time domain signal -> x(n)
+        """
+        time_domain_signal = freq_domain_signal
+        return time_domain_signal
+
     def task_4_dft(self):
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
@@ -672,19 +694,69 @@ class GUI:
 
         # signal_time, signal_value = self.read_only_signal(signal_file_path)
         # signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
-        fundamental_frequency = 4000
 
-        # ax1.plot(signal_time, signal_value, color='orange')
-        # ax1.scatter(signal_time, signal_value, color='blue')
-        # ax1.set_xlabel("Time")
-        # ax1.set_ylabel('Amplitude')
-        # ax1.set_title('Original Signal')
-        #
-        # ax2.plot(signal_time, quantized_signal, color='green')
-        # ax2.scatter(signal_time, quantized_signal, color='blue')
-        # ax2.set_xlabel("Time")
-        # ax2.set_ylabel('Amplitude')
-        # ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
+        sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in 9Hz):")
+        if sampling_frequency < 0:
+            messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
+            return
+
+        # sampling_frequency = 4000
+
+        rounding_parameter = 3
+        sampling_frequency_in_kHz = sampling_frequency / 1000
+        harmonics = []
+        N = len(signal_value)
+
+        print("=" * 200)
+        print(f"N       : {N}")
+        print(f"Fs (Hz) : {sampling_frequency}")
+        print(f"Fs (kHz): {sampling_frequency}")
+        print("=" * 200)
+
+        for k in range(N):
+            x_k_n = 0
+            for n, x_n in enumerate(signal_value):
+                power_term = 2 * k * n / N
+                pi_factor = power_term * math.pi
+                img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
+                x_k_n += x_n * img_term
+            rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
+                                    int(round(x_k_n.imag, rounding_parameter)))
+            harmonics.append(rounded_x_k_n)
+
+        amplitudes = [round(abs(x_k_n), rounding_parameter) for x_k_n in harmonics]
+        phase_shifts = [math.degrees(cmath.phase(x_k_n)) for x_k_n in harmonics]
+
+        print(f"Signal Values : {signal_value}")
+        print(f"Harmonics     : {harmonics}")
+        print(f"Amplitudes    : {amplitudes}")
+        print(f"Phase Shifts  : {phase_shifts}")
+        print("=" * 200)
+
+        fundamental_frequency = round((2 * math.pi * sampling_frequency_in_kHz) / N, rounding_parameter)
+        print(f"Fundamental Frequency : {fundamental_frequency}")
+        print("=" * 200)
+
+        x_axis = [fundamental_frequency]
+        for i in range(N - 1):
+            x_axis.append(x_axis[-1] + fundamental_frequency)
+
+        print(f"X-axis : {x_axis}")
+        print("=" * 200)
+
+        ax1.stem(x_axis, amplitudes)
+        ax1.set_xticks(x_axis)
+        ax1.set_xticklabels(x_axis)
+        ax1.set_xlabel("Frequency Index")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title('Task 4 - Amplitude vs Frequencies')
+
+        ax2.stem(x_axis, phase_shifts)
+        ax2.set_xticks(x_axis)
+        ax2.set_xticklabels(x_axis)
+        ax2.set_xlabel("Frequency Index")
+        ax2.set_ylabel('Phase Shift (in Degrees)')
+        ax2.set_title('Task 4 - Phase Shift vs Frequencies')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
