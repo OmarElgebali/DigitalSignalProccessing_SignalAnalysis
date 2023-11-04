@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
+
+import Task_4_signalcompare
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -666,15 +668,23 @@ class GUI:
 
     def save_freq_domain_signal(self, amplitudes, phase_shifts, signal_file_path):
         freq_domain_signal = [(amp, phase) for amp, phase in zip(amplitudes, phase_shifts)]
-        """
-        freq_domain_signal = [(amplitudes[i], phase_shifts[i]) for i in range(len(amplitudes))]
-        """
+        # freq_domain_signal = [(amplitudes[i], phase_shifts[i]) for i in range(len(amplitudes))]
         with open(signal_file_path, 'w') as file:
+            file.write(f"1\n")
+            file.write(f"0\n")
+            file.write(f"{len(amplitudes)}\n")
             for amp, phase in freq_domain_signal:
                 file.write(f"{amp} {phase}\n")
 
+    def save_time_domain_signal(self, signal_values, signal_file_path):
+        with open(signal_file_path, 'w') as file:
+            file.write(f"0\n")
+            file.write(f"0\n")
+            file.write(f"{len(signal_values)}\n")
+            for time, value in enumerate(signal_values):
+                file.write(f"{time} {value}\n")
+
     def dft(self, time_domain_signal):
-        rounding_parameter = 3
         harmonics = []
         N = len(time_domain_signal)
         for k in range(N):
@@ -684,12 +694,10 @@ class GUI:
                 pi_factor = power_term * math.pi
                 img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
                 x_k_n += x_n * img_term
-            rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
-                                    int(round(x_k_n.imag, rounding_parameter)))
-            harmonics.append(rounded_x_k_n)
+            harmonics.append(x_k_n)
 
-        amplitudes = [round(abs(x_k_n), rounding_parameter) for x_k_n in harmonics]
-        phase_shifts = [math.degrees(cmath.phase(x_k_n)) for x_k_n in harmonics]
+        amplitudes = [abs(x_k_n) for x_k_n in harmonics]
+        phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
         print("=" * 200)
         print(f"N : {N}")
         print(f"Signal Values   X(n): {time_domain_signal}")
@@ -702,9 +710,8 @@ class GUI:
     def idft(self, freq_domain_signal):
         signal_value = []
         for a, theta in freq_domain_signal:
-            rad_theta = math.radians(theta)
-            real_part = a * cmath.cos(rad_theta)
-            imaginary_part = a * cmath.sin(rad_theta)
+            real_part = a * cmath.cos(theta)
+            imaginary_part = a * cmath.sin(theta)
             signal_value.append(complex(real_part, imaginary_part))
 
         IDFT_component = []
@@ -729,17 +736,22 @@ class GUI:
 
     def read_signalT4(self, path):
         with open(path, 'r') as file:
+            file.readline()
+            file.readline()
+            file.readline()
             lines = file.readlines()
         data_tuples = []
         for line in lines:
             columns = line.strip().split()
-            data_tuple = (float(columns[0]), float(columns[1]))
+            amplitude_init = columns[0]
+            phase_shift_init = columns[1]
+            amplitude = float(amplitude_init.rstrip('f')) if amplitude_init.endswith('f') else float(amplitude_init)
+            phase_shift = float(phase_shift_init.rstrip('f')) if phase_shift_init.endswith('f') else float(phase_shift_init)
+            data_tuple = (amplitude, phase_shift)
             data_tuples.append(data_tuple)
-
         return data_tuples
 
     def fourier_transform(self, signal_value, img_factor):
-        rounding_parameter = 3
         harmonics = []
         N = len(signal_value)
         for k in range(N):
@@ -749,11 +761,10 @@ class GUI:
                 pi_factor = power_term * math.pi
                 img_term = math.cos(pi_factor) + img_factor * complex(0, math.sin(pi_factor))
                 x_k_n += x_n * img_term
-            rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
-                                    int(round(x_k_n.imag, rounding_parameter)))
             if img_factor > 0:
-                rounded_x_k_n = rounded_x_k_n.real / N
-            harmonics.append(rounded_x_k_n)
+                x_k_n = x_k_n.real / N
+            harmonics.append(x_k_n)
+        return harmonics
 
     def task_4_dft(self):
         # Clear the previous plot
@@ -784,7 +795,15 @@ class GUI:
         sampling_frequency_in_kHz = sampling_frequency / 1000
 
         amplitudes, phase_shifts = self.dft(signal_value)
-        self.save_freq_domain_signal(amplitudes, phase_shifts, "Task 4\Test_in.txt")
+
+        output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
+        polar_form = self.read_signalT4(output_file_path)
+        output_amplitudes = []
+        output_phase_shifts = []
+        for a, ps in polar_form:
+            output_amplitudes.append(a)
+            output_phase_shifts.append(ps)
+        Task_4_signalcompare.SignalCompare(amplitudes, output_amplitudes, phase_shifts, output_phase_shifts)
 
         fundamental_frequency = round((2 * math.pi * sampling_frequency_in_kHz) / N, rounding_parameter)
         print(f"Fundamental Frequency : {fundamental_frequency}")
@@ -865,7 +884,13 @@ class GUI:
         txt_file_name.grid(row=4, column=1, sticky=tk.W + tk.E)
 
         def save_modified_signal():
+            if not txt_file_name.get():
+                messagebox.showerror(title="Error", message="Signal File Name is Empty!")
+                return
             with open(txt_file_name.get(), 'w') as file:
+                file.write(f"0\n")
+                file.write(f"0\n")
+                file.write(f"{len(amplitudes)}\n")
                 for row in range(len(amplitudes)):
                     file.write(f'{amplitudes[row]} {phase_shifts[row]}\n')
             messagebox.showinfo(title="Successful", message="Signal Saved Successfully")
@@ -891,14 +916,18 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
         polar = self.read_signalT4(signal_file_path)
-        Signal_time_domain = self.idft(polar)
-        x_indices = [i for i in range(1, len(Signal_time_domain) + 1)]
+        signal_time_domain = self.idft(polar)
+        x_indices = [i for i in range(1, len(signal_time_domain) + 1)]
+
+        output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
+        _, s_v = self.read_only_signal(output_file_path)
+        SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
 
         # Plot the discrete values
-        plt.stem(x_indices, Signal_time_domain, markerfmt='bo', linefmt='k-',
+        plt.stem(x_indices, signal_time_domain, markerfmt='bo', linefmt='k-',
                  basefmt='k-')  # 'ro' for red circles, 'r-' for red line
-        plt.xlabel('Index')
-        plt.ylabel('Value')
+        plt.xlabel('Time')
+        plt.ylabel('Amplitude')
         plt.title('IDFT')
 
         # Embed the Matplotlib plot in the Tkinter window
