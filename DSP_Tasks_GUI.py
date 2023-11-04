@@ -832,27 +832,27 @@ class GUI:
         def apply_modification():
             amplitudes[int(txt_freq_index.get())] = float(txt_amplitude.get())
             phase_shifts[int(txt_freq_index.get())] = float(txt_phase_shift.get())
-            for widget in self.plots_frame.winfo_children():
-                widget.destroy()
+            for inner_widget in self.plots_frame.winfo_children():
+                inner_widget.destroy()
 
-            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-            fig.subplots_adjust(hspace=0.3)
-            ax1.stem(x_axis, amplitudes)
-            ax1.set_xticks(x_axis)
-            ax1.set_xticklabels(x_axis)
-            ax1.set_xlabel("Frequency Index")
-            ax1.set_ylabel('Amplitude')
-            ax1.set_title('Task 4 - Amplitude vs Frequencies')
+            inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+            inner_fig.subplots_adjust(hspace=0.3)
+            inner_ax1.stem(x_axis, amplitudes)
+            inner_ax1.set_xticks(x_axis)
+            inner_ax1.set_xticklabels(x_axis)
+            inner_ax1.set_xlabel("Frequency Index")
+            inner_ax1.set_ylabel('Amplitude')
+            inner_ax1.set_title('Task 4 - Amplitude vs Frequencies')
 
-            ax2.stem(x_axis, phase_shifts)
-            ax2.set_xticks(x_axis)
-            ax2.set_xticklabels(x_axis)
-            ax2.set_xlabel("Frequency Index")
-            ax2.set_ylabel('Phase Shift (in Degrees)')
-            ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+            inner_ax2.stem(x_axis, phase_shifts)
+            inner_ax2.set_xticks(x_axis)
+            inner_ax2.set_xticklabels(x_axis)
+            inner_ax2.set_xlabel("Frequency Index")
+            inner_ax2.set_ylabel('Phase Shift (in Degrees)')
+            inner_ax2.set_title('Task 4 - Phase Shift vs Frequencies')
             # Embed the Matplotlib plot in the Tkinter window
-            canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-            canvas.get_tk_widget().pack()
+            inner_canvas = FigureCanvasTkAgg(inner_fig, master=self.plots_frame)
+            inner_canvas.get_tk_widget().pack()
             messagebox.showinfo(title="Successful", message="Amplitude & Phase Shift Updated Successfully")
 
         btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14),
@@ -866,8 +866,8 @@ class GUI:
 
         def save_modified_signal():
             with open(txt_file_name.get(), 'w') as file:
-                for i in range(len(amplitudes)):
-                    file.write(f'{amplitudes[i]} {phase_shifts[i]}\n')
+                for row in range(len(amplitudes)):
+                    file.write(f'{amplitudes[row]} {phase_shifts[row]}\n')
             messagebox.showinfo(title="Successful", message="Signal Saved Successfully")
 
         btn_save_signal = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14),
