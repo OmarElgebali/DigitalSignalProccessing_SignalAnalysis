@@ -1,16 +1,12 @@
-import cmath
-import math
 import tkinter as tk
 from math import log2
 from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from numpy import outer
 
-import Task_4_signalcompare
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
-from Task_4_signalcompare import SignalCompare
 
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -64,12 +60,6 @@ class GUI:
         self.task_3_menu.add_command(label="(3) Quantize Signal", command=self.task_3_quantize)
         self.menubar.add_cascade(menu=self.task_3_menu, label="Task 3")
 
-        self.task_4_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_4_menu.add_command(label="(4.1) Fourier Transform [DFT]", command=self.task_4_dft)
-        self.task_4_menu.add_separator()
-        self.task_4_menu.add_command(label="(4.2) Inverse Fourier Transform [IDFT]", command=self.task_4_idft)
-        self.menubar.add_cascade(menu=self.task_4_menu, label="Task 4")
-
         self.root.config(menu=self.menubar)
 
         self.plots_frame = tk.Frame(self.root)
@@ -97,8 +87,7 @@ class GUI:
         number_of_signals = len(signal_lengths)
         current_signal = 0
         while current_signal <= number_of_signals - 1:
-            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(
-                list_signal_values[current_signal], list_signal_times[current_signal], max_len)
+            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(list_signal_values[current_signal], list_signal_times[current_signal], max_len)
             current_signal += 1
         return list_signal_times, list_signal_values
 
@@ -115,11 +104,6 @@ class GUI:
                 signal_time.append(float(parts[0]))
                 signal_value.append(float(parts[1]))
         return signal_time, signal_value
-
-    def round_complex(self, c):
-        real = round(c.real, 2)
-        imag = round(c.imag, 2)
-        return complex(real, imag)
 
     def task_1_1(self):
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
@@ -164,7 +148,7 @@ class GUI:
 
             x, y = self.sort_2_lists(x, y)
 
-            if signal_details[1] == 1:  # [1] Period
+            if signal_details[1] == 1:      # [1] Period
                 periodic = 'Periodic'
                 start_of_cycle = 0
                 end_of_cycle = signal_details[2]
@@ -175,12 +159,12 @@ class GUI:
                     x.extend(range(start_of_cycle, end_of_cycle))
                     y = y + temp_y
 
-            if signal_details[0] == 1:  # [0] Frequency Domain
+            if signal_details[0] == 1:      # [0] Frequency Domain
                 x_label = 'f'
                 domain = 'Frequency'
 
             title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
-            if signal_details[0] == 1 and signal_details[3]:  # [3] Phase Shift
+            if signal_details[0] == 1 and signal_details[3]:      # [3] Phase Shift
                 title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
                 plt.xlim(1, max(x) + abs(signal_details[3]))
                 x = [value + signal_details[3] for value in x]
@@ -205,6 +189,7 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+
         output_path = "Task 1/CosOutput.txt"
         name = "Cosine"
         wave_type = 2
@@ -219,8 +204,8 @@ class GUI:
             analog_frequency = 360
             sampling_frequency = 720
             phase_shift = 1.96349540849362
-
-        x_values = np.arange(0, 1, 1 / sampling_frequency)
+        
+        x_values = np.arange(0, 1, 1/sampling_frequency)
         self.Xs_SinCos = x_values
 
         # Equation -> y = amplitude * np.sin(2 * np.pi * x + phase_shift)
@@ -262,6 +247,7 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+
         output_path = "Task 2/output_signals/signal1+signal3.txt"
         signal_2_file_path = "Task 2/input_signals/signal3.txt"
         if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 + S2)\nNo  -> Signal 3 (S1 + S3)"):
@@ -285,8 +271,7 @@ class GUI:
             signal_values.append(signal_value_temp)
             if len(signal_times[0]) != len(signal_times[signal_number]):
                 lengths_equal = 0
-            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number],
-                                                                                          signal_values[signal_number])
+            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number], signal_values[signal_number])
 
         if not lengths_equal:
             signal_times, signal_values = self.extend_signals(signal_times, signal_values)
@@ -329,12 +314,10 @@ class GUI:
 
         # Not Equal Length Check
         if len(signal_1_time) < len(signal_2_time):
-            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value,
-                                                                           len(signal_2_value))
+            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value, len(signal_2_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
         elif len(signal_1_time) > len(signal_2_time):
-            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value,
-                                                                           len(signal_1_value))
+            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value, len(signal_1_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
         result_subtraction_signal = np.subtract(signal_2_value, signal_1_value)
@@ -362,8 +345,7 @@ class GUI:
         output_path = "Task 2/output_signals/MultiplySignalByConstant-signal2 - by 10.txt"
         signal_file_path = "Task 2/input_signals/Signal2.txt"
         factor = 10
-        if messagebox.askyesno(title="Test Signal",
-                               message="Yes -> Signal 1 (Factor = 5)\nNo  -> Signal 2 (Factor = 10)"):
+        if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1 (Factor = 5)\nNo  -> Signal 2 (Factor = 10)"):
             output_path = "Task 2/output_signals/MultiplySignalByConstant-Signal1 - by 5.txt"
             signal_file_path = "Task 2/input_signals/Signal1.txt"
             factor = 5
@@ -481,7 +463,7 @@ class GUI:
 
         signal_file_path = "Task 2/input_signals/Signal1.txt"
         signal_time, signal_value = self.read_only_signal(signal_file_path)
-        accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
+        accumulate_signal = [sum(signal_value[:i+1]) for i in range(len(signal_value))]
         SignalSamplesAreEqual("Task 2/output_signals/output accumulation for signal1.txt", None, accumulate_signal)
 
         # plt.plot(signal_time, square_signal, color='orange')
@@ -499,15 +481,16 @@ class GUI:
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
 
-        signal_file_path = "Task 3/Test 2/Quan2_input.txt"
-        output_path = "Task 3/Test 2/Quan2_Out.txt"
+
+        signal_file_path = "Task 3\Test 2\Quan2_input.txt"
+        output_path = "Task 3\Test 2\Quan2_Out.txt"
         # bits = 2
         L = 4
 
         is_test_1 = messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1\nNo  -> Signal 2")
         if is_test_1:
-            signal_file_path = "Task 3/Test 1/Quan1_input.txt"
-            output_path = "Task 3/Test 1/Quan1_Out.txt"
+            signal_file_path = "Task 3\Test 1\Quan1_input.txt"
+            output_path = "Task 3\Test 1\Quan1_Out.txt"
             # bits = 3
             L = 8
 
@@ -572,9 +555,9 @@ class GUI:
         print(f"Sum Errors: {np.sum(error_square)}")
         print(f"Len (N)   : {len(signal_value)}")
         print(f"MSE       : {mse}")
-        print("=" * 200)
+        print("="*200)
 
-        binary_values = [bin(index - 1)[2:] for index in interval_index]
+        binary_values = [bin(index-1)[2:] for index in interval_index]
         encoded_signal = []
         for bin_value in binary_values:
             if len(bin_value) < bits:
@@ -633,270 +616,10 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def save_freq_domain_signal(self, amplitudes, phase_shifts, signal_file_path):
-        freq_domain_signal = [(amp, phase) for amp, phase in zip(amplitudes, phase_shifts)]
-        # freq_domain_signal = [(amplitudes[i], phase_shifts[i]) for i in range(len(amplitudes))]
-        with open(signal_file_path, 'w') as file:
-            file.write(f"1\n")
-            file.write(f"0\n")
-            file.write(f"{len(amplitudes)}\n")
-            for amp, phase in freq_domain_signal:
-                file.write(f"{amp} {phase}\n")
-
-    def save_time_domain_signal(self, signal_values, signal_file_path):
-        with open(signal_file_path, 'w') as file:
-            file.write(f"0\n")
-            file.write(f"0\n")
-            file.write(f"{len(signal_values)}\n")
-            for time, value in enumerate(signal_values):
-                file.write(f"{time} {value}\n")
-
-    def dft(self, time_domain_signal):
-        harmonics = []
-        N = len(time_domain_signal)
-        for k in range(N):
-            x_k_n = 0
-            for n, x_n in enumerate(time_domain_signal):
-                power_term = 2 * k * n / N
-                pi_factor = power_term * math.pi
-                img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
-                x_k_n += x_n * img_term
-            harmonics.append(x_k_n)
-
-        amplitudes = [abs(x_k_n) for x_k_n in harmonics]
-        phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
-        print("=" * 200)
-        print(f"N : {N}")
-        print(f"Signal Values   X(n): {time_domain_signal}")
-        print(f"Harmonics       X(k): {harmonics}")
-        print(f"Amplitudes         A: {amplitudes}")
-        print(f"Phase Shifts       Ø: {phase_shifts}")
-        print("=" * 200)
-        return amplitudes, phase_shifts
-
-    def idft(self, freq_domain_signal):
-        signal_value = []
-        for a, theta in freq_domain_signal:
-            real_part = a * cmath.cos(theta)
-            imaginary_part = a * cmath.sin(theta)
-            signal_value.append(complex(real_part, imaginary_part))
-
-        IDFT_component = []
-        signal_length = len(signal_value)
-        n_values = [i for i in range(0, signal_length)]
-        for n in n_values:
-            current_value = 0
-            for k, value in enumerate(signal_value):
-                current_value += (value * pow(math.e, ((1j * 2 * math.pi * n * k) / signal_length)))
-                print(f'value {k} : {current_value}')
-            print("-" * 50)
-            IDFT_component.append(self.round_complex(current_value).real * (1 / signal_length))
-
-        print(f'signal_value : {signal_value}')
-        print(f'IDF : {IDFT_component}')
-        print(f'len : {len(IDFT_component)}')
-        print(f'first value in IDFT: {abs(IDFT_component[0])}')
-        print(f'first value in IDFT: {abs(IDFT_component[1])}')
-        print(f'first value in IDFT: {abs(IDFT_component[2])}')
-        print(f'first value in IDFT: {abs(IDFT_component[3])}')
-        return IDFT_component
-
-    def read_signalT4(self, path):
-        with open(path, 'r') as file:
-            file.readline()
-            file.readline()
-            file.readline()
-            lines = file.readlines()
-        data_tuples = []
-        for line in lines:
-            columns = line.strip().split()
-            amplitude_init = columns[0]
-            phase_shift_init = columns[1]
-            amplitude = float(amplitude_init.rstrip('f')) if amplitude_init.endswith('f') else float(amplitude_init)
-            phase_shift = float(phase_shift_init.rstrip('f')) if phase_shift_init.endswith('f') else float(phase_shift_init)
-            data_tuple = (amplitude, phase_shift)
-            data_tuples.append(data_tuple)
-        return data_tuples
-
-    def fourier_transform(self, signal_value, img_factor):
-        harmonics = []
-        N = len(signal_value)
-        for k in range(N):
-            x_k_n = 0
-            for n, x_n in enumerate(signal_value):
-                power_term = 2 * k * n / N
-                pi_factor = power_term * math.pi
-                img_term = math.cos(pi_factor) + img_factor * complex(0, math.sin(pi_factor))
-                x_k_n += x_n * img_term
-            if img_factor > 0:
-                x_k_n = x_k_n.real / N
-            harmonics.append(x_k_n)
-        return harmonics
-
-    def task_4_dft(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-
-        input_file_path = 'Task 4/DFT/input_Signal_DFT.txt'
-
-        signal_time, signal_value = self.read_only_signal(input_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
-
-        # sampling_frequency = 4000
-        sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
-        if sampling_frequency < 0:
-            messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
-            return
-
-        rounding_parameter = 3
-        N = len(signal_value)
-        sampling_frequency_in_kHz = sampling_frequency / 1000
-
-        amplitudes, phase_shifts = self.dft(signal_value)
-
-        output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
-        polar_form = self.read_signalT4(output_file_path)
-        output_amplitudes = []
-        output_phase_shifts = []
-        for a, ps in polar_form:
-            output_amplitudes.append(a)
-            output_phase_shifts.append(ps)
-        SignalCompare(amplitudes, output_amplitudes, phase_shifts, output_phase_shifts)
-
-        fundamental_frequency = round((2 * math.pi * sampling_frequency_in_kHz) / N, rounding_parameter)
-        print(f"Fundamental Frequency : {fundamental_frequency}")
-        print("=" * 200)
-
-        x_axis = [fundamental_frequency]
-        for i in range(N - 1):
-            x_axis.append(x_axis[-1] + fundamental_frequency)
-
-        print(f"X-axis : {x_axis}")
-        print("=" * 200)
-
-        ax1.stem(x_axis, amplitudes)
-        ax1.set_xticks(x_axis)
-        ax1.set_xticklabels(x_axis)
-        ax1.set_xlabel("Frequency Index")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title('Task 4 - Amplitude vs Frequencies')
-
-        ax2.stem(x_axis, phase_shifts)
-        ax2.set_xticks(x_axis)
-        ax2.set_xticklabels(x_axis)
-        ax2.set_xlabel("Frequency Index")
-        ax2.set_ylabel('Phase Shift (in Degrees)')
-        ax2.set_title('Task 4 - Phase Shift vs Frequencies')
-
-        popup = tk.Toplevel()
-        popup.title("Modification of Frequency Domain Signal")
-        modification_frame = tk.Frame(popup)
-        modification_frame.columnconfigure(0, weight=1)
-        modification_frame.columnconfigure(1, weight=1)
-        lbl_freq_index = tk.Label(modification_frame, text="Frequency Index (0, N-1)", font=('Arial', 16))
-        lbl_freq_index.grid(row=0, column=0, sticky=tk.W + tk.E)
-        txt_freq_index = tk.Entry(modification_frame)
-        txt_freq_index.grid(row=0, column=1, sticky=tk.W + tk.E)
-        lbl_amplitude = tk.Label(modification_frame, text="Amplitude (A)", font=('Arial', 16))
-        lbl_amplitude.grid(row=1, column=0, sticky=tk.W + tk.E)
-        txt_amplitude = tk.Entry(modification_frame)
-        txt_amplitude.grid(row=1, column=1, sticky=tk.W + tk.E)
-        lbl_phase_shift = tk.Label(modification_frame, text="Phase Shift (Ø)", font=('Arial', 16))
-        lbl_phase_shift.grid(row=2, column=0, sticky=tk.W + tk.E)
-        txt_phase_shift = tk.Entry(modification_frame)
-        txt_phase_shift.grid(row=2, column=1, sticky=tk.W + tk.E)
-
-        def apply_modification():
-            amplitudes[int(txt_freq_index.get())] = float(txt_amplitude.get())
-            phase_shifts[int(txt_freq_index.get())] = float(txt_phase_shift.get())
-            for inner_widget in self.plots_frame.winfo_children():
-                inner_widget.destroy()
-
-            inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-            inner_fig.subplots_adjust(hspace=0.3)
-            inner_ax1.stem(x_axis, amplitudes)
-            inner_ax1.set_xticks(x_axis)
-            inner_ax1.set_xticklabels(x_axis)
-            inner_ax1.set_xlabel("Frequency Index")
-            inner_ax1.set_ylabel('Amplitude')
-            inner_ax1.set_title('Task 4 - Amplitude vs Frequencies')
-
-            inner_ax2.stem(x_axis, phase_shifts)
-            inner_ax2.set_xticks(x_axis)
-            inner_ax2.set_xticklabels(x_axis)
-            inner_ax2.set_xlabel("Frequency Index")
-            inner_ax2.set_ylabel('Phase Shift (in Degrees)')
-            inner_ax2.set_title('Task 4 - Phase Shift vs Frequencies')
-            # Embed the Matplotlib plot in the Tkinter window
-            inner_canvas = FigureCanvasTkAgg(inner_fig, master=self.plots_frame)
-            inner_canvas.get_tk_widget().pack()
-            messagebox.showinfo(title="Successful", message="Amplitude & Phase Shift Updated Successfully")
-
-        btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14),
-                                  command=apply_modification)
-        btn_apply_mod.grid(row=3, column=0, columnspan=2, sticky=tk.W + tk.E)
-
-        save_file_path = 'Task 4/dft_out.txt'
-        # lbl_file_name = tk.Label(modification_frame, text="File Name", font=('Arial', 16))
-        # lbl_file_name.grid(row=4, column=0, sticky=tk.W + tk.E)
-        # txt_file_name = tk.Entry(modification_frame)
-        # txt_file_name.grid(row=4, column=1, sticky=tk.W + tk.E)
-
-        def save_modified_signal():
-            if not save_file_path:
-                messagebox.showerror(title="Error", message="Signal File Name is Empty!")
-                return
-            self.save_freq_domain_signal(amplitudes, phase_shifts, save_file_path)
-            messagebox.showinfo(title="Successful", message="Signal Saved Successfully")
-
-        btn_save_signal = tk.Button(modification_frame, text="Save Frequency Signal", font=('Arial', 14),
-                                    command=save_modified_signal)
-        btn_save_signal.grid(row=5, column=0, columnspan=2, sticky=tk.W + tk.E)
-        modification_frame.pack(fill='x')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
-
-    def task_4_idft(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-
-        input_file_path = 'Task 4/IDFT/Input_Signal_IDFT_A,Phase.txt'
-        save_file_path = 'Task 4/idft_out.txt'
-
-        polar = self.read_signalT4(input_file_path)
-        signal_time_domain = self.idft(polar)
-        x_indices = [i for i in range(1, len(signal_time_domain) + 1)]
-
-        self.save_time_domain_signal(signal_time_domain, save_file_path)
-
-        output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
-        _, s_v = self.read_only_signal(output_file_path)
-        SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
-
-        # Plot the discrete values
-        plt.stem(x_indices, signal_time_domain, markerfmt='bo', linefmt='k-',
-                 basefmt='k-')  # 'ro' for red circles, 'r-' for red line
-        plt.xlabel('Time')
-        plt.ylabel('Amplitude')
-        plt.title('IDFT')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
 
     def on_closing(self):
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
             print("Bye! :\" ")
             self.root.destroy()
-
 
 GUI()
