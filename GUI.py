@@ -49,25 +49,6 @@ class GUI:
 
         self.buttonframe.pack(fill='x')
 
-        self.modification_frame = tk.Frame(self.root)
-        self.modification_frame.columnconfigure(0, weight=1)
-        self.modification_frame.columnconfigure(1, weight=1)
-
-        self.lbl1 = tk.Label(self.modification_frame, text="Frequency Index (0, N-1)", font=('Arial', 16))
-        self.lbl1.grid(row=0, column=0, sticky=tk.W + tk.E)
-        self.txt1 = tk.Entry(self.modification_frame)
-        self.txt1.grid(row=0, column=1, sticky=tk.W + tk.E)
-        self.lbl2 = tk.Label(self.modification_frame, text="Amplitude (A)", font=('Arial', 16))
-        self.lbl2.grid(row=1, column=0, sticky=tk.W + tk.E)
-        self.txt2 = tk.Entry(self.modification_frame)
-        self.txt2.grid(row=1, column=1, sticky=tk.W + tk.E)
-        self.lbl3 = tk.Label(self.modification_frame, text="Phase Shift (Ø)", font=('Arial', 16))
-        self.lbl3.grid(row=2, column=0, sticky=tk.W + tk.E)
-        self.txt3 = tk.Entry(self.modification_frame)
-        self.txt3.grid(row=2, column=1, sticky=tk.W + tk.E)
-
-        self.modification_frame.pack(fill='x')
-
         self.textbox = tk.Text(self.root, height=5, font=('Arial', 16))
         self.textbox.bind("<KeyPress>", self.shortcut)
         self.textbox.pack(padx=10, pady=10)
