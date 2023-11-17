@@ -70,11 +70,11 @@ class GUI:
         self.task_4_menu.add_command(label="(4.2) Inverse Fourier Transform [IDFT]", command=self.task_4_idft)
         self.menubar.add_cascade(menu=self.task_4_menu, label="Task 4")
 
-        self.task_4_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_4_menu.add_command(label="(5.1) Compute DCT", command=self.task_5_dct)
-        self.task_4_menu.add_separator()
-        self.task_4_menu.add_command(label="(5.2) Remove DC", command=self.task_5_remove_dc)
-        self.menubar.add_cascade(menu=self.task_4_menu, label="Task 5")
+        self.task_5_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_5_menu.add_command(label="(5.1) Compute DCT", command=self.task_5_dct)
+        self.task_5_menu.add_separator()
+        self.task_5_menu.add_command(label="(5.2) Remove DC", command=self.task_5_remove_dc)
+        self.menubar.add_cascade(menu=self.task_5_menu, label="Task 5")
 
         self.root.config(menu=self.menubar)
 
