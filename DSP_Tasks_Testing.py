@@ -754,7 +754,6 @@ class GUI:
 
         rounding_parameter = 3
         N = len(signal_value)
-        sampling_frequency_in_kHz = sampling_frequency / 1000
 
         amplitudes, phase_shifts = self.dft(signal_value)
 
@@ -767,7 +766,7 @@ class GUI:
             output_phase_shifts.append(ps)
         SignalCompare(amplitudes, output_amplitudes, phase_shifts, output_phase_shifts)
 
-        fundamental_frequency = round((2 * math.pi * sampling_frequency_in_kHz) / N, rounding_parameter)
+        fundamental_frequency = round((2 * math.pi * sampling_frequency) / N, rounding_parameter)
         print(f"Fundamental Frequency : {fundamental_frequency}")
         print("=" * 200)
 

@@ -805,7 +805,7 @@ class GUI:
             output_phase_shifts.append(ps)
         Task_4_signalcompare.SignalCompare(amplitudes, output_amplitudes, phase_shifts, output_phase_shifts)
 
-        fundamental_frequency = round((2 * math.pi * sampling_frequency_in_kHz) / N, rounding_parameter)
+        fundamental_frequency = round((2 * math.pi * sampling_frequency) / N, rounding_parameter)
         print(f"Fundamental Frequency : {fundamental_frequency}")
         print("=" * 200)
 
