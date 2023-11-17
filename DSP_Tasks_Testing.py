@@ -70,6 +70,12 @@ class GUI:
         self.task_4_menu.add_command(label="(4.2) Inverse Fourier Transform [IDFT]", command=self.task_4_idft)
         self.menubar.add_cascade(menu=self.task_4_menu, label="Task 4")
 
+        self.task_4_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_4_menu.add_command(label="(5.1) Compute DCT", command=self.task_5_dct)
+        self.task_4_menu.add_separator()
+        self.task_4_menu.add_command(label="(5.2) Remove DC", command=self.task_5_remove_dc)
+        self.menubar.add_cascade(menu=self.task_4_menu, label="Task 5")
+
         self.root.config(menu=self.menubar)
 
         self.plots_frame = tk.Frame(self.root)
@@ -887,6 +893,28 @@ class GUI:
         plt.xlabel('Time')
         plt.ylabel('Amplitude')
         plt.title('IDFT')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_5_dct(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_5_remove_dc(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
