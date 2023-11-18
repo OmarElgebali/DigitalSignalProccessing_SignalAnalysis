@@ -3,6 +3,7 @@ from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 
 import Task_4_signalcompare
+import Task_5_comparesignal2
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -67,6 +68,12 @@ class GUI:
         self.task_4_menu.add_separator()
         self.task_4_menu.add_command(label="(4.2) Inverse Fourier Transform [IDFT]", command=self.task_4_idft)
         self.menubar.add_cascade(menu=self.task_4_menu, label="Task 4")
+
+        self.task_5_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_5_menu.add_command(label="(5.1) Compute DCT", command=self.task_5_dct)
+        self.task_5_menu.add_separator()
+        self.task_5_menu.add_command(label="(5.2) Remove DC", command=self.task_5_remove_dc)
+        self.menubar.add_cascade(menu=self.task_5_menu, label="Task 5")
 
         self.root.config(menu=self.menubar)
 
@@ -774,8 +781,6 @@ class GUI:
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
 
-        # signal_value = [0, 1, 2, 3]
-        # signal_value = [7, 15, 26, 88]
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
@@ -929,6 +934,47 @@ class GUI:
         plt.xlabel('Time')
         plt.ylabel('Amplitude')
         plt.title('IDFT')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_5_dct(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_5_remove_dc(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        average = sum(signal_value) / len(signal_value)
+        signal_value_without_dc = [round(value - average, 3) for value in signal_value]
+
+        self.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc.txt')
+
+        plt.plot(signal_time, signal_value_without_dc, color='orange')
+        plt.scatter(signal_time, signal_value_without_dc)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 5.2 - Signal After Removing DC Component')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

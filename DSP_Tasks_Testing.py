@@ -7,6 +7,7 @@ import numpy as np
 from numpy import outer
 
 import Task_4_signalcompare
+import Task_5_comparesignal2
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -915,6 +916,25 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        input_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+        output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+
+        signal_time, signal_value = self.read_only_signal(input_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        average = sum(signal_value) / len(signal_value)
+        signal_value_without_dc = [round(value - average, 3) for value in signal_value]
+
+        self.save_time_domain_signal(signal_value_without_dc, 'remove_dc_out.txt')
+
+        Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
+
+        plt.plot(signal_time, signal_value_without_dc, color='orange')
+        plt.scatter(signal_time, signal_value_without_dc)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 5.2 - Signal After Removing DC Component')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
