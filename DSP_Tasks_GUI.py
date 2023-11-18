@@ -948,6 +948,44 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+          # sampling_frequency = 4000
+        co_number = simpledialog.askinteger("Number of Coefficient", "enter number of coefficient")
+        length = len(signal_value)
+        if co_number <= 0:
+            messagebox.showerror(title="Error", message="number of coefficient must be +ve")
+            return
+        if co_number > length:
+            messagebox.showerror(title="Error", message="number of coefficient must be less than length")
+            return
+
+
+        dct = []
+        K_array = list(range(0,co_number))
+        term1 = math.sqrt((2/length))
+        for k in K_array:
+            summation = 0.0
+            for n , y_n in zip(signal_time, signal_value):
+                summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
+            dct.append(term1*summation)
+        print(f'dct {dct}')
+        signal_time = [int(x) for x in signal_time]
+        print(f'signal time  {signal_time}')
+        combined_values = list(zip(signal_time, dct))
+        file_path = "Task 5 Output - compute_dct.txt"
+        with open(file_path, 'w') as file:
+            file.write("0\n")
+            file.write("1\n")
+            file.write(f'{co_number}\n')
+            for x, y in combined_values:
+                file.write(f"{x}\t{y}\n")
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
