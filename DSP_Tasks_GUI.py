@@ -725,8 +725,8 @@ class GUI:
             current_value = 0
             for k, value in enumerate(signal_value):
                 current_value += (value * pow(math.e, ((1j * 2 * math.pi * n * k) / signal_length)))
-                print(f'value {k} : {current_value}')
-            print("-" * 50)
+                # print(f'value {k} : {current_value}')
+            # print("-" * 50)
             IDFT_component.append(self.round_complex(current_value).real * (1 / signal_length))
 
         print(f'signal_value : {signal_value}')
