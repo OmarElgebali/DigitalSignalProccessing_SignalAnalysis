@@ -67,6 +67,16 @@
 # plt.show()
 
 
-import math
+# import math
+# print(math.radians(45))
 
-print(math.radians(45))
+
+arr = [10.4628, 7.324, 7.8834, 11.3679, 12.962, 10.4628, 7.324, 7.8834, 11.3679,  12.962, 11.3679, 12.962, 10.4628, 7.324, 7.8834, 12.962]
+avg = sum(arr) / len(arr)
+print(sum(arr))
+print(len(arr))
+print(avg)
+new_arr = [val - avg for val in arr]
+print(new_arr)
+new_arr = [round(val, 3) for val in new_arr]
+print(new_arr)
