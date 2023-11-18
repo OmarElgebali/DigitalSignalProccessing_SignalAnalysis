@@ -74,7 +74,8 @@ class GUI:
         self.task_5_menu = tk.Menu(self.menubar, tearoff=2)
         self.task_5_menu.add_command(label="(5.1) Compute DCT", command=self.task_5_dct)
         self.task_5_menu.add_separator()
-        self.task_5_menu.add_command(label="(5.2) Remove DC", command=self.task_5_remove_dc)
+        self.task_5_menu.add_command(label="(5.2.1) Remove DC using Average", command=self.task_5_remove_dc_using_avg)
+        self.task_5_menu.add_command(label="(5.2.2) Remove DC using Harmonics", command=self.task_5_remove_dc_using_harmonics)
         self.menubar.add_cascade(menu=self.task_5_menu, label="Task 5")
 
         self.root.config(menu=self.menubar)
@@ -670,16 +671,12 @@ class GUI:
                 x_k_n += x_n * img_term
             harmonics.append(x_k_n)
 
-        amplitudes = [abs(x_k_n) for x_k_n in harmonics]
-        phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
         print("=" * 200)
         print(f"N : {N}")
         print(f"Signal Values   X(n): {time_domain_signal}")
         print(f"Harmonics       X(k): {harmonics}")
-        print(f"Amplitudes         A: {amplitudes}")
-        print(f"Phase Shifts       Ø: {phase_shifts}")
         print("=" * 200)
-        return amplitudes, phase_shifts
+        return harmonics
 
     def idft(self, freq_domain_signal):
         signal_value = []
@@ -762,7 +759,13 @@ class GUI:
         rounding_parameter = 3
         N = len(signal_value)
 
-        amplitudes, phase_shifts = self.dft(signal_value)
+        harmonics = self.dft(signal_value)
+
+        amplitudes = [abs(x_k_n) for x_k_n in harmonics]
+        phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
+        print(f"Amplitudes         A: {amplitudes}")
+        print(f"Phase Shifts       Ø: {phase_shifts}")
+        print("=" * 200)
 
         output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
         polar_form = self.read_signalT4(output_file_path)
@@ -910,7 +913,7 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def task_5_remove_dc(self):
+    def task_5_remove_dc_using_avg(self):
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
@@ -926,7 +929,7 @@ class GUI:
         average = sum(signal_value) / len(signal_value)
         signal_value_without_dc = [round(value - average, 3) for value in signal_value]
 
-        self.save_time_domain_signal(signal_value_without_dc, 'remove_dc_out.txt')
+        self.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_avg.txt')
 
         Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
 
@@ -934,7 +937,41 @@ class GUI:
         plt.scatter(signal_time, signal_value_without_dc)
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
-        plt.title('Task 5.2 - Signal After Removing DC Component')
+        plt.title('Task 5.2 - Signal After Removing DC Component  (using Average)')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_5_remove_dc_using_harmonics(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+        output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        harmonics = self.dft(signal_value)
+        harmonics[0] = complex(0, 0)
+        amplitudes = [abs(x_k_n) for x_k_n in harmonics]
+        phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
+        polar = list(zip(amplitudes, phase_shifts))
+        signal_value_without_dc = self.idft(polar)
+
+        self.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_harmonics.txt')
+
+        Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
+
+        plt.plot(signal_time, signal_value_without_dc, color='orange')
+        plt.scatter(signal_time, signal_value_without_dc)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 5.2 - Signal After Removing DC Component (using Harmonics)')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
