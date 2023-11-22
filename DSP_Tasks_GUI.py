@@ -4,6 +4,7 @@ import numpy as np
 
 import Task_4_signalcompare
 import Task_5_comparesignal2
+import Task_6_DerivativeSignal
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -1096,6 +1097,29 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
 
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        
+        first_derivative = [current_value - (signal_value[i - 1] if i != 0 else 0) for i, current_value in
+                            enumerate(signal_value)][1:]
+        second_derivative = [(signal_value[i + 1] if i < len(signal_value) - 1 else 0) + (
+            signal_value[i - 1] if i != 0 else 0) - 2 * current_value for i, current_value in
+                             enumerate(signal_value)][:(len(signal_value) - 1)]
+        print(f"Signal Value  : {signal_value}")
+        print(f"1st-Derivative: {first_derivative}")
+        print(f"2nd-Derivative: {second_derivative}")
+        print(f"Signal Value (Len): {len(signal_value)}")
+        print(f"1st-Derivative (Len): {len(first_derivative)}")
+        print(f"2nd-Derivative (Len): {len(second_derivative)}")
+        Task_6_DerivativeSignal.DerivativeSignal(first_derivative, second_derivative)
+
+        plt.plot(signal_value, color='green', label='Original Signal')
+        plt.plot(first_derivative, color='orange', label='1st Derivative')
+        plt.plot(second_derivative, color='red', label='2nd Derivative')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 6.2 - 1st & 2nd Derivatives')
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()

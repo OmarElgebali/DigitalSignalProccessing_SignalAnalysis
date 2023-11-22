@@ -8,6 +8,7 @@ from numpy import outer
 
 import Task_4_signalcompare
 import Task_5_comparesignal2
+import Task_6_DerivativeSignal
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -1046,10 +1047,32 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-            return
+        input_signal_value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                              26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+                              48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+                              70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91,
+                              92, 93, 94, 95, 96, 97, 98, 99, 100]
+
+        first_derivative = [current_value - (input_signal_value[i - 1] if i != 0 else 0) for i, current_value in
+                            enumerate(input_signal_value)][1:]
+        second_derivative = [(input_signal_value[i + 1] if i < len(input_signal_value) - 1 else 0) + (
+            input_signal_value[i - 1] if i != 0 else 0) - 2 * current_value for i, current_value in
+                             enumerate(input_signal_value)][:(len(input_signal_value) - 1)]
+        print(f"Signal Value  : {input_signal_value}")
+        print(f"1st-Derivative: {first_derivative}")
+        print(f"2nd-Derivative: {second_derivative}")
+        print(f"Signal Value (Len): {len(input_signal_value)}")
+        print(f"1st-Derivative (Len): {len(first_derivative)}")
+        print(f"2nd-Derivative (Len): {len(second_derivative)}")
+        Task_6_DerivativeSignal.DerivativeSignal(first_derivative, second_derivative)
+
+        plt.plot(input_signal_value, color='green', label='Original Signal')
+        plt.plot(first_derivative, color='orange', label='1st Derivative')
+        plt.plot(second_derivative, color='red', label='2nd Derivative')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 6.2 - 1st & 2nd Derivatives')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

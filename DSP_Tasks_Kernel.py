@@ -221,37 +221,29 @@ def round_complex(c):
 # idft(x_k)
 # transform(x_k, 1)
 
-def Compute_DCT(time , value):
-    dct = []
-    length = len(time)
-    K_array = list(range(0,length))
-    term1 = math.sqrt((2/length))
-    for k in K_array:
-        summation = 0.0
-        for n , y_n in zip(time, value):
-            summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
-        dct.append(term1*summation)
-    print(dct)
-    combined_values = list(zip(time, dct))
-    file_path = "output.txt"
-    with open(file_path, 'w') as file:
-        for x, y in combined_values:
-            file.write(f"{x}\t{y}\n")
-
-
-
-# Example values for x and f(x)
-x_values = [0,1, 2, 3, 4, 5]
-fx_values = [50.3844170297569, 49.5528258147577, 47.5503262094184, 44.4508497187474, 40.3553390593274, 50]
-
-# Combine x and f(x) into a 2D array
-two_d_array = list(zip(x_values, fx_values))
-
-
-
-
-
-Compute_DCT(x_values,fx_values)
-
-
-
+# def Compute_DCT(time, value):
+#     dct = []
+#     length = len(time)
+#     K_array = list(range(0, length))
+#     term1 = math.sqrt((2 / length))
+#     for k in K_array:
+#         summation = 0.0
+#         for n, y_n in zip(time, value):
+#             summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
+#         dct.append(term1 * summation)
+#     print(dct)
+#     combined_values = list(zip(time, dct))
+#     file_path = "output.txt"
+#     with open(file_path, 'w') as file:
+#         for x, y in combined_values:
+#             file.write(f"{x}\t{y}\n")
+#
+#
+# # Example values for x and f(x)
+# x_values = [0, 1, 2, 3, 4, 5]
+# fx_values = [50.3844170297569, 49.5528258147577, 47.5503262094184, 44.4508497187474, 40.3553390593274, 50]
+#
+# # Combine x and f(x) into a 2D array
+# two_d_array = list(zip(x_values, fx_values))
+#
+# Compute_DCT(x_values, fx_values)
