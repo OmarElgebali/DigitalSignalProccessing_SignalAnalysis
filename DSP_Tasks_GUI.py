@@ -1099,7 +1099,7 @@ class GUI:
 
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
-        
+
         first_derivative = [current_value - (signal_value[i - 1] if i != 0 else 0) for i, current_value in
                             enumerate(signal_value)][1:]
         second_derivative = [(signal_value[i + 1] if i < len(signal_value) - 1 else 0) + (
@@ -1135,6 +1135,23 @@ class GUI:
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
+
+        new_label = "Delay" if k_steps > 0 else "Advanc"
+        new_signal_time = [t+k_steps for t in signal_time]
+        print(f"Signal Time    : {signal_time}")
+        print(f"New Signal Time: {new_signal_time}")
+
+        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
+        plt.plot(new_signal_time, signal_value, color='orange', label=f'{new_label}ed Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 6.3 - {new_label}ing Signal with Steps(K)={k_steps}')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

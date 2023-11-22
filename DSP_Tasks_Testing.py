@@ -1085,10 +1085,22 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-            return
+        signal_file_path = "Task 4/DFT/input_Signal_DFT.txt"
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        k_steps = 2
+        new_label = "Delay" if k_steps > 0 else "Advanc"
+        new_signal_time = [t+k_steps for t in signal_time]
+        print(f"Signal Time    : {signal_time}")
+        print(f"New Signal Time: {new_signal_time}")
+
+        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
+        plt.plot(new_signal_time, signal_value, color='orange', label=f'{new_label}ed Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 6.3 - {new_label}ing Signal with K={k_steps}')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
