@@ -78,6 +78,20 @@ class GUI:
         self.task_5_menu.add_command(label="(5.2.2) Remove DC using Harmonics", command=self.task_5_remove_dc_using_harmonics)
         self.menubar.add_cascade(menu=self.task_5_menu, label="Task 5")
 
+        self.task_6_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_6_menu.add_command(label="(6.1) Smoothing", command=self.task_6_smoothing)
+        self.task_6_menu.add_separator()
+        self.task_6_menu.add_command(label="(6.2) Sharpening", command=self.task_6_sharpening)
+        self.task_6_menu.add_separator()
+        self.task_6_menu.add_command(label="(6.3) Delaying / Advancing", command=self.task_6_delay_advance_signal)
+        self.task_6_menu.add_separator()
+        self.task_6_menu.add_command(label="(6.4) Folding", command=self.task_6_folding)
+        self.task_6_menu.add_separator()
+        self.task_6_menu.add_command(label="(6.5) Delaying / Advancing a Folded Signal", command=self.task_6_delay_advance_folded_signal)
+        self.task_6_menu.add_separator()
+        self.task_6_menu.add_command(label="(6.6) Remove DC in Frequency Domain", command=self.task_6_remove_dc_in_freqdomain)
+        self.menubar.add_cascade(menu=self.task_6_menu, label="Task 6")
+
         self.root.config(menu=self.menubar)
 
         self.plots_frame = tk.Frame(self.root)
@@ -1008,6 +1022,103 @@ class GUI:
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
+
+    def task_6_smoothing(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_6_sharpening(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_6_delay_advance_signal(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_6_folding(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_6_delay_advance_folded_signal(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_6_remove_dc_in_freqdomain(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path:
+            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+            return
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
 
     def on_closing(self):
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
