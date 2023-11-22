@@ -167,56 +167,91 @@ def round_complex(c):
 
 ####################################################################################################
 # Code for generic DFT/IDFT
-def dft(time_domain_signal):
-    rounding_parameter = 3
-    harmonics = []
-    N = len(time_domain_signal)
-    for k in range(N):
-        x_k_n = 0
-        for n, x_n in enumerate(time_domain_signal):
-            power_term = 2 * k * n / N
-            pi_factor = power_term * math.pi
-            img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
-            x_k_n += x_n * img_term
-        rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
-                                int(round(x_k_n.imag, rounding_parameter)))
-        harmonics.append(rounded_x_k_n)
-    print(f"Harmonics - DFT: {harmonics}")
+# def dft(time_domain_signal):
+#     rounding_parameter = 3
+#     harmonics = []
+#     N = len(time_domain_signal)
+#     for k in range(N):
+#         x_k_n = 0
+#         for n, x_n in enumerate(time_domain_signal):
+#             power_term = 2 * k * n / N
+#             pi_factor = power_term * math.pi
+#             img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
+#             x_k_n += x_n * img_term
+#         rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
+#                                 int(round(x_k_n.imag, rounding_parameter)))
+#         harmonics.append(rounded_x_k_n)
+#     print(f"Harmonics - DFT: {harmonics}")
 
 
-def idft(signal_value):
-    IDFT_component = []
-    signal_length = len(signal_value)
-    n_values = [i for i in range(0, signal_length)]
-    for n in n_values:
-        current_value = 0
-        for k, value in enumerate(signal_value):
-            current_value += (value * pow(math.e, ((1j * 2 * math.pi * n * k) / signal_length)))
-        IDFT_component.append(round_complex(current_value).real * (1 / signal_length))
-    print(f"Harmonics - IDFT: {IDFT_component}")
+# def idft(signal_value):
+#     IDFT_component = []
+#     signal_length = len(signal_value)
+#     n_values = [i for i in range(0, signal_length)]
+#     for n in n_values:
+#         current_value = 0
+#         for k, value in enumerate(signal_value):
+#             current_value += (value * pow(math.e, ((1j * 2 * math.pi * n * k) / signal_length)))
+#         IDFT_component.append(round_complex(current_value).real * (1 / signal_length))
+#     print(f"Harmonics - IDFT: {IDFT_component}")
 
 
-def transform(signal, img_factor):
-    rounding_parameter = 3
-    harmonics = []
-    N = len(signal)
-    for k in range(N):
-        x_k_n = 0
-        for n, x_n in enumerate(signal):
-            power_term = 2 * k * n / N
-            pi_factor = power_term * math.pi
-            img_term = math.cos(pi_factor) + img_factor * complex(0, math.sin(pi_factor))
-            x_k_n += x_n * img_term
-        rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
-                                int(round(x_k_n.imag, rounding_parameter)))
-        if img_factor > 0:
-            rounded_x_k_n = rounded_x_k_n.real / N
-        harmonics.append(rounded_x_k_n)
-    print(f"Harmonics - Transform: {harmonics}")
+# def transform(signal, img_factor):
+#     rounding_parameter = 3
+#     harmonics = []
+#     N = len(signal)
+#     for k in range(N):
+#         x_k_n = 0
+#         for n, x_n in enumerate(signal):
+#             power_term = 2 * k * n / N
+#             pi_factor = power_term * math.pi
+#             img_term = math.cos(pi_factor) + img_factor * complex(0, math.sin(pi_factor))
+#             x_k_n += x_n * img_term
+#         rounded_x_k_n = complex(int(round(x_k_n.real, rounding_parameter)),
+#                                 int(round(x_k_n.imag, rounding_parameter)))
+#         if img_factor > 0:
+#             rounded_x_k_n = rounded_x_k_n.real / N
+#         harmonics.append(rounded_x_k_n)
+#     print(f"Harmonics - Transform: {harmonics}")
+#
+# x_n = [0, 1, 2, 3]
+# x_k = [6, -2+2j, -2, -2-2j]
+# dft(x_n)
+# transform(x_n, -1)
+# idft(x_k)
+# transform(x_k, 1)
 
-x_n = [0, 1, 2, 3]
-x_k = [6, -2+2j, -2, -2-2j]
-dft(x_n)
-transform(x_n, -1)
-idft(x_k)
-transform(x_k, 1)
+def Compute_DCT(time , value):
+    dct = []
+    length = len(time)
+    K_array = list(range(0,length))
+    term1 = math.sqrt((2/length))
+    for k in K_array:
+        summation = 0.0
+        for n , y_n in zip(time, value):
+            summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
+        dct.append(term1*summation)
+    print(dct)
+    combined_values = list(zip(time, dct))
+    file_path = "output.txt"
+    with open(file_path, 'w') as file:
+        for x, y in combined_values:
+            file.write(f"{x}\t{y}\n")
+
+
+
+# Example values for x and f(x)
+x_values = [0,1, 2, 3, 4, 5]
+fx_values = [50.3844170297569, 49.5528258147577, 47.5503262094184, 44.4508497187474, 40.3553390593274, 50]
+
+# Combine x and f(x) into a 2D array
+two_d_array = list(zip(x_values, fx_values))
+
+
+
+
+
+Compute_DCT(x_values,fx_values)
+
+
+
