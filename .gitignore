@@ -152,3 +152,5 @@ cython_debug/
 #.idea/
 .idea/misc.xml
 .idea/DSP.iml
+.idea/DSP.iml
+.idea/misc.xml
