@@ -6,9 +6,11 @@ from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from numpy import outer
 
+import Shift_Fold_Signal
 import Task_4_signalcompare
 import Task_5_comparesignal2
 import Task_6_DerivativeSignal
+import comparesignals
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -1031,10 +1033,38 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-            return
+        signal_file_path = 'Task 6/Moving Average/MovAvgTest1.txt'
+        # signal_file_path = 'Task 6/Moving Average/MovAvgTest2.txt'
+
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        filter_size = 3
+        # filter_size = 5
+
+        avg_value=[]
+        time_for_avg = []
+        for index , (t,v) in enumerate(zip(signal_time,signal_value)):
+            if index > (len(signal_value) - filter_size):
+                break
+            sum = 0
+            for index in range(index , index + filter_size):
+                sum += signal_value[index]
+            avg_value.append((sum/filter_size))
+            time_for_avg.append(t)
+        time_for_avg = [int(x) for x in time_for_avg]
+        signal_with_time = list(zip(time_for_avg,avg_value))
+        print(signal_with_time)
+
+        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
+        plt.scatter(time_for_avg, avg_value, label='average Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 6.4 - Moving Average Signal')
+
+
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -1113,10 +1143,16 @@ class GUI:
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-            return
+        signal_file_path = 'Task 6/Shifting and Folding/input_fold.txt'
+        output_file_path = 'Task 6/Shifting and Folding/Output_fold.txt'
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+
+        new_signal_time = [int((-1*x)) for x in signal_time]
+        signal_time, signal_value = self.sort_2_lists(new_signal_time, signal_value)
+        Shift_Fold_Signal.Shift_Fold_Signal(output_file_path,signal_time,signal_value)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

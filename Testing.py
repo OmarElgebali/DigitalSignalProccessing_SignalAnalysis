@@ -71,12 +71,24 @@
 # print(math.radians(45))
 
 
-arr = [10.4628, 7.324, 7.8834, 11.3679, 12.962, 10.4628, 7.324, 7.8834, 11.3679,  12.962, 11.3679, 12.962, 10.4628, 7.324, 7.8834, 12.962]
-avg = sum(arr) / len(arr)
-print(sum(arr))
-print(len(arr))
-print(avg)
-new_arr = [val - avg for val in arr]
-print(new_arr)
-new_arr = [round(val, 3) for val in new_arr]
-print(new_arr)
+# arr = [10.4628, 7.324, 7.8834, 11.3679, 12.962, 10.4628, 7.324, 7.8834, 11.3679,  12.962, 11.3679, 12.962, 10.4628, 7.324, 7.8834, 12.962]
+# avg = sum(arr) / len(arr)
+# print(sum(arr))
+# print(len(arr))
+# print(avg)
+# new_arr = [val - avg for val in arr]
+# print(new_arr)
+# new_arr = [round(val, 3) for val in new_arr]
+# print(new_arr)
+
+
+time = [1, 2, 3, 4, 5]
+values = [10, 20, 30, 40, 50]
+
+# Reverse the signal
+
+# Shift the reversed signal to align with the original signal
+folded = [(-1*x) for x in time]
+# Print the original and folded signals
+print("Original Signal (Time, Values):", list(zip(time, values)))
+print("Folded Signal (Time, Values):", list(zip(folded, values)))

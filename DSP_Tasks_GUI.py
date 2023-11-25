@@ -1142,8 +1142,17 @@ class GUI:
                 sum += signal_value[index]
             avg_value.append((sum/filter_size))
             time_for_avg.append(t)
-            signal_with_time = list(zip(time_for_avg,avg_value))
-            print(signal_with_time)
+
+        time_for_avg = [int(x) for x in time_for_avg]
+        signal_with_time = list(zip(time_for_avg,avg_value))
+        print(signal_with_time)
+
+        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
+        plt.scatter(time_for_avg, avg_value, label='average Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 6.4 - Moving Average Signal')
 
 
         # Embed the Matplotlib plot in the Tkinter window
@@ -1237,11 +1246,13 @@ class GUI:
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
-        folded_signal = signal_value[::-1]
+        # folded_signal = signal_value[::-1]
+        new_signal_time = [(-1*x) for x in signal_time]
+        new_signal_time, new_signal_value = self.sort_2_lists(new_signal_time, signal_value)
 
-        print(f'folded_signal : {folded_signal}')
+        # print(f'folded_signal : {new_signal}')
         plt.plot(signal_time, signal_value, color='green', label='Original Signal')
-        plt.plot(signal_time, folded_signal, color='orange', label='folded Signal')
+        plt.plot(new_signal_time, new_signal_value, color='orange', label='folded Signal')
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
@@ -1279,6 +1290,26 @@ class GUI:
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        harmonics = self.dft(signal_value)
+        harmonics[0] = complex(0, 0)
+        amplitudes = [abs(x_k_n) for x_k_n in harmonics]
+        phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
+        polar = list(zip(amplitudes, phase_shifts))
+        signal_value_without_dc = self.idft(polar)
+
+        self.save_time_domain_signal(signal_value_without_dc, 'Task 6 Output - remove_dc_using_harmonics.txt')
+
+        plt.plot(signal_time, signal_value_without_dc, color='orange')
+        plt.scatter(signal_time, signal_value_without_dc)
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 6.6 - Signal After Removing DC Component in Frequency Domain')
+
+
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
