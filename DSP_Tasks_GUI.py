@@ -74,7 +74,8 @@ class GUI:
         self.task_5_menu.add_command(label="(5.1) Compute DCT", command=self.task_5_dct)
         self.task_5_menu.add_separator()
         self.task_5_menu.add_command(label="(5.2.1) Remove DC using Average", command=self.task_5_remove_dc_using_avg)
-        self.task_5_menu.add_command(label="(5.2.2) Remove DC using Harmonics", command=self.task_5_remove_dc_using_harmonics)
+        self.task_5_menu.add_command(label="(5.2.2) Remove DC using Harmonics",
+                                     command=self.task_5_remove_dc_using_harmonics)
         self.menubar.add_cascade(menu=self.task_5_menu, label="Task 5")
 
         self.task_6_menu = tk.Menu(self.menubar, tearoff=2)
@@ -86,9 +87,11 @@ class GUI:
         self.task_6_menu.add_separator()
         self.task_6_menu.add_command(label="(6.4) Folding", command=self.task_6_folding)
         self.task_6_menu.add_separator()
-        self.task_6_menu.add_command(label="(6.5) Delaying / Advancing a Folded Signal", command=self.task_6_delay_advance_folded_signal)
+        self.task_6_menu.add_command(label="(6.5) Delaying / Advancing a Folded Signal",
+                                     command=self.task_6_delay_advance_folded_signal)
         self.task_6_menu.add_separator()
-        self.task_6_menu.add_command(label="(6.6) Remove DC in Frequency Domain", command=self.task_6_remove_dc_in_freqdomain)
+        self.task_6_menu.add_command(label="(6.6) Remove DC in Frequency Domain",
+                                     command=self.task_6_remove_dc_in_freqdomain)
         self.menubar.add_cascade(menu=self.task_6_menu, label="Task 6")
 
         self.root.config(menu=self.menubar)
@@ -765,7 +768,8 @@ class GUI:
             amplitude_init = columns[0]
             phase_shift_init = columns[1]
             amplitude = float(amplitude_init.rstrip('f')) if amplitude_init.endswith('f') else float(amplitude_init)
-            phase_shift = float(phase_shift_init.rstrip('f')) if phase_shift_init.endswith('f') else float(phase_shift_init)
+            phase_shift = float(phase_shift_init.rstrip('f')) if phase_shift_init.endswith('f') else float(
+                phase_shift_init)
             data_tuple = (amplitude, phase_shift)
             data_tuples.append(data_tuple)
         return data_tuples
@@ -876,7 +880,8 @@ class GUI:
             for inner_widget in self.plots_frame.winfo_children():
                 inner_widget.destroy()
 
-            inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+            inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(
+                self.screen_width / 100, self.screen_height / 110))
             inner_fig.subplots_adjust(hspace=0.3)
             inner_ax1.stem(x_axis, amplitudes)
             inner_ax1.set_xticks(x_axis)
@@ -971,7 +976,7 @@ class GUI:
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
-          # sampling_frequency = 4000
+        # sampling_frequency = 4000
         co_number = simpledialog.askinteger("Number of Coefficient", "enter number of coefficient")
         length = len(signal_value)
         if co_number <= 0:
@@ -981,15 +986,14 @@ class GUI:
             messagebox.showerror(title="Error", message="number of coefficient must be less than length")
             return
 
-
         dct = []
-        K_array = list(range(0,co_number))
-        term1 = math.sqrt((2/length))
+        K_array = list(range(0, co_number))
+        term1 = math.sqrt((2 / length))
         for k in K_array:
             summation = 0.0
-            for n , y_n in zip(signal_time, signal_value):
+            for n, y_n in zip(signal_time, signal_value):
                 summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
-            dct.append(term1*summation)
+            dct.append(term1 * summation)
         print(f'dct {dct}')
         signal_time = [int(x) for x in signal_time]
         print(f'signal time  {signal_time}')
@@ -1113,7 +1117,7 @@ class GUI:
     #     canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
     #     canvas.get_tk_widget().pack()
 
-    def task_6_smoothing(self): ## >>>>>>>>>>>>>>>>> WITHOUT PADDING <<<<<<<<<<<<<<<<<<<<<<<
+    def task_6_smoothing(self):  ## >>>>>>>>>>>>>>>>> WITHOUT PADDING <<<<<<<<<<<<<<<<<<<<<<<
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
@@ -1132,19 +1136,19 @@ class GUI:
         if filter_size <= 0:
             messagebox.showerror(title="Error", message="filter size must be +ve")
             return
-        avg_value=[]
+        avg_value = []
         time_for_avg = []
-        for index , (t,v) in enumerate(zip(signal_time,signal_value)):
+        for index, (t, v) in enumerate(zip(signal_time, signal_value)):
             if index > (len(signal_value) - filter_size):
                 break
             sum = 0
-            for index in range(index , index + filter_size):
+            for index in range(index, index + filter_size):
                 sum += signal_value[index]
-            avg_value.append((sum/filter_size))
+            avg_value.append((sum / filter_size))
             time_for_avg.append(t)
 
         time_for_avg = [int(x) for x in time_for_avg]
-        signal_with_time = list(zip(time_for_avg,avg_value))
+        signal_with_time = list(zip(time_for_avg, avg_value))
         print(signal_with_time)
 
         plt.plot(signal_time, signal_value, color='green', label='Original Signal')
@@ -1152,8 +1156,7 @@ class GUI:
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
-        plt.title(f'Task 6.4 - Moving Average Signal')
-
+        plt.title(f'Task 6.1 - Moving Average Signal')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -1216,7 +1219,7 @@ class GUI:
         k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
 
         new_label = "Delay" if k_steps > 0 else "Advanc"
-        new_signal_time = [t+k_steps for t in signal_time]
+        new_signal_time = [t + k_steps for t in signal_time]
         print(f"Signal Time    : {signal_time}")
         print(f"New Signal Time: {new_signal_time}")
 
@@ -1246,18 +1249,15 @@ class GUI:
         signal_time, signal_value = self.read_only_signal(signal_file_path)
         signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
 
-        # folded_signal = signal_value[::-1]
-        new_signal_time = [(-1*x) for x in signal_time]
+        new_signal_time = [(-1 * x) for x in signal_time]
         new_signal_time, new_signal_value = self.sort_2_lists(new_signal_time, signal_value)
 
-        # print(f'folded_signal : {new_signal}')
         plt.plot(signal_time, signal_value, color='green', label='Original Signal')
-        plt.plot(new_signal_time, new_signal_value, color='orange', label='folded Signal')
+        plt.plot(new_signal_time, new_signal_value, color='orange', label='Folded Signal')
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title(f'Task 6.4 - Folding Signal')
-
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -1274,6 +1274,28 @@ class GUI:
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
+
+        k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        # Folding
+        folded_signal_time = [(-1 * x) for x in signal_time]
+        folded_signal_time, folded_signal_value = self.sort_2_lists(folded_signal_time, signal_value)
+
+        # Delaying / Advancing
+        new_label = "Delay" if k_steps > 0 else "Advanc"
+        delayed_folded_signal_time = [t + k_steps for t in folded_signal_time]
+        print(f"Signal Time    : {signal_time}")
+        print(f"New Signal Time: {delayed_folded_signal_time}")
+
+        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
+        plt.plot(delayed_folded_signal_time, folded_signal_value, color='orange', label=f'{new_label}ed Folded Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 6.5 - {new_label}ing a Folded Signal with Steps(K)={k_steps}')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -1309,12 +1331,9 @@ class GUI:
         plt.ylabel('Amplitude')
         plt.title('Task 6.6 - Signal After Removing DC Component in Frequency Domain')
 
-
-
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
-
 
     def on_closing(self):
         if messagebox.askyesno(title="Quit", message="U really want 2 quit? :("):
