@@ -246,4 +246,52 @@ def round_complex(c):
 # # Combine x and f(x) into a 2D array
 # two_d_array = list(zip(x_values, fx_values))
 #
-# Compute_DCT(x_values, fx_values)
+#
+#
+#
+#
+# Compute_DCT(x_values,fx_values)
+
+
+def Smoothing_with_padding(time , value , window_size):
+    avg_value=[]
+    signal_time = []
+    # calculate padding *2 in case we add at the end of the values array
+    padding = ((window_size-1)/2)*2
+    #for adding zero padding to values
+    for i in range(1,int(padding)+1):
+        value.append(0)
+
+    for t, v in zip(time, value):
+        index = value.index(v)
+        sum = 0
+        for index in range(index , index + window_size):
+            sum += value[index]
+        sum = sum / window_size
+        avg_value.append(sum)
+        signal_time.append(t)
+    print(f'average value : {avg_value}')
+    combined_values = list(zip(signal_time, avg_value))
+    print(combined_values)
+
+
+arr = [7,8,12,10,1]
+t = [1,2,3,4,5]
+Smoothing_with_padding(t,arr,3)
+
+def Smoothing_without_padding(time , value , window_size):
+    avg_values = []
+    signal_time = []
+    for index, (t, v) in enumerate(zip(time,value)):
+        if index > (len(value)-window_size):
+            break
+        sum = 0
+        for index in range(index , index + window_size):
+            sum += value[index]
+        avg_values.append((sum/window_size))
+        signal_time.append(t)
+    signal_with_time = list(zip(signal_time,avg_values))
+    print(signal_with_time)
+
+
+# Smoothing_without_padding(t,arr,3)

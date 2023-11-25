@@ -1069,7 +1069,51 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def task_6_smoothing(self):
+    # def task_6_smoothing(self): # >>>>>>>>>>>>>>>>> WITH PADDING <<<<<<<<<<<<<<<<<<<<<<<<<<
+    #     # Clear the previous plot
+    #     for widget in self.plots_frame.winfo_children():
+    #         widget.destroy()
+    #
+    #     fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+    #
+    #     signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+    #     if not signal_file_path:
+    #         messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+    #         return
+    #
+    #     signal_time, signal_value = self.read_only_signal(signal_file_path)
+    #     signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+    #
+    #     filter_size = simpledialog.askinteger("enter filter size", "enter filter size")
+    #     if filter_size <= 0:
+    #         messagebox.showerror(title="Error", message="filter size must be +ve")
+    #         return
+    #     avg_value=[]
+    #     time_for_avg = []
+    #     # calculate padding *2 in case we add at the end of the values array
+    #     padding = (filter_size-1)
+    #     #for adding zero padding to values
+    #     for i in range(1,int(padding)+1):
+    #         signal_value.append(0)
+    #
+    #     for t, v in zip(signal_time,signal_value):
+    #         index = signal_value.index(v)
+    #         sum = 0
+    #         for index in range(index , index + filter_size):
+    #             sum += signal_value[index]
+    #         sum = sum / filter_size
+    #         avg_value.append(sum)
+    #         time_for_avg.append(t)
+    #
+    #     combined_values = list(zip(time_for_avg,avg_value))
+    #     # print(combined_values)
+    #     print(f'length : {len(avg_value)}')
+    #     print(f' average values : \n{avg_value}')
+    #     # Embed the Matplotlib plot in the Tkinter window
+    #     canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+    #     canvas.get_tk_widget().pack()
+
+    def task_6_smoothing(self): ## >>>>>>>>>>>>>>>>> WITHOUT PADDING <<<<<<<<<<<<<<<<<<<<<<<
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
@@ -1080,6 +1124,27 @@ class GUI:
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
+
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        filter_size = simpledialog.askinteger("enter filter size", "enter filter size")
+        if filter_size <= 0:
+            messagebox.showerror(title="Error", message="filter size must be +ve")
+            return
+        avg_value=[]
+        time_for_avg = []
+        for index , (t,v) in enumerate(zip(signal_time,signal_value)):
+            if index > (len(signal_value) - filter_size):
+                break
+            sum = 0
+            for index in range(index , index + filter_size):
+                sum += signal_value[index]
+            avg_value.append((sum/filter_size))
+            time_for_avg.append(t)
+            signal_with_time = list(zip(time_for_avg,avg_value))
+            print(signal_with_time)
+
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
