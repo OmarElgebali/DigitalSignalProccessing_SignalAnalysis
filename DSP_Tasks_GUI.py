@@ -1149,7 +1149,7 @@ class GUI:
 
         time_for_avg = [int(x) for x in time_for_avg]
         signal_with_time = list(zip(time_for_avg, avg_value))
-        print(signal_with_time)
+        print(f'Moving Average Signal: {signal_with_time}')
 
         plt.plot(signal_time, signal_value, color='green', label='Original Signal')
         plt.scatter(time_for_avg, avg_value, label='average Signal')
