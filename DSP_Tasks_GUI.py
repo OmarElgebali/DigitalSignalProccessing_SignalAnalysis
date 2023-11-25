@@ -1234,6 +1234,20 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
             return
 
+        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+
+        folded_signal = signal_value[::-1]
+
+        print(f'folded_signal : {folded_signal}')
+        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
+        plt.plot(signal_time, folded_signal, color='orange', label='folded Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title(f'Task 6.4 - Folding Signal')
+
+
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
