@@ -221,37 +221,77 @@ def round_complex(c):
 # idft(x_k)
 # transform(x_k, 1)
 
-def Compute_DCT(time , value):
-    dct = []
-    length = len(time)
-    K_array = list(range(0,length))
-    term1 = math.sqrt((2/length))
-    for k in K_array:
-        summation = 0.0
-        for n , y_n in zip(time, value):
-            summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
-        dct.append(term1*summation)
-    print(dct)
-    combined_values = list(zip(time, dct))
-    file_path = "output.txt"
-    with open(file_path, 'w') as file:
-        for x, y in combined_values:
-            file.write(f"{x}\t{y}\n")
+# def Compute_DCT(time, value):
+#     dct = []
+#     length = len(time)
+#     K_array = list(range(0, length))
+#     term1 = math.sqrt((2 / length))
+#     for k in K_array:
+#         summation = 0.0
+#         for n, y_n in zip(time, value):
+#             summation += y_n * math.cos((math.pi / (4 * length)) * float(2 * n - 1) * float(2 * k - 1))
+#         dct.append(term1 * summation)
+#     print(dct)
+#     combined_values = list(zip(time, dct))
+#     file_path = "output.txt"
+#     with open(file_path, 'w') as file:
+#         for x, y in combined_values:
+#             file.write(f"{x}\t{y}\n")
+#
+#
+# # Example values for x and f(x)
+# x_values = [0, 1, 2, 3, 4, 5]
+# fx_values = [50.3844170297569, 49.5528258147577, 47.5503262094184, 44.4508497187474, 40.3553390593274, 50]
+#
+# # Combine x and f(x) into a 2D array
+# two_d_array = list(zip(x_values, fx_values))
+#
+#
+#
+#
+#
+# Compute_DCT(x_values,fx_values)
 
 
+def Smoothing_with_padding(time , value , window_size):
+    avg_value=[]
+    signal_time = []
+    # calculate padding *2 in case we add at the end of the values array
+    padding = ((window_size-1)/2)*2
+    #for adding zero padding to values
+    for i in range(1,int(padding)+1):
+        value.append(0)
 
-# Example values for x and f(x)
-x_values = [0,1, 2, 3, 4, 5]
-fx_values = [50.3844170297569, 49.5528258147577, 47.5503262094184, 44.4508497187474, 40.3553390593274, 50]
-
-# Combine x and f(x) into a 2D array
-two_d_array = list(zip(x_values, fx_values))
-
-
-
-
-
-Compute_DCT(x_values,fx_values)
-
+    for t, v in zip(time, value):
+        index = value.index(v)
+        sum = 0
+        for index in range(index , index + window_size):
+            sum += value[index]
+        sum = sum / window_size
+        avg_value.append(sum)
+        signal_time.append(t)
+    print(f'average value : {avg_value}')
+    combined_values = list(zip(signal_time, avg_value))
+    print(combined_values)
 
 
+arr = [7,8,12,10,1]
+t = [1,2,3,4,5]
+Smoothing_with_padding(t,arr,3)
+
+def Smoothing_without_padding(time , value , window_size):
+    avg_values = []
+    signal_time = []
+    for index, (t, v) in enumerate(zip(time,value)):
+        if index > (len(value)-window_size):
+            break
+        sum = 0
+        for index in range(index , index + window_size):
+            sum += value[index]
+        avg_values.append((sum/window_size))
+        signal_time.append(t)
+    signal_with_time = list(zip(signal_time,avg_values))
+    print(signal_with_time)
+
+
+# Smoothing_without_padding(t,arr,3)
