@@ -10,6 +10,7 @@ import Task_4_signalcompare
 import Task_5_comparesignal2
 import Task_6_Shift_Fold_Signal
 import Task_6_DerivativeSignal
+import Task_7_ConvTest
 import comparesignals
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
@@ -97,6 +98,10 @@ class GUI:
         self.task_6_menu.add_command(label="(6.6) Remove DC in Frequency Domain",
                                      command=self.task_6_remove_dc_in_freqdomain)
         self.menubar.add_cascade(menu=self.task_6_menu, label="Task 6")
+
+        self.task_7_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_7_menu.add_command(label="(7) Convolution Signal", command=self.task_7_convolution)
+        self.menubar.add_cascade(menu=self.task_7_menu, label="Task 7")
 
         self.root.config(menu=self.menubar)
 
@@ -1238,6 +1243,33 @@ class GUI:
         plt.title('Task 6.6 - Signal After Removing DC Component in Frequency Domain')
 
         Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_7_convolution(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+
+        signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
+        signal_time_1, signal_value_1 = self.read_only_signal(signal_file_path_1)
+        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+
+        signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
+        signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
+        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+
+        plt.plot(signal_time_1, signal_value_1, color='green', label='Signal 1 - X(K)')
+        plt.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2 - H(K)')
+        # plt.plot(convoluted_signal_time, convoluted_signal_value, color='red', label='Convoluted Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 7 - Convolution Signal')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
