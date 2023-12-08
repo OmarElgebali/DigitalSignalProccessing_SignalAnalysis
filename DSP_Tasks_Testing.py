@@ -1256,16 +1256,43 @@ class GUI:
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
 
         signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
-        signal_time_1, signal_value_1 = self.read_only_signal(signal_file_path_1)
-        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
+        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
 
         signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
-        signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
-        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
+        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
 
-        plt.plot(signal_time_1, signal_value_1, color='green', label='Signal 1 - X(K)')
-        plt.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2 - H(K)')
-        # plt.plot(convoluted_signal_time, convoluted_signal_value, color='red', label='Convoluted Signal')
+
+
+        min_index = signal_time1[0] + signal_time2[0]
+        max_index = signal_time1[-1] + signal_time2[-1]
+
+        output_time = list(range(int(min_index),int(max_index)+1))
+        number_of_elements = len(output_time)
+
+        signal_value1 = np.pad(signal_value1, (0, number_of_elements - len(signal_value1)))
+        signal_value2 = np.pad(signal_value2, (0, number_of_elements - len(signal_value2)))
+        print(len(signal_value1))
+
+        signal1_freq_domain = self.dft(signal_value1)
+        signal2_freq_domain = self.dft(signal_value2)
+
+        print(signal1_freq_domain)
+
+        output = [a*b for a, b in zip(signal1_freq_domain, signal2_freq_domain)]
+
+        amplitude = [abs(x) for x in output]
+        phase_shift = [cmath.phase(angle) for angle in output]
+
+        polar1 = list(zip(amplitude, phase_shift))
+        convoluted_signal_value = self.idft(polar1)
+        print(f'final_signal : {convoluted_signal_value}')
+
+        Task_7_ConvTest.ConvTest(output_time,convoluted_signal_value)
+
+
+        plt.plot(output_time, convoluted_signal_value, color='red', label='Convoluted Signal')
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
