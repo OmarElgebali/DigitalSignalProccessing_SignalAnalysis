@@ -1322,7 +1322,6 @@ class GUI:
         signal1_freq_domain = self.dft(signal_value1)
         signal2_freq_domain = self.dft(signal_value2)
 
-
         output = [a * b for a, b in zip(np.conj(signal1_freq_domain), signal2_freq_domain)]
         print(f'conj :   {np.conj(signal1_freq_domain)}')
         amplitude = [abs(x) for x in output]
@@ -1330,19 +1329,17 @@ class GUI:
 
         polar1 = list(zip(amplitude, phase_shift))
         signal_time_domain = self.idft(polar1)
-        final_cross_correlation = [int(a) * 1/len(signal_value2) for a in signal_time_domain]
+        final_cross_correlation = [int(a) * 1 / len(signal_value2) for a in signal_time_domain]
         print(f'correlation  : {final_cross_correlation}')
 
         signal1_sum_square = np.sum(np.square(signal_value1))
         signal2_sum_square = np.sum(np.square(signal_value2))
-        normalization_term = 1/len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
+        normalization_term = 1 / len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
         normalized_signal = [a / normalization_term for a in final_cross_correlation]
         print(f'final after normalization : {normalized_signal}')
-        Task_8_CompareSignal.Compare_Signals(output_file_path,signal_time1,normalized_signal)
+        Task_8_CompareSignal.Compare_Signals(output_file_path, signal_time1, normalized_signal)
 
-        plt.plot(signal_time2, normalized_signal, color='red', label='Convoluted Signal')
-
-        # plt.plot(output_signal_time, correlation_signal_value, color='red', label='Correlation Signal')
+        plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
