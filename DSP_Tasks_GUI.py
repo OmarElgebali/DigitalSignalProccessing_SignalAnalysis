@@ -1425,6 +1425,29 @@ class GUI:
         signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
         signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
 
+
+        signal1_freq_domain = self.dft(signal_value1)
+        signal2_freq_domain = self.dft(signal_value2)
+
+
+        output = [a * b for a, b in zip(np.conj(signal1_freq_domain), signal2_freq_domain)]
+        print(f'conj :   {np.conj(signal1_freq_domain)}')
+        amplitude = [abs(x) for x in output]
+        phase_shift = [cmath.phase(angle) for angle in output]
+
+        polar1 = list(zip(amplitude, phase_shift))
+        signal_time_domain = self.idft(polar1)
+        final_cross_correlation = [int(a) * 1/len(signal_value2) for a in signal_time_domain]
+        print(f'correlation  : {final_cross_correlation}')
+
+        signal1_sum_square = np.sum(np.square(signal_value1))
+        signal2_sum_square = np.sum(np.square(signal_value2))
+        normalization_term = 1/len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
+        normalized_signal = [a / normalization_term for a in final_cross_correlation]
+        print(f'final after normalization : {normalized_signal}')
+
+
+        plt.plot(signal_time2, normalized_signal, color='red', label='Convoluted Signal')
         # plt.plot(output_time, correlation_signal_value, color='red', label='Correlation Signal')
         plt.legend()
         plt.xlabel("Time")
