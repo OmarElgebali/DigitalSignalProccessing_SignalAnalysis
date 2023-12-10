@@ -46,6 +46,7 @@ class GUI:
 
         self.menubar = tk.Menu(self.root)
         self.task_1_menu = tk.Menu(self.menubar, tearoff=0)
+        self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
@@ -104,18 +105,37 @@ class GUI:
         self.task_7_menu = tk.Menu(self.menubar, tearoff=2)
         self.task_7_menu.add_command(label="(7.1) Convolution Signal [TD]", command=self.task_7_convolution_time_domain)
         self.task_7_menu.add_separator()
-        self.task_7_menu.add_command(label="(7.2) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
+        self.task_7_menu.add_command(label="(7.2+) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
         self.menubar.add_cascade(menu=self.task_7_menu, label="Task 7")
 
         self.task_8_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_8_menu.add_command(label="(8) Correlation", command=self.task_8_correlation)
+        self.task_8_menu.add_command(label="(8.1) Correlation", command=self.task_8_correlation)
         self.task_8_menu.add_separator()
-        self.task_8_menu.add_command(label="(8) Time Analysis", command=self.task_8_time_analysis_BONUS)
+        self.task_8_menu.add_command(label="(8.2+) Time Analysis", command=self.task_8_time_analysis_BONUS)
         self.task_8_menu.add_separator()
-        self.task_8_menu.add_command(label="(8) Template Matching", command=self.task_8_template_matching_BONUS)
+        self.task_8_menu.add_command(label="(8.3+) Template Matching", command=self.task_8_template_matching_BONUS)
         self.menubar.add_cascade(menu=self.task_8_menu, label="Task 8")
 
-        self.root.config(menu=self.menubar)
+        self.color_green_1 = '#092635'
+        self.color_green_2 = '#1B4242'
+        self.color_green_3 = '#5C8374'
+        self.color_green_4 = '#9EC8B9'
+        self.plots_bg_color = self.color_green_4
+
+        # Customize menu appearance
+        menu_bg_color = self.color_green_3  # Menu background color
+        menu_fg_color = 'white'  # Menu foreground color
+        menu_font = ('serif', 10, 'italic')
+
+        self.menubar.config(bg=menu_bg_color)
+
+        # Apply styles to menus
+        menus = [self.task_1_menu, self.task_2_menu, self.task_3_menu, self.task_4_menu,
+                 self.task_5_menu, self.task_6_menu, self.task_7_menu, self.task_8_menu]
+        for menu in menus:
+            menu.config(bg=menu_bg_color, fg=menu_fg_color, font=menu_font)
+
+        self.root.config(menu=self.menubar, bg=self.plots_bg_color)
 
         self.plots_frame = tk.Frame(self.root)
         self.plots_frame.grid(row=0, column=0)
@@ -184,6 +204,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         with open(file_path, 'r') as file:
             line_count = 0
@@ -249,6 +270,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         output_path = "Task 1/CosOutput.txt"
         name = "Cosine"
@@ -306,6 +328,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         output_path = "Task 2/output_signals/signal1+signal3.txt"
         signal_2_file_path = "Task 2/input_signals/signal3.txt"
@@ -358,6 +381,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         output_path = "Task 2/output_signals/signal1-signal3.txt"
         signal_2_file_path = "Task 2/input_signals/signal3.txt"
@@ -403,6 +427,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         output_path = "Task 2/output_signals/MultiplySignalByConstant-signal2 - by 10.txt"
         signal_file_path = "Task 2/input_signals/Signal2.txt"
@@ -435,6 +460,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = "Task 2/input_signals/Signal1.txt"
         signal_time, signal_value = self.read_only_signal(signal_file_path)
@@ -457,6 +483,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = "Task 2/input_signals/Input Shifting.txt"
         signal_time, signal_value = self.read_only_signal(signal_file_path)
@@ -492,6 +519,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         output_path = "Task 2/output_signals/normlize signal 2 -- output.txt"
         signal_file_path = "Task 2/input_signals/Signal2.txt"
@@ -523,6 +551,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = "Task 2/input_signals/Signal1.txt"
         signal_time, signal_value = self.read_only_signal(signal_file_path)
@@ -656,6 +685,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         ax1.plot(signal_time, signal_value, color='orange')
         ax1.scatter(signal_time, signal_value, color='blue')
@@ -782,6 +812,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         input_file_path = 'Task 4/DFT/input_Signal_DFT.txt'
 
@@ -866,6 +897,8 @@ class GUI:
             inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(
                 self.screen_width / 100, self.screen_height / 110))
             inner_fig.subplots_adjust(hspace=0.3)
+            inner_fig.patch.set_facecolor(self.plots_bg_color)
+
             inner_ax1.stem(x_axis, amplitudes)
             inner_ax1.set_xticks(x_axis)
             inner_ax1.set_xticklabels(x_axis)
@@ -917,6 +950,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         input_file_path = 'Task 4/IDFT/Input_Signal_IDFT_A,Phase.txt'
         save_file_path = 'Task 4/idft_out.txt'
@@ -948,6 +982,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         input_file_path = 'Task 5/DCT/DCT_input.txt'
         output_file_path = 'Task 5/DCT/DCT_output.txt'
@@ -988,6 +1023,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         input_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
         output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
@@ -1018,6 +1054,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
         output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
@@ -1052,6 +1089,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = 'Task 6/Moving Average/MovAvgTest1.txt'
         # signal_file_path = 'Task 6/Moving Average/MovAvgTest2.txt'
@@ -1093,6 +1131,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         input_signal_value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
                               26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -1131,6 +1170,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = "Task 4/DFT/input_Signal_DFT.txt"
         signal_time, signal_value = self.read_only_signal(signal_file_path)
@@ -1159,6 +1199,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = 'Task 6/Shifting and Folding/input_fold.txt'
         output_file_path = 'Task 6/Shifting and Folding/Output_fold.txt'
@@ -1187,6 +1228,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = "Task 6/Shifting and Folding/input_fold.txt"
         output_file_path = "Task 6/Shifting and Folding/Output_ShiftFoldedby-500.txt"
@@ -1230,6 +1272,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
         output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
@@ -1265,6 +1308,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         # out_of_range = lambda signal_v, signal_t, index: signal_v[signal_t.index(index)] if index in signal_t else 0
         def out_of_range(signal_v, signal_t, index):
@@ -1320,6 +1364,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
         signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
@@ -1368,6 +1413,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path_1 = "Task 8/Correlation/Corr_input signal1.txt"
         signal_file_path_2 = "Task 8/Correlation/Corr_input signal2.txt"
@@ -1400,6 +1446,7 @@ class GUI:
         Task_8_CompareSignal.Compare_Signals(output_file_path, signal_time1, normalized_signal)
 
         plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
+        plt.grid()
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
@@ -1447,6 +1494,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         """
         perform time delay analysis,
@@ -1504,6 +1552,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         """
         the user will give the paths for two folders of two classes and a test folder,

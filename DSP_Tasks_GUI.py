@@ -40,6 +40,7 @@ class GUI:
 
         self.menubar = tk.Menu(self.root)
         self.task_1_menu = tk.Menu(self.menubar, tearoff=0)
+        self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
@@ -98,18 +99,37 @@ class GUI:
         self.task_7_menu = tk.Menu(self.menubar, tearoff=2)
         self.task_7_menu.add_command(label="(7.1) Convolution Signal [TD]", command=self.task_7_convolution_time_domain)
         self.task_7_menu.add_separator()
-        self.task_7_menu.add_command(label="(7.2) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
+        self.task_7_menu.add_command(label="(7.2+) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
         self.menubar.add_cascade(menu=self.task_7_menu, label="Task 7")
 
         self.task_8_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_8_menu.add_command(label="(8) Correlation", command=self.task_8_correlation)
+        self.task_8_menu.add_command(label="(8.1) Correlation", command=self.task_8_correlation)
         self.task_8_menu.add_separator()
-        self.task_8_menu.add_command(label="(8) Time Analysis", command=self.task_8_time_analysis_BONUS)
+        self.task_8_menu.add_command(label="(8.2+) Time Analysis", command=self.task_8_time_analysis_BONUS)
         self.task_8_menu.add_separator()
-        self.task_8_menu.add_command(label="(8) Template Matching", command=self.task_8_template_matching_BONUS)
+        self.task_8_menu.add_command(label="(8.3+) Template Matching", command=self.task_8_template_matching_BONUS)
         self.menubar.add_cascade(menu=self.task_8_menu, label="Task 8")
 
-        self.root.config(menu=self.menubar)
+        self.color_green_1 = '#092635'
+        self.color_green_2 = '#1B4242'
+        self.color_green_3 = '#5C8374'
+        self.color_green_4 = '#9EC8B9'
+        self.plots_bg_color = self.color_green_4
+
+        # Customize menu appearance
+        menu_bg_color = self.color_green_3  # Menu background color
+        menu_fg_color = 'white'  # Menu foreground color
+        menu_font = ('serif', 10, 'italic')
+
+        self.menubar.config(bg=menu_bg_color)
+
+        # Apply styles to menus
+        menus = [self.task_1_menu, self.task_2_menu, self.task_3_menu, self.task_4_menu,
+                 self.task_5_menu, self.task_6_menu, self.task_7_menu, self.task_8_menu]
+        for menu in menus:
+            menu.config(bg=menu_bg_color, fg=menu_fg_color, font=menu_font)
+
+        self.root.config(menu=self.menubar, bg=self.plots_bg_color)
 
         self.plots_frame = tk.Frame(self.root)
         self.plots_frame.grid(row=0, column=0)
@@ -178,6 +198,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         with open(file_path, 'r') as file:
             line_count = 0
@@ -243,6 +264,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         wave_type = simpledialog.askinteger("Wave Type", "Enter Type of Signal:\n1- Sin\n2- Cosine")
         amplitude = simpledialog.askfloat("Amplitude", "Enter Amplitude:")
@@ -319,6 +341,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         # Select Multiple Files
         """
@@ -410,6 +433,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_1_file_path:
@@ -462,6 +486,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_file_path:
@@ -492,6 +517,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -516,6 +542,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -549,6 +576,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -587,6 +615,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -690,6 +719,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         ax1.plot(signal_time, signal_value, color='orange')
         ax1.scatter(signal_time, signal_value, color='blue')
@@ -811,6 +841,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -898,6 +929,8 @@ class GUI:
             inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(
                 self.screen_width / 100, self.screen_height / 110))
             inner_fig.subplots_adjust(hspace=0.3)
+            inner_fig.set_facecolor(self.plots_bg_color)
+
             inner_ax1.stem(x_axis, amplitudes)
             inner_ax1.set_xticks(x_axis)
             inner_ax1.set_xticklabels(x_axis)
@@ -952,6 +985,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -982,6 +1016,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1030,6 +1065,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1060,6 +1096,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1138,6 +1175,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1183,6 +1221,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1222,6 +1261,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1255,6 +1295,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1284,6 +1325,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1322,6 +1364,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1357,6 +1400,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         # out_of_range = lambda signal_v, signal_t, index: signal_v[signal_t.index(index)] if index in signal_t else 0
         def out_of_range(signal_v, signal_t, index):
@@ -1418,6 +1462,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
@@ -1476,6 +1521,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
@@ -1513,6 +1559,7 @@ class GUI:
         print(f'final after normalization : {normalized_signal}')
 
         plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
+        plt.grid()
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
@@ -1560,6 +1607,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         """
         perform time delay analysis,
@@ -1628,6 +1676,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         """
         the user will give the paths for two folders of two classes and a test folder,
