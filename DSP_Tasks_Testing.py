@@ -104,15 +104,15 @@ class GUI:
         self.task_7_menu = tk.Menu(self.menubar, tearoff=2)
         self.task_7_menu.add_command(label="(7.1) Convolution Signal [TD]", command=self.task_7_convolution_time_domain)
         self.task_7_menu.add_separator()
-        self.task_7_menu.add_command(label="(7.2) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
+        self.task_7_menu.add_command(label="(7.2+) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
         self.menubar.add_cascade(menu=self.task_7_menu, label="Task 7")
 
         self.task_8_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_8_menu.add_command(label="(8) Correlation", command=self.task_8_correlation)
+        self.task_8_menu.add_command(label="(8.1) Correlation", command=self.task_8_correlation)
         self.task_8_menu.add_separator()
-        self.task_8_menu.add_command(label="(8) Time Analysis", command=self.task_8_time_analysis_BONUS)
+        self.task_8_menu.add_command(label="(8.2+) Time Analysis", command=self.task_8_time_analysis_BONUS)
         self.task_8_menu.add_separator()
-        self.task_8_menu.add_command(label="(8) Template Matching", command=self.task_8_template_matching_BONUS)
+        self.task_8_menu.add_command(label="(8.3+) Template Matching", command=self.task_8_template_matching_BONUS)
         self.menubar.add_cascade(menu=self.task_8_menu, label="Task 8")
 
         self.root.config(menu=self.menubar)
@@ -1400,6 +1400,7 @@ class GUI:
         Task_8_CompareSignal.Compare_Signals(output_file_path, signal_time1, normalized_signal)
 
         plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
+        plt.grid()
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
