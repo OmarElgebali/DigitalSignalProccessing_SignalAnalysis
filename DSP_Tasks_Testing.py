@@ -1,5 +1,6 @@
 import cmath
 import math
+import os
 import tkinter as tk
 from math import log2
 from tkinter import messagebox, filedialog, simpledialog, ttk
@@ -101,11 +102,17 @@ class GUI:
         self.menubar.add_cascade(menu=self.task_6_menu, label="Task 6")
 
         self.task_7_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_7_menu.add_command(label="(7) Convolution Signal", command=self.task_7_convolution)
+        self.task_7_menu.add_command(label="(7.1) Convolution Signal [TD]", command=self.task_7_convolution_time_domain)
+        self.task_7_menu.add_separator()
+        self.task_7_menu.add_command(label="(7.2) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
         self.menubar.add_cascade(menu=self.task_7_menu, label="Task 7")
 
         self.task_8_menu = tk.Menu(self.menubar, tearoff=2)
         self.task_8_menu.add_command(label="(8) Correlation", command=self.task_8_correlation)
+        self.task_8_menu.add_separator()
+        self.task_8_menu.add_command(label="(8) Time Analysis", command=self.task_8_time_analysis_BONUS)
+        self.task_8_menu.add_separator()
+        self.task_8_menu.add_command(label="(8) Template Matching", command=self.task_8_template_matching_BONUS)
         self.menubar.add_cascade(menu=self.task_8_menu, label="Task 8")
 
         self.root.config(menu=self.menubar)
@@ -974,9 +981,6 @@ class GUI:
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
 
     def task_5_remove_dc_using_avg(self):
         # Clear the previous plot
@@ -1254,7 +1258,63 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def task_7_convolution(self):
+    def task_7_convolution_time_domain(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        # out_of_range = lambda signal_v, signal_t, index: signal_v[signal_t.index(index)] if index in signal_t else 0
+        def out_of_range(signal_v, signal_t, index):
+            return signal_v[signal_t.index(index)] if index in signal_t else 0
+
+        signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
+        signal_time_1, signal_value_1 = self.read_only_signal(signal_file_path_1)
+        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+
+        signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
+        signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
+        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+
+        min_i = int(signal_time_1[0] + signal_time_2[0])
+        max_i = int(signal_time_1[-1] + signal_time_2[-1])
+        convoluted_signal_time = list(range(min_i, max_i + 1, 1))
+
+        convoluted_signal_value = []
+        for n in convoluted_signal_time:
+            y_n = 0
+            # print(f"K: {n} -> Value[1]: {out_of_range(signal_value_1, signal_time_1, n)}")
+            # print(f"K: {n} -> Value[2]: {out_of_range(signal_value_2, signal_time_2, n)}")
+            for k in convoluted_signal_time:
+                y_n += out_of_range(signal_value_1, signal_time_1, k) * out_of_range(signal_value_2, signal_time_2,
+                                                                                     n - k)
+            convoluted_signal_value.append(y_n)
+
+        print(f"Convoluted Signal Time  : {convoluted_signal_time}")
+        print(f"Convoluted Signal Value : {convoluted_signal_value}")
+
+        Task_7_ConvTest.ConvTest(convoluted_signal_time, convoluted_signal_value)
+
+        ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1 - X(K)')
+        ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2 - H(K)')
+        ax1.legend()
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title(f'Task 7.1 - Convolution (Time Domain) [Signals]')
+
+        ax2.plot(convoluted_signal_time, convoluted_signal_value, color='red', label='Convoluted Signal')
+        ax2.legend()
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title(f'Task 7.1 - Convolution (Time Domain) [Value]')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_7_convolution_freq_domain(self):
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
@@ -1296,7 +1356,7 @@ class GUI:
         plt.legend()
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
-        plt.title('Task 7 - Convolution')
+        plt.title('Task 7.2 - Convolution (Frequency Domain)')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -1344,6 +1404,202 @@ class GUI:
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 8 - Correlation')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def correlation_2_signals(self, signal_value_1, signal_value_2):
+        summation_square_of_list = lambda signal: sum([x1 * x1 for x1 in signal])
+
+        N = len(signal_value_1)
+        print("=" * 200)
+        print(f"Length (N)                  : {N}")
+
+        harmonics_signal_1 = self.fourier_transform(signal_value_1, -1)
+        harmonics_signal_2 = self.fourier_transform(signal_value_2, -1)
+        conjugate_signal_1 = [x_k.conjugate() for x_k in harmonics_signal_1]
+        print(f"Conjugate Signal-1          : {conjugate_signal_1}")
+        print(f"HarmonicS Signal-2          : {harmonics_signal_2}")
+
+        harmonic_multiplication = [x1_k * x2_k for x1_k, x2_k in zip(conjugate_signal_1, harmonics_signal_2)]
+        print(f"Harmonic Multiplication     : {harmonic_multiplication}")
+
+        idft_of_harmonic_multiplication = self.fourier_transform(harmonic_multiplication, 1)
+        correlated_signal = [round(x_n) / N for x_n in idft_of_harmonic_multiplication]
+        print(f"Correlated Signal           : {correlated_signal}")
+
+        summation_power_1 = summation_square_of_list(signal_value_1)
+        summation_power_2 = summation_square_of_list(signal_value_2)
+        normalization_term = math.sqrt(summation_power_1 * summation_power_2) / N
+        print(f"Normalization Term          : {normalization_term}")
+
+        normalized_correlated_signal = [r_1_2 / normalization_term for r_1_2 in correlated_signal]
+        print(f"Normalized Correlated Signal: {normalized_correlated_signal}")
+        print("=" * 200)
+
+        return normalized_correlated_signal
+
+    def task_8_time_analysis_BONUS(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        """
+        perform time delay analysis,
+        given two periodic signals and the sampling period,
+        find approximately the delay between them.
+        """
+
+        signal_file_path_1 = "Task 8/Time analysis/TD_input signal1.txt"
+        signal_file_path_2 = "Task 8/Time analysis/TD_input signal2.txt"
+        fs = 100
+
+        signal_time_1, signal_value_1 = self.read_only_signal(signal_file_path_1)
+        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+
+        signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
+        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+
+        normalized_correlated_signal = self.correlation_2_signals(signal_value_1, signal_value_2)
+
+        print("=" * 200)
+        print(f"Sampling Frequency                  : {fs}")
+
+        absolute_normalized_correlated_signal = [abs(corr) for corr in normalized_correlated_signal]
+        maximum_absolute_correlation = max(absolute_normalized_correlated_signal)
+        index_maximum_absolute_correlation = absolute_normalized_correlated_signal.index(maximum_absolute_correlation)
+        print(f"Maximum Absolute Correlation        : {maximum_absolute_correlation}")
+        print(f"Index Maximum Absolute Correlation  : {index_maximum_absolute_correlation}")
+
+        time_delay = index_maximum_absolute_correlation / fs
+        print(f"Time Delay (Time-Analysis)          : {time_delay}")
+        print("=" * 200)
+
+        ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1')
+        ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2')
+        ax1.legend()
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title(f'Task 8.2 - Time Analysis [Signals]')
+
+        ax2.plot(signal_time_1, normalized_correlated_signal, color='red', label='Correlation Signal')
+        ax2.legend()
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title(
+            f'Task 8.2 - Time Analysis [Correlation]\nTime Delayed = {time_delay}s, FS = {fs}Hz, and Index Maximum Absolute Correlation = {index_maximum_absolute_correlation}')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_8_template_matching_BONUS(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+
+        """
+        the user will give the paths for two folders of two classes and a test folder,
+        using template matching the application will give labels for all signals in test folder
+        """
+
+        def print_class_lists(list_of_lists, its_name):
+            num_of_lists = len(list_of_lists)
+            labeled_lists = {}
+            for i in range(num_of_lists):
+                label = f'Signal {i + 1}'
+                labeled_lists[label] = list_of_lists[i]
+            print("=" * 400)
+            print(f'Number of Signals ({its_name}): {num_of_lists}')
+            for label, lst in labeled_lists.items():
+                print(f'{its_name} - {label} (N: {len(lst)}): {lst}')
+
+        def template_matching_read_file(signal_file_path):
+            with open(signal_file_path, 'r') as file:
+                lines = file.readlines()
+                signal_value = []
+                for line in lines:
+                    signal_value.append(float(line))
+            return signal_value
+
+        def template_matching_read_folder(signals_folder_path):
+            class_signals = []
+            for filename in os.listdir(signals_folder_path):
+                file_path = os.path.join(signals_folder_path, filename)
+                class_signals.append(template_matching_read_file(file_path))
+            return class_signals
+
+        folder_path_1 = 'Task 8/Template Matching/Class 1'
+        folder_path_2 = 'Task 8/Template Matching/Class 2'
+
+        class_1_signals = template_matching_read_folder(folder_path_1)
+        class_2_signals = template_matching_read_folder(folder_path_2)
+        # print_class_lists(class_1_signals, "Down")
+        # print_class_lists(class_2_signals, "UP")
+
+        class_1_length = len(class_1_signals)
+        class_2_length = len(class_2_signals)
+
+        class_1_average = [sum(items) / class_1_length for items in zip(*class_1_signals)]
+        class_2_average = [sum(items) / class_2_length for items in zip(*class_2_signals)]
+
+        print("=" * 200)
+        print(f"Class 1 - Average       : {class_1_average}")
+        print(f"Class 2 - Average       : {class_2_average}")
+
+        test_path_1 = 'Task 8/Template Matching/Test Signals/Test1.txt'
+        test_path_2 = 'Task 8/Template Matching/Test Signals/Test2.txt'
+
+        test_1_signal = template_matching_read_file(test_path_1)
+        test_2_signal = template_matching_read_file(test_path_2)
+
+        APPLIED_TEST = True
+        test_signal = test_1_signal if APPLIED_TEST else test_2_signal
+        test_label = "Test 1" if APPLIED_TEST else "Test 2"
+
+        normalized_correlated_class_1 = self.correlation_2_signals(class_1_average, test_signal)
+        absolute_normalized_correlated_class_1 = [abs(corr) for corr in normalized_correlated_class_1]
+        maximum_absolute_correlation_class_1 = max(absolute_normalized_correlated_class_1)
+
+        normalized_correlated_class_2 = self.correlation_2_signals(class_2_average, test_signal)
+        absolute_normalized_correlated_class_2 = [abs(corr) for corr in normalized_correlated_class_2]
+        maximum_absolute_correlation_class_2 = max(absolute_normalized_correlated_class_2)
+
+        print(f"Class 1 (DOWN) - Max Correlation    : {maximum_absolute_correlation_class_1}")
+        print(f"Class 2 ( UP ) - Max Correlation    : {maximum_absolute_correlation_class_2}")
+
+        if maximum_absolute_correlation_class_1 > maximum_absolute_correlation_class_2:
+            best_match_label = "DOWN Class"
+            best_match_class_average = class_1_average
+            best_match_class_normalized_correlation = normalized_correlated_class_1
+        else:
+            best_match_label = "UP Class"
+            best_match_class_average = class_2_average
+            best_match_class_normalized_correlation = normalized_correlated_class_2
+
+        print(f"Best Match - Class                  : {best_match_label}")
+        print(f"Best Match - Average                : {best_match_class_average}")
+        print(f"Best Match - Normalized_Correlation : {best_match_class_normalized_correlation}")
+        print("=" * 200)
+
+        ax1.plot(best_match_class_average, color='green', label='Average Signal')
+        ax1.legend()
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title(f'Task 8.3 - Template Matching with {test_label} and best match {best_match_label}')
+
+        ax2.plot(best_match_class_normalized_correlation, color='orange', label='Normalized Correlation')
+        ax2.legend()
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title(f'Task 8.3 - Template Matching with {test_label} and best match {best_match_label}')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
