@@ -6,6 +6,8 @@ import Task_4_signalcompare
 import Task_5_comparesignal2
 import Task_6_DerivativeSignal
 import Task_7_ConvTest
+import Task_8_CompareSignal
+import Task_9_ConvTest
 from comparesignals import SignalSamplesAreEqual
 from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
@@ -40,6 +42,7 @@ class GUI:
 
         self.menubar = tk.Menu(self.root)
         self.task_1_menu = tk.Menu(self.menubar, tearoff=0)
+        self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
@@ -96,20 +99,46 @@ class GUI:
         self.menubar.add_cascade(menu=self.task_6_menu, label="Task 6")
 
         self.task_7_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_7_menu.add_command(label="(7.1) Convolution Signal [TD]", command=self.task_7_convolution_time_domain)
-        self.task_7_menu.add_separator()
-        self.task_7_menu.add_command(label="(7.2+) Convolution Signal [FD]", command=self.task_7_convolution_freq_domain)
+        self.task_7_menu.add_command(label="(7) Convolution Signal [TD]", command=self.task_7_convolution_time_domain)
         self.menubar.add_cascade(menu=self.task_7_menu, label="Task 7")
 
         self.task_8_menu = tk.Menu(self.menubar, tearoff=2)
-        self.task_8_menu.add_command(label="(8.1) Correlation", command=self.task_8_correlation)
+        self.task_8_menu.add_command(label="(8.1) Correlation [TD]", command=self.task_8_direct_correlation)
         self.task_8_menu.add_separator()
         self.task_8_menu.add_command(label="(8.2+) Time Analysis", command=self.task_8_time_analysis_BONUS)
         self.task_8_menu.add_separator()
         self.task_8_menu.add_command(label="(8.3+) Template Matching", command=self.task_8_template_matching_BONUS)
         self.menubar.add_cascade(menu=self.task_8_menu, label="Task 8")
 
-        self.root.config(menu=self.menubar)
+        self.task_9_menu = tk.Menu(self.menubar, tearoff=2)
+        self.task_9_menu.add_command(label="(9.1) Fast Convolution Signal [FD]",
+                                     command=self.task_9_fast_convolution)
+        self.task_9_menu.add_separator()
+        self.task_9_menu.add_command(label="(9.2) Fast Convolution Signal [FD]",
+                                     command=self.task_9_fast_correlation)
+        self.menubar.add_cascade(menu=self.task_9_menu, label="Task 9")
+
+        self.color_green_1 = '#092635'
+        self.color_green_2 = '#1B4242'
+        self.color_green_3 = '#5C8374'
+        self.color_green_4 = '#9EC8B9'
+        self.plots_bg_color = self.color_green_4
+
+        # Customize menu appearance
+        menu_bg_color = self.color_green_3  # Menu background color
+        menu_fg_color = 'white'  # Menu foreground color
+        menu_font = ('serif', 10, 'italic')
+
+        self.menubar.config(bg=menu_bg_color)
+
+        # Apply styles to menus
+        menus = [self.task_1_menu, self.task_2_menu, self.task_3_menu,
+                 self.task_4_menu, self.task_5_menu, self.task_6_menu,
+                 self.task_7_menu, self.task_8_menu, self.task_9_menu]
+        for menu in menus:
+            menu.config(bg=menu_bg_color, fg=menu_fg_color, font=menu_font)
+
+        self.root.config(menu=self.menubar, bg=self.plots_bg_color)
 
         self.plots_frame = tk.Frame(self.root)
         self.plots_frame.grid(row=0, column=0)
@@ -178,6 +207,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         with open(file_path, 'r') as file:
             line_count = 0
@@ -243,6 +273,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         wave_type = simpledialog.askinteger("Wave Type", "Enter Type of Signal:\n1- Sin\n2- Cosine")
         amplitude = simpledialog.askfloat("Amplitude", "Enter Amplitude:")
@@ -319,6 +350,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         # Select Multiple Files
         """
@@ -410,6 +442,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_1_file_path:
@@ -462,6 +495,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_file_path:
@@ -492,6 +526,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -516,6 +551,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -549,6 +585,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -587,6 +624,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -690,6 +728,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         ax1.plot(signal_time, signal_value, color='orange')
         ax1.scatter(signal_time, signal_value, color='blue')
@@ -811,6 +850,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -898,6 +938,8 @@ class GUI:
             inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(
                 self.screen_width / 100, self.screen_height / 110))
             inner_fig.subplots_adjust(hspace=0.3)
+            inner_fig.set_facecolor(self.plots_bg_color)
+
             inner_ax1.stem(x_axis, amplitudes)
             inner_ax1.set_xticks(x_axis)
             inner_ax1.set_xticklabels(x_axis)
@@ -952,6 +994,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -982,6 +1025,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1030,6 +1074,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1060,6 +1105,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1138,6 +1184,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1183,6 +1230,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1222,6 +1270,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1255,6 +1304,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1284,6 +1334,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1322,6 +1373,7 @@ class GUI:
             widget.destroy()
 
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1357,6 +1409,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         # out_of_range = lambda signal_v, signal_t, index: signal_v[signal_t.index(index)] if index in signal_t else 0
         def out_of_range(signal_v, signal_t, index):
@@ -1400,24 +1453,67 @@ class GUI:
         ax1.legend()
         ax1.set_xlabel("Time")
         ax1.set_ylabel('Amplitude')
-        ax1.set_title(f'Task 7.1 - Convolution (Time Domain) [Signals]')
+        ax1.set_title(f'Task 7 - Convolution (Time Domain) [Signals]')
 
         ax2.plot(convoluted_signal_time, convoluted_signal_value, color='red', label='Convoluted Signal')
         ax2.legend()
         ax2.set_xlabel("Time")
         ax2.set_ylabel('Amplitude')
-        ax2.set_title(f'Task 7.1 - Convolution (Time Domain) [Value]')
+        ax2.set_title(f'Task 7 - Convolution (Time Domain) [Value]')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def task_7_convolution_freq_domain(self):
+    def read_signal_periodicity(self, signal_file_path):
+        with open(signal_file_path, 'r') as file:
+            file.readline()
+            periodicity = int(float(file.readline()))
+            file.readline()
+            lines = file.readlines()
+            signal_time = []
+            signal_value = []
+            for line in lines:
+                parts = line.split()
+                signal_time.append(float(parts[0]))
+                signal_value.append(float(parts[1]))
+        return signal_time, signal_value, periodicity
+
+    def direct_correlation_2_signals(self, signal_value_1, signal_value_2, periodicity):
+        def shift_left_signal(signal_v, is_periodic):
+            prev_first_element = signal_v.pop(0)
+            signal_v.append(prev_first_element if is_periodic else 0)
+            return signal_v
+
+        summation_square_of_list = lambda signal: sum([x1 * x1 for x1 in signal])
+        calc_normalization_term = lambda signal_1, signal_2, length: math.sqrt(
+            summation_square_of_list(signal_1) * summation_square_of_list(signal_2)) / length
+
+        N = len(signal_value_1)
+        print("=" * 200)
+        print(f"Length (N)                  : {N}")
+        normalization_term = calc_normalization_term(signal_value_1, signal_value_2, N)
+        print(f"Normalization Term          : {normalization_term}")
+        normalized_correlated_signal = []
+        for i in range(N):
+            r_12 = np.sum([a * b for a, b in zip(signal_value_1, signal_value_2)]) / N
+            if periodicity:
+                norm_12 = normalization_term
+            else:
+                norm_12 = calc_normalization_term(signal_value_1, signal_value_2, N)
+            normalized_correlated_signal.append(r_12 / norm_12)
+            signal_value_2 = shift_left_signal(signal_value_2, periodicity)
+        print(f"Normalized Correlated Signal: {normalized_correlated_signal}")
+        return normalized_correlated_signal
+
+    def task_8_direct_correlation(self):
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
             widget.destroy()
 
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
@@ -1429,101 +1525,33 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        # signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
-        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
-        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
+        signal_time_1, signal_value_1, signal_periodicity_1 = self.read_signal_periodicity(signal_file_path_1)
+        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
 
-        # signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
-        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
-        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
+        signal_time_2, signal_value_2, signal_periodicity_2 = self.read_signal_periodicity(signal_file_path_2)
+        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
 
-        min_index = signal_time1[0] + signal_time2[0]
-        max_index = signal_time1[-1] + signal_time2[-1]
+        normalized_correlated_signal = self.direct_correlation_2_signals(signal_value_1, signal_value_2,
+                                                                         signal_periodicity_2)
 
-        output_time = list(range(int(min_index), int(max_index) + 1))
-        number_of_elements = len(output_time)
+        ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1')
+        ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2')
+        ax1.legend()
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title(f'Task 8.2 - Correlation (Time Domain) [Signals]')
 
-        signal_value1 = np.pad(signal_value1, (0, number_of_elements - len(signal_value1)))
-        signal_value2 = np.pad(signal_value2, (0, number_of_elements - len(signal_value2)))
-
-        signal1_freq_domain = self.dft(signal_value1)
-        signal2_freq_domain = self.dft(signal_value2)
-
-        output = [a * b for a, b in zip(signal1_freq_domain, signal2_freq_domain)]
-
-        amplitude = [abs(x) for x in output]
-        phase_shift = [cmath.phase(angle) for angle in output]
-
-        polar1 = list(zip(amplitude, phase_shift))
-        convoluted_signal_value = self.idft(polar1)
-        print(f'convoluted_signal_value : {convoluted_signal_value}')
-
-        Task_7_ConvTest.ConvTest(output_time, convoluted_signal_value)
-
-        plt.plot(output_time, convoluted_signal_value, color='red', label='Convoluted Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 7.2 - Convolution (Frequency Domain)')
+        ax2.plot(signal_time_1, normalized_correlated_signal, color='red', label='Correlation')
+        ax2.legend()
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel('Amplitude')
+        ax2.set_title('Task 8.1 - Correlation (Time Domain) [Value]')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def task_8_correlation(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-
-        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
-
-        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_2:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
-
-        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
-        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
-
-        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
-        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
-
-        signal1_freq_domain = self.dft(signal_value1)
-        signal2_freq_domain = self.dft(signal_value2)
-
-        output = [a * b for a, b in zip(np.conj(signal1_freq_domain), signal2_freq_domain)]
-        print(f'conj :   {np.conj(signal1_freq_domain)}')
-        amplitude = [abs(x) for x in output]
-        phase_shift = [cmath.phase(angle) for angle in output]
-
-        polar1 = list(zip(amplitude, phase_shift))
-        signal_time_domain = self.idft(polar1)
-        final_cross_correlation = [int(a) * 1 / len(signal_value2) for a in signal_time_domain]
-        print(f'correlation  : {final_cross_correlation}')
-
-        signal1_sum_square = np.sum(np.square(signal_value1))
-        signal2_sum_square = np.sum(np.square(signal_value2))
-        normalization_term = 1 / len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
-        normalized_signal = [a / normalization_term for a in final_cross_correlation]
-        print(f'final after normalization : {normalized_signal}')
-
-        plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
-        plt.grid()
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 8 - Correlation')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
-
-    def correlation_2_signals(self, signal_value_1, signal_value_2):
+    def fast_correlation_2_signals(self, signal_value_1, signal_value_2):
         summation_square_of_list = lambda signal: sum([x1 * x1 for x1 in signal])
 
         N = len(signal_value_1)
@@ -1561,6 +1589,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         """
         perform time delay analysis,
@@ -1589,7 +1618,7 @@ class GUI:
         signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
         signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
 
-        normalized_correlated_signal = self.correlation_2_signals(signal_value_1, signal_value_2)
+        normalized_correlated_signal = self.fast_correlation_2_signals(signal_value_1, signal_value_2)
 
         print("=" * 200)
         print(f"Sampling Frequency                  : {sampling_frequency}")
@@ -1629,6 +1658,7 @@ class GUI:
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
 
         """
         the user will give the paths for two folders of two classes and a test folder,
@@ -1670,7 +1700,7 @@ class GUI:
         if not folder_path_2:
             messagebox.showerror(title="Error", message="Signal Data Folder Not Found!")
             return
-        
+
         class_1_signals = template_matching_read_folder(folder_path_1)
         class_2_signals = template_matching_read_folder(folder_path_2)
         # print_class_lists(class_1_signals, "Down")
@@ -1693,11 +1723,11 @@ class GUI:
 
         test_signal = template_matching_read_file(test_file_path)
 
-        normalized_correlated_class_1 = self.correlation_2_signals(class_1_average, test_signal)
+        normalized_correlated_class_1 = self.fast_correlation_2_signals(class_1_average, test_signal)
         absolute_normalized_correlated_class_1 = [abs(corr) for corr in normalized_correlated_class_1]
         maximum_absolute_correlation_class_1 = max(absolute_normalized_correlated_class_1)
 
-        normalized_correlated_class_2 = self.correlation_2_signals(class_2_average, test_signal)
+        normalized_correlated_class_2 = self.fast_correlation_2_signals(class_2_average, test_signal)
         absolute_normalized_correlated_class_2 = [abs(corr) for corr in normalized_correlated_class_2]
         maximum_absolute_correlation_class_2 = max(absolute_normalized_correlated_class_2)
 
@@ -1729,6 +1759,116 @@ class GUI:
         ax2.set_xlabel("Time")
         ax2.set_ylabel('Amplitude')
         ax2.set_title(f'Task 8.3 - Template Matching with Tested File and best match {best_match_label}')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_9_fast_convolution(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path_1:
+            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+            return
+
+        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path_2:
+            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+            return
+
+        # signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
+        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
+        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
+
+        # signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
+        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
+        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
+
+        min_index = signal_time1[0] + signal_time2[0]
+        max_index = signal_time1[-1] + signal_time2[-1]
+
+        output_time = list(range(int(min_index), int(max_index) + 1))
+        number_of_elements = len(output_time)
+
+        signal_value1 = np.pad(signal_value1, (0, number_of_elements - len(signal_value1)))
+        signal_value2 = np.pad(signal_value2, (0, number_of_elements - len(signal_value2)))
+
+        signal1_freq_domain = self.dft(signal_value1)
+        signal2_freq_domain = self.dft(signal_value2)
+
+        output = [a * b for a, b in zip(signal1_freq_domain, signal2_freq_domain)]
+
+        amplitude = [abs(x) for x in output]
+        phase_shift = [cmath.phase(angle) for angle in output]
+
+        polar1 = list(zip(amplitude, phase_shift))
+        convoluted_signal_value = self.idft(polar1)
+        print(f'convoluted_signal_value : {convoluted_signal_value}')
+
+        plt.plot(output_time, convoluted_signal_value, color='red', label='Convoluted Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 9.1 - Convolution (Frequency Domain)')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_9_fast_correlation(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path_1:
+            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+            return
+
+        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+        if not signal_file_path_2:
+            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+            return
+
+        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
+        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
+
+        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
+        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
+
+        signal1_freq_domain = self.dft(signal_value1)
+        signal2_freq_domain = self.dft(signal_value2)
+
+        output = [a * b for a, b in zip(np.conj(signal1_freq_domain), signal2_freq_domain)]
+        print(f'conj :   {np.conj(signal1_freq_domain)}')
+        amplitude = [abs(x) for x in output]
+        phase_shift = [cmath.phase(angle) for angle in output]
+
+        polar1 = list(zip(amplitude, phase_shift))
+        signal_time_domain = self.idft(polar1)
+        final_cross_correlation = [int(a) * 1 / len(signal_value2) for a in signal_time_domain]
+        print(f'correlation  : {final_cross_correlation}')
+
+        signal1_sum_square = np.sum(np.square(signal_value1))
+        signal2_sum_square = np.sum(np.square(signal_value2))
+        normalization_term = 1 / len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
+        normalized_signal = [a / normalization_term for a in final_cross_correlation]
+        print(f'final after normalization : {normalized_signal}')
+
+        plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
+        plt.legend()
+        plt.xlabel("Time")
+        plt.ylabel('Amplitude')
+        plt.title('Task 9.2 - Correlation (Frequency Domain)')
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
