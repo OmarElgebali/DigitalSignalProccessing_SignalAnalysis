@@ -11,14 +11,20 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from math import log2
 
 # Tasks Imports
-from TaskFunctions import Task_6_DerivativeSignal, Task_4_signalcompare
+from TaskFunctions import Task_9_ConvTest, Task_6_Shift_Fold_Signal, Task_5_comparesignal2, Task_7_ConvTest, \
+    Task_6_DerivativeSignal, Task_8_CompareSignal, Task_9_CompareSignal, Task_4_signalcompare
 from TaskFunctions.Task_1_comparesignals import SignalSamplesAreEqual
+from TaskFunctions.Task_3_QuanTest1 import QuantizationTest1
+from TaskFunctions.Task_3_QuanTest2 import QuantizationTest2
+from TaskFunctions.Task_4_signalcompare import SignalCompare
 
 import HelperResources
 from FourierTransform import dft, idft, fourier_transform
 from Correlation import direct_correlation_2_signals, fast_correlation_2_signals
 
-# TestCases = True
+
+TestCases = True
+
 
 class GUI:
     def __init__(self):
@@ -43,7 +49,11 @@ class GUI:
         self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.1) Generate Cont. & Disc. Signals", command=self.task_1_1)
         self.task_1_menu.add_separator()
+        self.task_1_menu.add_command(label="(1.1-TEST) Generate Cont. & Disc. Signals", command=self.task_1_1_TEST)
+        self.task_1_menu.add_separator()
         self.task_1_menu.add_command(label="(1.2) Generate Sin/Cos Signal", command=self.task_1_2)
+        self.task_1_menu.add_separator()
+        self.task_1_menu.add_command(label="(1.2-TEST) Generate Sin/Cos Signal", command=self.task_1_2_TEST)
         self.menubar.add_cascade(menu=self.task_1_menu, label="Task 1")
 
         self.task_2_menu = tk.Menu(self.menubar, tearoff=1)
@@ -250,7 +260,6 @@ class GUI:
             if wave_type == 1:
                 name = "Sin"
                 y_axis = self.Ys_sin_analog
-
             else:
                 name = "Cosine"
                 y_axis = self.Ys_cos_analog
@@ -286,26 +295,172 @@ class GUI:
 
         self.window_1_plots([self.Xs_SinCos],
                             [y_axis],
-                            ['Normalized Signal'],
+                            [f'{name} Wave Plot'],
                             'Time',
                             'Amplitude',
                             title)
 
-    def task_2_1_addition(self):
-        # Select Multiple Files
-        """
-        file_paths = [filedialog.askopenfilename(title="Select a Signal Data File")]
-        if not file_paths[0]:
-            messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+    def task_1_1_TEST(self):
+        file_path = filedialog.askopenfilename(title="Select a Signal Data File")
+        if not file_path:
+            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        while messagebox.askyesno(title="File Upload", message="Select another file (Signal)?"):
-            file_paths.append(filedialog.askopenfilename(title="Select a Signal Data File"))
-        """
-        file_paths = list(filedialog.askopenfilenames(title="Select Signal Data Files"))
-        if not file_paths[0]:
-            messagebox.showerror(title="Error", message="There is a Signal Data File Not Found!")
-            return
+        x = []
+        y = []
+        signal_details = []
+        x_label = 't'
+        domain = 'Time'
+        periodic = 'Aperiodic'
+
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        with open(file_path, 'r') as file:
+            line_count = 0
+            for line in file:
+                line_count += 1
+                if line_count <= 3:
+                    # [0] Domain
+                    # if == 0 -> Time Domain (x= time_in_secs, y= Amplitude)
+                    # if == 1 -> Freq Domain (x= bin_num, y= Amplitude, z= phase_shift)
+                    # [1] Period
+                    # if == 0 -> Aperiodic
+                    # if == 1 -> Periodic
+                    # [2] N samples
+                    # [3] Phase Shift
+                    signal_details.append(int(line))
+                    continue
+                elif signal_details[0] == 1 and (line_count - 3) == (signal_details[2] + 1):
+                    signal_details.append(int(line))
+                    continue
+                values = line.split()  # Separate by whitespace
+                x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
+                y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
+
+            x, y = self.sort_2_lists(x, y)
+
+            if signal_details[1] == 1:  # [1] Period
+                periodic = 'Periodic'
+                start_of_cycle = 0
+                end_of_cycle = signal_details[2]
+                temp_y = y
+                for i in range(1, 3):
+                    start_of_cycle += signal_details[2]
+                    end_of_cycle += signal_details[2]
+                    x.extend(range(start_of_cycle, end_of_cycle))
+                    y = y + temp_y
+
+            if signal_details[0] == 1:  # [0] Frequency Domain
+                x_label = 'f'
+                domain = 'Frequency'
+
+            title = f'{periodic} {domain} Domain with {signal_details[2]} Samples'
+            if signal_details[0] == 1 and signal_details[3]:  # [3] Phase Shift
+                title = f'{periodic} {domain} Domain with {signal_details[2]} Samples and {signal_details[3]} Phase Shift'
+                plt.xlim(1, max(x) + abs(signal_details[3]))
+                x = [value + signal_details[3] for value in x]
+
+        self.Xs_ContDisc = x
+        self.Ys_ContDisc = y
+        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='orange')
+        plt.scatter(self.Xs_ContDisc, self.Ys_ContDisc)
+        plt.xlabel(x_label)
+        plt.ylabel('Amplitude')
+        plt.title(title)
+        plt.grid(True)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_1_2_TEST(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        output_path = "Task 1/CosOutput.txt"
+        name = "Cosine"
+        wave_type = 2
+        amplitude = 3
+        analog_frequency = 200
+        sampling_frequency = 500
+        phase_shift = 2.35619449019235
+        if messagebox.askyesno(title="Test Signal", message="Yes -> Sine Test\nNo  -> Cosine Test"):
+            output_path = "Task 1/SinOutput.txt"
+            name = "Sin"
+            wave_type = 1
+            analog_frequency = 360
+            sampling_frequency = 720
+            phase_shift = 1.96349540849362
+
+        x_values = np.arange(0, 1, 1 / sampling_frequency)
+        self.Xs_SinCos = x_values
+
+        # Equation -> y = amplitude * np.sin(2 * np.pi * x + phase_shift)
+        self.Ys_sin_analog = amplitude * np.sin(2 * np.pi * analog_frequency * x_values + phase_shift)
+        self.Ys_sin_sample = amplitude * np.sin(2 * np.pi * sampling_frequency * x_values + phase_shift)
+
+        # Equation -> y = amplitude * np.cos(2 * np.pi * x + phase_shift)
+        self.Ys_cos_analog = amplitude * np.cos(2 * np.pi * analog_frequency * x_values + phase_shift)
+        self.Ys_cos_sample = amplitude * np.cos(2 * np.pi * sampling_frequency * x_values + phase_shift)
+
+        if wave_type == 1:
+            plt.plot(self.Xs_SinCos, self.Ys_sin_sample, color='orange')
+            plt.scatter(self.Xs_SinCos, self.Ys_sin_sample)
+            SignalSamplesAreEqual(output_path, sampling_frequency, self.Ys_sin_analog)
+        else:
+            plt.plot(self.Xs_SinCos, self.Ys_cos_sample, color='orange')
+            plt.scatter(self.Xs_SinCos, self.Ys_cos_sample)
+            SignalSamplesAreEqual(output_path, sampling_frequency, self.Ys_cos_analog)
+
+        title = f"""{name} Wave Plot
+        Form: Y = A * {name.lower()}( W * X + Theta ) 
+        Equation: Y = ({amplitude}) * {name.lower()}( ({analog_frequency}) * X + ({phase_shift}) )
+        Sampling Frequency: {sampling_frequency}
+        Fs >= 2 * Fmax : ({sampling_frequency}) >= (2 * {analog_frequency})"""
+
+        plt.title(title)
+        plt.xlabel('Time')
+        plt.ylabel('Amplitude')
+        plt.grid(True)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def task_2_1_addition(self):
+        if TestCases:
+            output_path = "Task 2/output_signals/signal1+signal3.txt"
+            signal_2_file_path = "Task 2/input_signals/signal3.txt"
+            if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 + S2)\nNo  -> Signal 3 (S1 + S3)"):
+                output_path = "Task 2/output_signals/Signal1+signal2.txt"
+                signal_2_file_path = "Task 2/input_signals/Signal2.txt"
+
+            signal_1_file_path = "Task 2/input_signals/Signal1.txt"
+            file_paths = [signal_1_file_path, signal_2_file_path]
+        else:
+            # Select Multiple Files
+            """
+            file_paths = [filedialog.askopenfilename(title="Select a Signal Data File")]
+            if not file_paths[0]:
+                messagebox.showwarning(title="Warning", message="Signal Data File Not Found!")
+                return
+    
+            while messagebox.askyesno(title="File Upload", message="Select another file (Signal)?"):
+                file_paths.append(filedialog.askopenfilename(title="Select a Signal Data File"))
+            """
+            file_paths = list(filedialog.askopenfilenames(title="Select Signal Data Files"))
+            if not file_paths[0]:
+                messagebox.showerror(title="Error", message="There is a Signal Data File Not Found!")
+                return
 
         signal_number = 0
         lengths_equal = 1
@@ -366,6 +521,9 @@ class GUI:
         """
         result_addition_signal = np.sum(signal_values, axis=0)
 
+        if TestCases:
+            SignalSamplesAreEqual(output_path, None, result_addition_signal)
+
         self.window_1_plots([signal_times[0]],
                             [result_addition_signal],
                             ['Addition Signal'],
@@ -374,15 +532,24 @@ class GUI:
                             'Task 2.1 - Addition Signal')
 
     def task_2_2_subtraction(self):
-        signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
-        if not signal_1_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File (S1) Not Found!")
-            return
+        if TestCases:
+            output_path = "Task 2/output_signals/signal1-signal3.txt"
+            signal_2_file_path = "Task 2/input_signals/signal3.txt"
+            if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 - S2)\nNo  -> Signal 3 (S1 - S3)"):
+                output_path = "Task 2/output_signals/signal1-signal2.txt"
+                signal_2_file_path = "Task 2/input_signals/Signal2.txt"
 
-        signal_2_file_path = filedialog.askopenfilename(title="Select Signal Data File (S2)")
-        if not signal_2_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File (S2) Not Found!")
-            return
+            signal_1_file_path = "Task 2/input_signals/Signal1.txt"
+        else:
+            signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
+            if not signal_1_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File (S1) Not Found!")
+                return
+
+            signal_2_file_path = filedialog.askopenfilename(title="Select Signal Data File (S2)")
+            if not signal_2_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File (S2) Not Found!")
+                return
 
         signal_1_time, signal_1_value = HelperResources.read_only_signal(signal_1_file_path)
         signal_2_time, signal_2_value = HelperResources.read_only_signal(signal_2_file_path)
@@ -406,7 +573,11 @@ class GUI:
         signal_2_value = np.array(signal_2_value)
         result_subtraction_signal_ = signal_1_value - signal_2_value
         """
-        result_subtraction_signal = np.subtract(signal_1_value, signal_2_value)
+        result_subtraction_signal = np.subtract(signal_2_value, signal_1_value)
+
+        if TestCases:
+            SignalSamplesAreEqual(output_path, None, result_subtraction_signal)
+
         self.window_1_plots([signal_1_time],
                             [result_subtraction_signal],
                             ['Subtraction Signal'],
@@ -415,17 +586,31 @@ class GUI:
                             'Task 2.2 - Subtraction Signal')
 
     def task_2_3_multiplication(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
-        if not signal_file_path:
-            messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
-            return
+        if TestCases:
+            output_path = "Task 2/output_signals/MultiplySignalByConstant-signal2 - by 10.txt"
+            signal_file_path = "Task 2/input_signals/Signal2.txt"
+            factor = 10
+            if messagebox.askyesno(title="Test Signal",
+                                   message="Yes -> Signal 1 (Factor = 5)\nNo  -> Signal 2 (Factor = 10)"):
+                output_path = "Task 2/output_signals/MultiplySignalByConstant-Signal1 - by 5.txt"
+                signal_file_path = "Task 2/input_signals/Signal1.txt"
+                factor = 5
 
-        factor = simpledialog.askinteger("Factor", "Enter Factor:")
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
+            if not signal_file_path:
+                messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
+                return
+
+            factor = simpledialog.askinteger("Factor", "Enter Factor:")
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
 
         signal_value_multiplied = np.array(signal_value) * np.array(factor)
         signal_time, signal_value_multiplied = HelperResources.sort_2_lists(signal_time, signal_value_multiplied)
+
+        if TestCases:
+            SignalSamplesAreEqual(output_path, None, signal_value_multiplied)
 
         self.window_1_plots([signal_time],
                             [signal_value_multiplied],
@@ -435,13 +620,19 @@ class GUI:
                             f'Task 2.3 - Multiplication Signal by Factor = {factor}')
 
     def task_2_4_squaring(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = "Task 2/input_signals/Signal1.txt"
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         square_signal = np.array(signal_value) * np.array(signal_value)
+
+        if TestCases:
+            SignalSamplesAreEqual("Task 2/output_signals/Output squaring signal 1.txt", None, square_signal)
 
         self.window_1_plots([signal_time],
                             [square_signal],
@@ -458,20 +649,29 @@ class GUI:
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.patch.set_facecolor(self.plots_bg_color)
 
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = "Task 2/input_signals/Input Shifting.txt"
+            shift_value = -500
+            output_path = "Task 2/output_signals/output shifting by minus 500.txt"
+            if messagebox.askyesno(title="Shifting Value", message="Yes -> +500\nNo  -> -500"):
+                shift_value = 500
+                output_path = "Task 2/output_signals/output shifting by add 500.txt"
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+            shift_value = simpledialog.askfloat("Shifting Value", "Enter Shift Value (+ve or -ve):")
 
-        signal_time, signal_value = (
-            HelperResources.read_only_signal(signal_file_path))
+        signal_time, signal_value = (HelperResources.read_only_signal(signal_file_path))
         old_min_time = min(signal_time)
         old_max_time = max(signal_time)
-        shift_value = simpledialog.askfloat("Shifting Value", "Enter Shift Value (+ve or -ve):")
         shifted_signal = np.array(signal_time) + shift_value
         shifted_signal, signal_value = HelperResources.sort_2_lists(shifted_signal, signal_value)
         new_min_time = min(shifted_signal)
         new_max_time = max(shifted_signal)
+        if TestCases:
+            SignalSamplesAreEqual(output_path, None, signal_value)
 
         plt.xlim(min(old_min_time, new_min_time) - 1, max(old_max_time, new_max_time) + 1)
         # plt.plot(shifted_signal, signal_value, color='orange')
@@ -486,18 +686,27 @@ class GUI:
         canvas.get_tk_widget().pack()
 
     def task_2_6_normalization(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = "Task 2/input_signals/Signal2.txt"
+            output_path = "Task 2/output_signals/normlize signal 2 -- output.txt"
+            scaler_value = 1
+            if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1 (-1 , 1)\nNo  -> Signal 2 (0 , 1)"):
+                output_path = "Task 2/output_signals/normalize of signal 1 -- output.txt"
+                signal_file_path = "Task 2/input_signals/Signal1.txt"
+                scaler_value = 2
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+            scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
+
+            if scaler_value != 1 and scaler_value != 2:
+                messagebox.showerror(title="Error",
+                                     message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
-        scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
-
-        if scaler_value != 1 and scaler_value != 2:
-            messagebox.showerror(title="Error",
-                                 message="Normalizing Value is not either:\n[0, 1] -> (Number 1.) or\n [-1, 1] -> (Number 2.)")
-            return
 
         signal_value = np.reshape(signal_value, (-1, 1))
         scaler = MinMaxScaler(feature_range=(0, 1))
@@ -507,6 +716,9 @@ class GUI:
         normalized_signal = scaler.fit_transform(np.array(signal_value))
         normalized_result = normalized_signal.flatten()
 
+        if TestCases:
+            SignalSamplesAreEqual(output_path, None, normalized_result)
+
         self.window_1_plots([signal_time],
                             [normalized_result],
                             ['Normalized Signal'],
@@ -515,13 +727,19 @@ class GUI:
                             'Task 2.6 - Normalized Signal')
 
     def task_2_7_accumulation(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = "Task 2/input_signals/Signal1.txt"
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
+
+        if TestCases:
+            SignalSamplesAreEqual("Task 2/output_signals/output accumulation for signal1.txt", None, accumulate_signal)
 
         self.window_1_plots([signal_time],
                             [accumulate_signal],
@@ -531,27 +749,36 @@ class GUI:
                             'Task 2.7 - Accumulated Signal')
 
     def task_3_quantize(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = "Task 3/Test 2/Quan2_input.txt"
+            bits = 2
+            L = 4
+            is_test_1 = messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1\nNo  -> Signal 2")
+            if is_test_1:
+                signal_file_path = "Task 3/Test 1/Quan1_input.txt"
+                bits = 3
+                L = 8
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+            if messagebox.askyesno(title="Levels or Bits used for Quantization",
+                                   message="Yes -> # of Levels\nNo  -> # of Bits"):
+                L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
+                if L < 0:
+                    messagebox.showerror(title="Error", message="#ofLevels are -ve")
+                    return
+                bits = int(log2(L))
+            else:
+                bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
+                if bits < 0:
+                    messagebox.showerror(title="Error", message="#ofBits are -ve")
+                    return
+                L = pow(2, bits)
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
-
-        if messagebox.askyesno(title="Levels or Bits used for Quantization",
-                               message="Yes -> # of Levels\nNo  -> # of Bits"):
-            L = simpledialog.askinteger("Number of Levels", "Enter a +ve value:")
-            if L < 0:
-                messagebox.showerror(title="Error", message="#ofLevels are -ve")
-                return
-            bits = int(log2(L))
-        else:
-            bits = simpledialog.askinteger("Number of Bits", "Enter a +ve value:")
-            if bits < 0:
-                messagebox.showerror(title="Error", message="#ofBits are -ve")
-                return
-            L = pow(2, bits)
 
         rounding_parameter = 3
         minimum = min(signal_value)
@@ -607,6 +834,14 @@ class GUI:
                 encoded_signal[i]))
 
         tree.pack()
+        if TestCases:
+            if is_test_1:
+                output_path = "Task 3/Test 1/Quan1_Out.txt"
+                QuantizationTest1(output_path, encoded_signal, quantized_signal)
+            else:
+                output_path = "Task 3/Test 2/Quan2_Out.txt"
+                QuantizationTest2(output_path, interval_index, encoded_signal, quantized_signal, errors)
+
         self.window_2_plots([signal_time, signal_time],
                             [signal_value, quantized_signal],
                             ['Original Signal', 'Quantized Signal'],
@@ -616,19 +851,22 @@ class GUI:
                             f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
 
     def task_4_dft(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 4/DFT/input_Signal_DFT.txt'
+            sampling_frequency = 4
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+            sampling_frequency = simpledialog.askinteger("Sampling Frequency",
+                                                         "Enter a +ve Sampling Frequency in (Hz):")
+            if sampling_frequency < 0:
+                messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
-
-        # sampling_frequency = 4000
-        sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
-        if sampling_frequency < 0:
-            messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
-            return
 
         rounding_parameter = 3
         N = len(signal_value)
@@ -641,14 +879,15 @@ class GUI:
         print(f"Phase Shifts       Ø: {phase_shifts}")
         print("=" * 200)
 
-        output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
-        polar_form = HelperResources.read_polar_signal(output_file_path)
-        output_amplitudes = []
-        output_phase_shifts = []
-        for a, ps in polar_form:
-            output_amplitudes.append(a)
-            output_phase_shifts.append(ps)
-        Task_4_signalcompare.SignalCompare(amplitudes, output_amplitudes, phase_shifts, output_phase_shifts)
+        if TestCases:
+            output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
+            polar_form = HelperResources.read_polar_signal(output_file_path)
+            output_amplitudes = []
+            output_phase_shifts = []
+            for a, ps in polar_form:
+                output_amplitudes.append(a)
+                output_phase_shifts.append(ps)
+            Task_4_signalcompare.SignalCompare(amplitudes, output_amplitudes, phase_shifts, output_phase_shifts)
 
         fundamental_frequency = round((2 * math.pi * sampling_frequency) / N, rounding_parameter)
         print(f"Fundamental Frequency : {fundamental_frequency}")
@@ -716,18 +955,24 @@ class GUI:
         modification_frame.pack(fill='x')
 
     def task_4_idft(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 4/IDFT/Input_Signal_IDFT_A,Phase.txt'
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+
         polar = HelperResources.read_polar_signal(signal_file_path)
         signal_time_domain = idft(polar)
         x_indices = [i for i in range(1, len(signal_time_domain) + 1)]
 
-        output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
-        _, s_v = HelperResources.read_only_signal(output_file_path)
-
-        SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
+        if TestCases:
+            # save_file_path = 'Task 4/idft_out.txt'
+            # HelperResources.save_time_domain_signal(signal_time_domain, save_file_path)
+            output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
+            _, s_v = HelperResources.read_only_signal(output_file_path)
+            SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
 
         self.window_1_plots([x_indices],
                             [signal_time_domain],
@@ -737,23 +982,30 @@ class GUI:
                             'Task 4.2 - IDFT')
 
     def task_5_dct(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 5/DCT/DCT_input.txt'
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         # sampling_frequency = 4000
-        co_number = simpledialog.askinteger("Number of Coefficient", "enter number of coefficient")
         length = len(signal_value)
-        if co_number <= 0:
-            messagebox.showerror(title="Error", message="number of coefficient must be +ve")
-            return
-        if co_number > length:
-            messagebox.showerror(title="Error", message="number of coefficient must be less than length")
-            return
+
+        if TestCases:
+            co_number = 6
+        else:
+            co_number = simpledialog.askinteger("Number of Coefficient", "enter number of coefficient")
+            if co_number <= 0:
+                messagebox.showerror(title="Error", message="number of coefficient must be +ve")
+                return
+            if co_number > length:
+                messagebox.showerror(title="Error", message="number of coefficient must be less than length")
+                return
 
         dct = []
         K_array = list(range(0, co_number))
@@ -775,11 +1027,18 @@ class GUI:
             for x, y in combined_values:
                 file.write(f"{x}\t{y}\n")
 
+        if TestCases:
+            output_file_path = 'Task 5/DCT/DCT_output.txt'
+            Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, dct)
+
     def task_5_remove_dc_using_avg(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
@@ -789,6 +1048,10 @@ class GUI:
 
         HelperResources.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_avg.txt')
 
+        if TestCases:
+            output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+            Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
+
         self.window_1_plots([signal_time, signal_time],
                             [signal_value, signal_value_without_dc],
                             ['Original Signal', 'Removed DC Signal'],
@@ -797,10 +1060,13 @@ class GUI:
                             'Task 5.2 - Signal After Removing DC Component (using Average)')
 
     def task_5_remove_dc_using_harmonics(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
@@ -814,6 +1080,10 @@ class GUI:
 
         HelperResources.save_time_domain_signal(signal_value_without_dc,
                                                 'Task 5 Output - remove_dc_using_harmonics.txt')
+
+        if TestCases:
+            output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+            Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
 
         self.window_1_plots([signal_time, signal_time],
                             [signal_value, signal_value_without_dc],
@@ -867,18 +1137,27 @@ class GUI:
     #     canvas.get_tk_widget().pack()
 
     def task_6_smoothing(self):  ## >>>>>>>>>>>>>>>>> WITHOUT PADDING <<<<<<<<<<<<<<<<<<<<<<<
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 6/Moving Average/MovAvgTest2.txt'
+            filter_size = 5
+            if messagebox.askyesno(title="Test Signal",
+                                   message="Yes -> Test Case 1 with Filter Size = 3\nNo  -> Test Case 2 with Filter Size = 5"):
+                signal_file_path = 'Task 6/Moving Average/MovAvgTest1.txt'
+                filter_size = 3
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+
+            filter_size = simpledialog.askinteger("enter filter size", "enter filter size")
+            if filter_size <= 0:
+                messagebox.showerror(title="Error", message="filter size must be +ve")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
-        filter_size = simpledialog.askinteger("enter filter size", "enter filter size")
-        if filter_size <= 0:
-            messagebox.showerror(title="Error", message="filter size must be +ve")
-            return
         avg_value = []
         time_for_avg = []
         for index, (t, v) in enumerate(zip(signal_time, signal_value)):
@@ -903,13 +1182,20 @@ class GUI:
                             'Task 6.1 - Moving Average Signal')
 
     def task_6_sharpening(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_value = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+                            25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+                            47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+                            69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+                            91, 92, 93, 94, 95, 96, 97, 98, 99, 100]
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
-        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
+            signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+            signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         first_derivative = [current_value - (signal_value[i - 1] if i != 0 else 0) for i, current_value in
                             enumerate(signal_value)][1:]
@@ -919,10 +1205,11 @@ class GUI:
         print(f"Signal Value  : {signal_value}")
         print(f"1st-Derivative: {first_derivative}")
         print(f"2nd-Derivative: {second_derivative}")
-        print(f"Signal Value (Len): {len(signal_value)}")
+        print(f"Signal Value (Len)  : {len(signal_value)}")
         print(f"1st-Derivative (Len): {len(first_derivative)}")
         print(f"2nd-Derivative (Len): {len(second_derivative)}")
-        Task_6_DerivativeSignal.DerivativeSignal(first_derivative, second_derivative)
+        if TestCases:
+            Task_6_DerivativeSignal.DerivativeSignal(first_derivative, second_derivative)
         self.window_2_plots([],
                             [first_derivative, second_derivative, signal_value],
                             ['1st Derivative', '2nd Derivative', 'Original Signal'],
@@ -932,15 +1219,19 @@ class GUI:
                             'Task 6.2 - 1st & 2nd Derivatives')
 
     def task_6_delay_advance_signal(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 6/Shifting and Folding/input_fold.txt'
+            k_steps = 2
+
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+            k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
-
-        k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
 
         new_label = "Delay" if k_steps > 0 else "Advanc"
         new_signal_time = [t + k_steps for t in signal_time]
@@ -955,16 +1246,23 @@ class GUI:
                             f'Task 6.3 - {new_label}ing Signal with Steps(K)={k_steps}')
 
     def task_6_folding(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 6/Shifting and Folding/input_fold.txt'
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         new_signal_time = [(-1 * x) for x in signal_time]
         new_signal_time, new_signal_value = HelperResources.sort_2_lists(new_signal_time, signal_value)
+
+        if TestCases:
+            output_file_path = 'Task 6/Shifting and Folding/Output_fold.txt'
+            Task_6_Shift_Fold_Signal.Shift_Fold_Signal(output_file_path, new_signal_time, new_signal_value)
 
         self.window_1_plots([signal_time, new_signal_time],
                             [signal_value, new_signal_value],
@@ -974,12 +1272,21 @@ class GUI:
                             f'Task 6.4 - Folding Signal')
 
     def task_6_delay_advance_folded_signal(self):
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
-
-        k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
+        if TestCases:
+            signal_file_path = "Task 6/Shifting and Folding/input_fold.txt"
+            output_file_path = "Task 6/Shifting and Folding/Output_ShiftFoldedby-500.txt"
+            k_steps = -500
+            is_test_500 = messagebox.askyesno(title="Test Signal",
+                                              message="Yes -> Delay with 500\nNo  -> Advance with -500")
+            if is_test_500:
+                output_file_path = "Task 6/Shifting and Folding/Output_ShifFoldedby500.txt"
+                k_steps = 500
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
+            k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
@@ -994,6 +1301,10 @@ class GUI:
         print(f"Signal Time    : {signal_time}")
         print(f"New Signal Time: {delayed_folded_signal_time}")
 
+        if TestCases:
+            Task_6_Shift_Fold_Signal.Shift_Fold_Signal(output_file_path, delayed_folded_signal_time,
+                                                       folded_signal_value)
+
         self.window_1_plots([signal_time, delayed_folded_signal_time],
                             [signal_value, folded_signal_value],
                             ['Original Signal', f'{new_label}ed Folded Signal'],
@@ -1002,11 +1313,13 @@ class GUI:
                             f'Task 6.5 - {new_label}ing a Folded Signal with Steps(K)={k_steps}')
 
     def task_6_remove_dc_in_freqdomain(self):
-
-        signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+        else:
+            signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
@@ -1020,6 +1333,11 @@ class GUI:
 
         HelperResources.save_time_domain_signal(signal_value_without_dc,
                                                 'Task 6 Output - remove_dc_using_harmonics.txt')
+
+        if TestCases:
+            output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+            Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
+
         self.window_1_plots([signal_time, signal_time],
                             [signal_value, signal_value_without_dc],
                             ['Original Signal', 'Removed DC Signal'],
@@ -1032,15 +1350,19 @@ class GUI:
         def out_of_range(signal_v, signal_t, index):
             return signal_v[signal_t.index(index)] if index in signal_t else 0
 
-        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
+            signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
+        else:
+            signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_1:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_2:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+            signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_2:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time_1, signal_value_1 = HelperResources.read_only_signal(signal_file_path_1)
         signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
@@ -1065,6 +1387,9 @@ class GUI:
         print(f"Convoluted Signal Time  : {convoluted_signal_time}")
         print(f"Convoluted Signal Value : {convoluted_signal_value}")
 
+        if TestCases:
+            Task_7_ConvTest.ConvTest(convoluted_signal_time, convoluted_signal_value)
+
         self.window_2_plots([signal_time_1, signal_time_2, convoluted_signal_time],
                             [signal_value_1, signal_value_2, convoluted_signal_value],
                             ['Signal 1 - X(K)', 'Signal 2 - H(K)', 'Convoluted Signal'],
@@ -1074,15 +1399,19 @@ class GUI:
                             f'Task 7 - Convolution (Time Domain) [Value]')
 
     def task_8_direct_correlation(self):
-        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path_1 = "Task 8/Correlation/Corr_input signal1.txt"
+            signal_file_path_2 = "Task 8/Correlation/Corr_input signal2.txt"
+        else:
+            signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_1:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_2:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+            signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_2:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time_1, signal_value_1, signal_periodicity_1 = HelperResources.read_signal_periodicity(
             signal_file_path_1)
@@ -1094,6 +1423,10 @@ class GUI:
 
         normalized_correlated_signal = direct_correlation_2_signals(signal_value_1, signal_value_2,
                                                                     signal_periodicity_2)
+
+        if TestCases:
+            output_file_path = "Task 8/Correlation/CorrOutput.txt"
+            Task_8_CompareSignal.Compare_Signals(output_file_path, signal_time_1, normalized_correlated_signal)
 
         self.window_2_plots([signal_time_1, signal_time_2, signal_time_1],
                             [signal_value_1, signal_value_2, normalized_correlated_signal],
@@ -1110,20 +1443,26 @@ class GUI:
         find approximately the delay between them.
         """
 
-        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path_1 = "Task 8/Time analysis/TD_input signal1.txt"
+            signal_file_path_2 = "Task 8/Time analysis/TD_input signal2.txt"
+            sampling_frequency = 100
+        else:
+            signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_1:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_2:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+            signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_2:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
-        if sampling_frequency < 0:
-            messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
-            return
+            sampling_frequency = simpledialog.askinteger("Sampling Frequency",
+                                                         "Enter a +ve Sampling Frequency in (Hz):")
+            if sampling_frequency < 0:
+                messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
+                return
 
         signal_time_1, signal_value_1 = HelperResources.read_only_signal(signal_file_path_1)
         signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
@@ -1186,15 +1525,19 @@ class GUI:
                 class_signals.append(template_matching_read_file(file_path))
             return class_signals
 
-        folder_path_1 = filedialog.askdirectory(title="Select Signals Folder (Class-1)")
-        if not folder_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            folder_path_1 = 'Task 8/Template Matching/Class 1'
+            folder_path_2 = 'Task 8/Template Matching/Class 2'
+        else:
+            folder_path_1 = filedialog.askdirectory(title="Select Signals Folder (Class-1)")
+            if not folder_path_1:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        folder_path_2 = filedialog.askdirectory(title="Select Signals Folder (Class-2)")
-        if not folder_path_2:
-            messagebox.showerror(title="Error", message="Signal Data Folder Not Found!")
-            return
+            folder_path_2 = filedialog.askdirectory(title="Select Signals Folder (Class-2)")
+            if not folder_path_2:
+                messagebox.showerror(title="Error", message="Signal Data Folder Not Found!")
+                return
 
         class_1_signals = template_matching_read_folder(folder_path_1)
         class_2_signals = template_matching_read_folder(folder_path_2)
@@ -1211,10 +1554,15 @@ class GUI:
         print(f"Class 1 - Average       : {class_1_average}")
         print(f"Class 2 - Average       : {class_2_average}")
 
-        test_file_path = filedialog.askopenfilename(title="Select Signal Data File")
-        if not test_file_path:
-            messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
-            return
+        if TestCases:
+            test_file_path = 'Task 8/Template Matching/Test Signals/Test2.txt'
+            if messagebox.askyesno(title="Test Case", message="Yes -> Test Case 1\nNo  -> Test Case 2"):
+                test_file_path = 'Task 8/Template Matching/Test Signals/Test1.txt'
+        else:
+            test_file_path = filedialog.askopenfilename(title="Select Signal Data File")
+            if not test_file_path:
+                messagebox.showerror(title="Error", message="Signal Data FileNot Found!")
+                return
 
         test_signal = template_matching_read_file(test_file_path)
 
@@ -1252,15 +1600,19 @@ class GUI:
                             f'Task 8.3 - Template Matching with Tested File and best match {best_match_label}')
 
     def task_9_fast_convolution(self):
-        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path_1 = "Task 9/Fast Convolution/Input_conv_Sig1.txt"
+            signal_file_path_2 = "Task 9/Fast Convolution/Input_conv_Sig2.txt"
+        else:
+            signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_1:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_2:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+            signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_2:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         # signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
         signal_time1, signal_value1 = HelperResources.read_only_signal(signal_file_path_1)
@@ -1291,6 +1643,9 @@ class GUI:
         convoluted_signal_value = idft(polar1)
         print(f'convoluted_signal_value : {convoluted_signal_value}')
 
+        if TestCases:
+            Task_9_ConvTest.ConvTest(output_time, convoluted_signal_value)
+
         self.window_1_plots([output_time],
                             [convoluted_signal_value],
                             ['Convoluted Signal'],
@@ -1299,15 +1654,19 @@ class GUI:
                             'Task 9.1 - Convolution (Frequency Domain)')
 
     def task_9_fast_correlation(self):
-        signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_1:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+        if TestCases:
+            signal_file_path_1 = "Task 9/Fast Correlation/Corr_input signal1.txt"
+            signal_file_path_2 = "Task 9/Fast Correlation/Corr_input signal2.txt"
+        else:
+            signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_1:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
-        signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
-        if not signal_file_path_2:
-            messagebox.showerror(title="Error", message="Signal Data File Not Found!")
-            return
+            signal_file_path_2 = filedialog.askopenfilename(title="Select Signal Data File")
+            if not signal_file_path_2:
+                messagebox.showerror(title="Error", message="Signal Data File Not Found!")
+                return
 
         signal_time1, signal_value1 = HelperResources.read_only_signal(signal_file_path_1)
         signal_time1, signal_value1 = HelperResources.sort_2_lists(signal_time1, signal_value1)
@@ -1333,6 +1692,11 @@ class GUI:
         normalization_term = 1 / len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
         normalized_signal = [a / normalization_term for a in final_cross_correlation]
         print(f'final after normalization : {normalized_signal}')
+
+        if TestCases:
+            output_file_path = "Task 9/Fast Correlation/Corr_Output.txt"
+            Task_9_CompareSignal.Compare_Signals(output_file_path, signal_time1, normalized_signal)
+
         self.window_1_plots([signal_time2],
                             [normalized_signal],
                             ['Correlation'],
@@ -1369,6 +1733,7 @@ class GUI:
         ax1.set_xlabel(x_axis[0])
         ax1.set_ylabel(y_axis[0])
         ax1.set_title(title_1)
+        ax1.grid(True)
 
         if not signal_times:
             ax2.plot(signal_values[-1], color='red', label=legends[-1])
@@ -1378,6 +1743,7 @@ class GUI:
         ax2.set_xlabel(x_axis[1])
         ax2.set_ylabel(y_axis[1])
         ax2.set_title(title_2)
+        ax2.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
@@ -1398,6 +1764,7 @@ class GUI:
         ax1.set_xlabel("Frequency Index")
         ax1.set_ylabel('Amplitude')
         ax1.set_title('Task 4 - Amplitude vs Frequencies')
+        ax1.grid(True)
 
         ax2.stem(x_axis, phase_shifts)
         ax2.set_xticks(x_axis)
@@ -1405,6 +1772,7 @@ class GUI:
         ax2.set_xlabel("Frequency Index")
         ax2.set_ylabel('Phase Shift (in Degrees)')
         ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+        ax2.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
