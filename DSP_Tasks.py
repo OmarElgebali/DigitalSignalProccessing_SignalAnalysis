@@ -18,7 +18,7 @@ import HelperResources
 from FourierTransform import dft, idft, fourier_transform
 from Correlation import direct_correlation_2_signals, fast_correlation_2_signals
 
-
+# TestCases = True
 
 class GUI:
     def __init__(self):
@@ -145,6 +145,13 @@ class GUI:
         self.root.mainloop()
 
     def task_1_1(self):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
+
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
         if not file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -205,12 +212,16 @@ class GUI:
         self.Xs_ContDisc = x
         self.Ys_ContDisc = y
 
-        self.window_1_plots([self.Xs_ContDisc],
-                            [self.Ys_ContDisc],
-                            ['Normalized Signal'],
-                            x_label,
-                            'Amplitude',
-                            title)
+        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='orange')
+        plt.scatter(self.Xs_ContDisc, self.Ys_ContDisc)
+        plt.xlabel(x_label)
+        plt.ylabel('Amplitude')
+        plt.title(title)
+        plt.grid(True)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
 
     def task_1_2(self):
         wave_type = simpledialog.askinteger("Wave Type", "Enter Type of Signal:\n1- Sin\n2- Cosine")
@@ -1073,10 +1084,12 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time_1, signal_value_1, signal_periodicity_1 = HelperResources.read_signal_periodicity(signal_file_path_1)
+        signal_time_1, signal_value_1, signal_periodicity_1 = HelperResources.read_signal_periodicity(
+            signal_file_path_1)
         signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
 
-        signal_time_2, signal_value_2, signal_periodicity_2 = HelperResources.read_signal_periodicity(signal_file_path_2)
+        signal_time_2, signal_value_2, signal_periodicity_2 = HelperResources.read_signal_periodicity(
+            signal_file_path_2)
         signal_time_2, signal_value_2 = HelperResources.sort_2_lists(signal_time_2, signal_value_2)
 
         normalized_correlated_signal = direct_correlation_2_signals(signal_value_1, signal_value_2,
