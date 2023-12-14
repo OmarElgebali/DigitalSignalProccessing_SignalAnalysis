@@ -95,7 +95,7 @@ from matplotlib import pyplot as plt
 # # Print the original and folded signals
 # print("Original Signal (Time, Values):", list(zip(time, values)))
 # print("Folded Signal (Time, Values):", list(zip(folded, values)))
-import Task_8_CompareSignal
+from TaskFunctions import Task_8_CompareSignal
 
 
 def sort_2_lists(list_1, list_2):

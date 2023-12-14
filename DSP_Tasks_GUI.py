@@ -5,23 +5,14 @@ import numpy as np
 import math
 import cmath
 import os
-from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.ticker import FuncFormatter
 from math import log2
 
 # Tasks Imports
-import Task_4_signalcompare
-import Task_5_comparesignal2
-import Task_6_DerivativeSignal
-import Task_7_ConvTest
-import Task_8_CompareSignal
-import Task_9_ConvTest
-from comparesignals import SignalSamplesAreEqual
-from QuanTest1 import QuantizationTest1
-from QuanTest2 import QuantizationTest2
+from TaskFunctions import Task_6_DerivativeSignal, Task_4_signalcompare
+from TaskFunctions.Task_1_comparesignals import SignalSamplesAreEqual
 
 
 class GUI:

@@ -7,24 +7,14 @@ from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.ticker import FuncFormatter
-from sklearn import preprocessing
 from sklearn.preprocessing import MinMaxScaler
-from numpy import outer
 
-import Task_4_signalcompare
-import Task_5_comparesignal2
-import Task_6_Shift_Fold_Signal
-import Task_6_DerivativeSignal
-import Task_7_ConvTest
-import Task_8_CompareSignal
-import Task_9_CompareSignal
-import Task_9_ConvTest
-import comparesignals
-from comparesignals import SignalSamplesAreEqual
-from QuanTest1 import QuantizationTest1
-from QuanTest2 import QuantizationTest2
-from Task_4_signalcompare import SignalCompare
+from TaskFunctions import Task_9_ConvTest, Task_6_Shift_Fold_Signal, Task_5_comparesignal2, Task_7_ConvTest, \
+    Task_6_DerivativeSignal, Task_8_CompareSignal, Task_9_CompareSignal
+from TaskFunctions.Task_1_comparesignals import SignalSamplesAreEqual
+from TaskFunctions.Task_3_QuanTest1 import QuantizationTest1
+from TaskFunctions.Task_3_QuanTest2 import QuantizationTest2
+from TaskFunctions.Task_4_signalcompare import SignalCompare
 
 
 
