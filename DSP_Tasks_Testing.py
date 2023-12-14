@@ -5,6 +5,11 @@ import tkinter as tk
 from math import log2
 from tkinter import messagebox, filedialog, simpledialog, ttk
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.ticker import FuncFormatter
+from sklearn import preprocessing
+from sklearn.preprocessing import MinMaxScaler
 from numpy import outer
 
 import Task_4_signalcompare
@@ -21,11 +26,6 @@ from QuanTest1 import QuantizationTest1
 from QuanTest2 import QuantizationTest2
 from Task_4_signalcompare import SignalCompare
 
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.ticker import FuncFormatter
-from sklearn import preprocessing
-from sklearn.preprocessing import MinMaxScaler
 
 
 class GUI:
