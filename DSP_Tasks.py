@@ -19,20 +19,6 @@ from FourierTransform import dft, idft, fourier_transform
 from Correlation import direct_correlation_2_signals, fast_correlation_2_signals
 
 
-def read_signal_periodicity(signal_file_path):
-    with open(signal_file_path, 'r') as file:
-        file.readline()
-        periodicity = int(float(file.readline()))
-        file.readline()
-        lines = file.readlines()
-        signal_time = []
-        signal_value = []
-        for line in lines:
-            parts = line.split()
-            signal_time.append(float(parts[0]))
-            signal_value.append(float(parts[1]))
-    return signal_time, signal_value, periodicity
-
 
 class GUI:
     def __init__(self):
@@ -171,13 +157,6 @@ class GUI:
         domain = 'Time'
         periodic = 'Aperiodic'
 
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         with open(file_path, 'r') as file:
             line_count = 0
             for line in file:
@@ -225,25 +204,15 @@ class GUI:
 
         self.Xs_ContDisc = x
         self.Ys_ContDisc = y
-        plt.plot(self.Xs_ContDisc, self.Ys_ContDisc, color='orange')
-        plt.scatter(self.Xs_ContDisc, self.Ys_ContDisc)
-        plt.xlabel(x_label)
-        plt.ylabel('Amplitude')
-        plt.title(title)
-        plt.grid(True)
 
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([self.Xs_ContDisc],
+                            [self.Ys_ContDisc],
+                            ['Normalized Signal'],
+                            x_label,
+                            'Amplitude',
+                            title)
 
     def task_1_2(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         wave_type = simpledialog.askinteger("Wave Type", "Enter Type of Signal:\n1- Sin\n2- Cosine")
         amplitude = simpledialog.askfloat("Amplitude", "Enter Amplitude:")
         analog_frequency = simpledialog.askinteger("Analog Frequency", "Enter Analog Frequency:")
@@ -269,11 +238,11 @@ class GUI:
             self.Ys_cos_analog = amplitude * np.cos(2 * np.pi * analog_frequency * x_values + phase_shift)
             if wave_type == 1:
                 name = "Sin"
-                plt.plot(self.Xs_SinCos, self.Ys_sin_analog)
+                y_axis = self.Ys_sin_analog
 
             else:
                 name = "Cosine"
-                plt.plot(self.Xs_SinCos, self.Ys_cos_analog)
+                y_axis = self.Ys_cos_analog
         else:
             x_values = np.linspace(0, 10, sampling_frequency)
             self.Xs_SinCos = x_values
@@ -292,11 +261,11 @@ class GUI:
             # else :
             if wave_type == 1:
                 name = "Sin"
-                plt.plot(self.Xs_SinCos, self.Ys_sin_sample)
+                y_axis = self.Ys_sin_sample
 
             else:
                 name = "Cosine"
-                plt.plot(self.Xs_SinCos, self.Ys_cos_sample)
+                y_axis = self.Ys_cos_sample
 
         title = f"""{name} Wave Plot
         Form: Y = A * {name.lower()}( W * X + Theta ) 
@@ -304,23 +273,14 @@ class GUI:
         Sampling Frequency: {sampling_frequency}
         Fs >= 2 * Fmax : ({sampling_frequency}) >= (2 * {analog_frequency})"""
 
-        plt.title(title)
-        plt.xlabel('Time')
-        plt.ylabel('Amplitude')
-        plt.grid(True)
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([self.Xs_SinCos],
+                            [y_axis],
+                            ['Normalized Signal'],
+                            'Time',
+                            'Amplitude',
+                            title)
 
     def task_2_1_addition(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         # Select Multiple Files
         """
         file_paths = [filedialog.askopenfilename(title="Select a Signal Data File")]
@@ -395,25 +355,14 @@ class GUI:
         """
         result_addition_signal = np.sum(signal_values, axis=0)
 
-        # plt.plot(signal_times[0], result_addition_signal, color='orange')
-        plt.scatter(signal_times[0], result_addition_signal)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 2.1 - Addition Signal')
-        plt.grid(True)
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_times[0]],
+                            [result_addition_signal],
+                            ['Addition Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 2.1 - Addition Signal')
 
     def task_2_2_subtraction(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_1_file_path:
             messagebox.showerror(title="Error", message="Signal Data File (S1) Not Found!")
@@ -447,26 +396,14 @@ class GUI:
         result_subtraction_signal_ = signal_1_value - signal_2_value
         """
         result_subtraction_signal = np.subtract(signal_1_value, signal_2_value)
-
-        # plt.plot(signal_1_time, result_subtraction_signal, color='orange')
-        plt.scatter(signal_1_time, result_subtraction_signal)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 2.2 - Subtraction Signal')
-        plt.grid(True)
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_1_time],
+                            [result_subtraction_signal],
+                            ['Subtraction Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 2.2 - Subtraction Signal')
 
     def task_2_3_multiplication(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
         if not signal_file_path:
             messagebox.showwarning(title="Warning", message="Signal Data File (S1) Not Found!")
@@ -479,25 +416,14 @@ class GUI:
         signal_value_multiplied = np.array(signal_value) * np.array(factor)
         signal_time, signal_value_multiplied = HelperResources.sort_2_lists(signal_time, signal_value_multiplied)
 
-        # plt.plot(signal_time, signal_value_multiplied, color='orange')
-        plt.scatter(signal_time, signal_value_multiplied)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title(f'Task 2.3 - Multiplication Signal by Factor = {factor}')
-        plt.grid(True)
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time],
+                            [signal_value_multiplied],
+                            ['Multiplication Signal'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 2.3 - Multiplication Signal by Factor = {factor}')
 
     def task_2_4_squaring(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -505,15 +431,13 @@ class GUI:
 
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         square_signal = np.array(signal_value) * np.array(signal_value)
-        # plt.plot(signal_time, square_signal, color='orange')
-        plt.scatter(signal_time, square_signal)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 2.4 - Squared Signal')
 
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time],
+                            [square_signal],
+                            ['Squared Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 2.4 - Squared Signal')
 
     def task_2_5_shifting(self):
         # Clear the previous plot
@@ -551,13 +475,6 @@ class GUI:
         canvas.get_tk_widget().pack()
 
     def task_2_6_normalization(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -578,25 +495,15 @@ class GUI:
 
         normalized_signal = scaler.fit_transform(np.array(signal_value))
         normalized_result = normalized_signal.flatten()
-        plt.plot(signal_time, normalized_result, color='orange')
-        plt.scatter(signal_time, normalized_result)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 2.6 - Normalized Signal')
-        plt.grid(True)
 
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time],
+                            [normalized_result],
+                            ['Normalized Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 2.6 - Normalized Signal')
 
     def task_2_7_accumulation(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -605,21 +512,14 @@ class GUI:
         signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
 
-        # plt.plot(signal_time, square_signal, color='orange')
-        plt.scatter(signal_time, accumulate_signal)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 2.7 - Accumulated Signal')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time],
+                            [accumulate_signal],
+                            ['Accumulated Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 2.7 - Accumulated Signal')
 
     def task_3_quantize(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -696,36 +596,15 @@ class GUI:
                 encoded_signal[i]))
 
         tree.pack()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-        fig.patch.set_facecolor(self.plots_bg_color)
-
-        ax1.plot(signal_time, signal_value, color='orange')
-        ax1.scatter(signal_time, signal_value, color='blue')
-        ax1.set_xlabel("Time")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title('Original Signal')
-
-        ax2.plot(signal_time, quantized_signal, color='green')
-        ax2.scatter(signal_time, quantized_signal, color='blue')
-        ax2.set_xlabel("Time")
-        ax2.set_ylabel('Amplitude')
-        ax2.set_title(f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_2_plots([signal_time, signal_time],
+                            [signal_value, quantized_signal],
+                            ['Original Signal', 'Quantized Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Original Signal',
+                            f'Task 3 - Quantized Signal with # of Levels = {L} & MSE = {mse}')
 
     def task_4_dft(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -771,19 +650,7 @@ class GUI:
         print(f"X-axis : {x_axis}")
         print("=" * 200)
 
-        ax1.stem(x_axis, amplitudes)
-        ax1.set_xticks(x_axis)
-        ax1.set_xticklabels(x_axis)
-        ax1.set_xlabel("Frequency Index")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title('Task 4 - Amplitude vs Frequencies')
-
-        ax2.stem(x_axis, phase_shifts)
-        ax2.set_xticks(x_axis)
-        ax2.set_xticklabels(x_axis)
-        ax2.set_xlabel("Frequency Index")
-        ax2.set_ylabel('Phase Shift (in Degrees)')
-        ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+        self.window_2_plots_freq_domain(x_axis, amplitudes, phase_shifts)
 
         popup = tk.Toplevel()
         popup.title("Modification of Frequency Domain Signal")
@@ -806,30 +673,9 @@ class GUI:
         def apply_modification():
             amplitudes[int(txt_freq_index.get())] = float(txt_amplitude.get())
             phase_shifts[int(txt_freq_index.get())] = float(txt_phase_shift.get())
-            for inner_widget in self.plots_frame.winfo_children():
-                inner_widget.destroy()
 
-            inner_fig, (inner_ax1, inner_ax2) = plt.subplots(2, 1, figsize=(
-                self.screen_width / 100, self.screen_height / 110))
-            inner_fig.subplots_adjust(hspace=0.3)
-            inner_fig.set_facecolor(self.plots_bg_color)
+            self.window_2_plots_freq_domain(x_axis, amplitudes, phase_shifts)
 
-            inner_ax1.stem(x_axis, amplitudes)
-            inner_ax1.set_xticks(x_axis)
-            inner_ax1.set_xticklabels(x_axis)
-            inner_ax1.set_xlabel("Frequency Index")
-            inner_ax1.set_ylabel('Amplitude')
-            inner_ax1.set_title('Task 4 - Amplitude vs Frequencies')
-
-            inner_ax2.stem(x_axis, phase_shifts)
-            inner_ax2.set_xticks(x_axis)
-            inner_ax2.set_xticklabels(x_axis)
-            inner_ax2.set_xlabel("Frequency Index")
-            inner_ax2.set_ylabel('Phase Shift (in Degrees)')
-            inner_ax2.set_title('Task 4 - Phase Shift vs Frequencies')
-            # Embed the Matplotlib plot in the Tkinter window
-            inner_canvas = FigureCanvasTkAgg(inner_fig, master=self.plots_frame)
-            inner_canvas.get_tk_widget().pack()
             messagebox.showinfo(title="Successful", message="Amplitude & Phase Shift Updated Successfully")
 
         btn_apply_mod = tk.Button(modification_frame, text="Apply Modifications", font=('Arial', 14),
@@ -858,18 +704,7 @@ class GUI:
         btn_save_signal.grid(row=5, column=0, columnspan=2, sticky=tk.W + tk.E)
         modification_frame.pack(fill='x')
 
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
-
     def task_4_idft(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -880,27 +715,17 @@ class GUI:
 
         output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
         _, s_v = HelperResources.read_only_signal(output_file_path)
+
         SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
 
-        # Plot the discrete values
-        plt.stem(x_indices, signal_time_domain, markerfmt='bo', linefmt='k-',
-                 basefmt='k-')  # 'ro' for red circles, 'r-' for red line
-        plt.xlabel('Time')
-        plt.ylabel('Amplitude')
-        plt.title('IDFT')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([x_indices],
+                            [signal_time_domain],
+                            ['IDFT Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 4.2 - IDFT')
 
     def task_5_dct(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -938,18 +763,8 @@ class GUI:
             file.write(f'{co_number}\n')
             for x, y in combined_values:
                 file.write(f"{x}\t{y}\n")
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
 
     def task_5_remove_dc_using_avg(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -963,24 +778,14 @@ class GUI:
 
         HelperResources.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_avg.txt')
 
-        plt.plot(signal_time, signal_value_without_dc, color='orange')
-        plt.scatter(signal_time, signal_value_without_dc)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 5.2 - Signal After Removing DC Component  (using Average)')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time, signal_time],
+                            [signal_value, signal_value_without_dc],
+                            ['Original Signal', 'Removed DC Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 5.2 - Signal After Removing DC Component (using Average)')
 
     def task_5_remove_dc_using_harmonics(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -999,15 +804,12 @@ class GUI:
         HelperResources.save_time_domain_signal(signal_value_without_dc,
                                                 'Task 5 Output - remove_dc_using_harmonics.txt')
 
-        plt.plot(signal_time, signal_value_without_dc, color='orange')
-        plt.scatter(signal_time, signal_value_without_dc)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 5.2 - Signal After Removing DC Component (using Harmonics)')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time, signal_time],
+                            [signal_value, signal_value_without_dc],
+                            ['Original Signal', 'Removed DC Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 5.2 - Signal After Removing DC Component (using Harmonics)')
 
     # def task_6_smoothing(self): # >>>>>>>>>>>>>>>>> WITH PADDING <<<<<<<<<<<<<<<<<<<<<<<<<<
     #     # Clear the previous plot
@@ -1054,13 +856,6 @@ class GUI:
     #     canvas.get_tk_widget().pack()
 
     def task_6_smoothing(self):  ## >>>>>>>>>>>>>>>>> WITHOUT PADDING <<<<<<<<<<<<<<<<<<<<<<<
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1088,25 +883,15 @@ class GUI:
         signal_with_time = list(zip(time_for_avg, avg_value))
         print(f'Moving Average Signal: {signal_with_time}')
 
-        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
-        plt.scatter(time_for_avg, avg_value, label='average Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title(f'Task 6.1 - Moving Average Signal')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_2_plots([signal_time, time_for_avg],
+                            [signal_value, avg_value],
+                            ['Original Signal', 'Average Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 6.1 - Moving Average Signal',
+                            'Task 6.1 - Moving Average Signal')
 
     def task_6_sharpening(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1127,26 +912,15 @@ class GUI:
         print(f"1st-Derivative (Len): {len(first_derivative)}")
         print(f"2nd-Derivative (Len): {len(second_derivative)}")
         Task_6_DerivativeSignal.DerivativeSignal(first_derivative, second_derivative)
-
-        plt.plot(signal_value, color='green', label='Original Signal')
-        plt.plot(first_derivative, color='orange', label='1st Derivative')
-        plt.plot(second_derivative, color='red', label='2nd Derivative')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 6.2 - 1st & 2nd Derivatives')
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_2_plots([],
+                            [first_derivative, second_derivative, signal_value],
+                            ['1st Derivative', '2nd Derivative', 'Original Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 6.2 - 1st & 2nd Derivatives',
+                            'Task 6.2 - 1st & 2nd Derivatives')
 
     def task_6_delay_advance_signal(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1162,25 +936,14 @@ class GUI:
         print(f"Signal Time    : {signal_time}")
         print(f"New Signal Time: {new_signal_time}")
 
-        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
-        plt.plot(new_signal_time, signal_value, color='orange', label=f'{new_label}ed Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title(f'Task 6.3 - {new_label}ing Signal with Steps(K)={k_steps}')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time, new_signal_time],
+                            [signal_value, signal_value],
+                            ['Original Signal', f'{new_label}ed Signal'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 6.3 - {new_label}ing Signal with Steps(K)={k_steps}')
 
     def task_6_folding(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1192,25 +955,14 @@ class GUI:
         new_signal_time = [(-1 * x) for x in signal_time]
         new_signal_time, new_signal_value = HelperResources.sort_2_lists(new_signal_time, signal_value)
 
-        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
-        plt.plot(new_signal_time, new_signal_value, color='orange', label='Folded Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title(f'Task 6.4 - Folding Signal')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time, new_signal_time],
+                            [signal_value, new_signal_value],
+                            ['Original Signal', 'Folded Signal'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 6.4 - Folding Signal')
 
     def task_6_delay_advance_folded_signal(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1231,24 +983,14 @@ class GUI:
         print(f"Signal Time    : {signal_time}")
         print(f"New Signal Time: {delayed_folded_signal_time}")
 
-        plt.plot(signal_time, signal_value, color='green', label='Original Signal')
-        plt.plot(delayed_folded_signal_time, folded_signal_value, color='orange', label=f'{new_label}ed Folded Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title(f'Task 6.5 - {new_label}ing a Folded Signal with Steps(K)={k_steps}')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time, delayed_folded_signal_time],
+                            [signal_value, folded_signal_value],
+                            ['Original Signal', f'{new_label}ed Folded Signal'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 6.5 - {new_label}ing a Folded Signal with Steps(K)={k_steps}')
 
     def task_6_remove_dc_in_freqdomain(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path:
@@ -1267,26 +1009,14 @@ class GUI:
 
         HelperResources.save_time_domain_signal(signal_value_without_dc,
                                                 'Task 6 Output - remove_dc_using_harmonics.txt')
-
-        plt.plot(signal_time, signal_value_without_dc, color='orange')
-        plt.scatter(signal_time, signal_value_without_dc)
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 6.6 - Signal After Removing DC Component in Frequency Domain')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time, signal_time],
+                            [signal_value, signal_value_without_dc],
+                            ['Original Signal', 'Removed DC Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 6.6 - Signal After Removing DC Component in Frequency Domain')
 
     def task_7_convolution_time_domain(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         # out_of_range = lambda signal_v, signal_t, index: signal_v[signal_t.index(index)] if index in signal_t else 0
         def out_of_range(signal_v, signal_t, index):
             return signal_v[signal_t.index(index)] if index in signal_t else 0
@@ -1324,32 +1054,15 @@ class GUI:
         print(f"Convoluted Signal Time  : {convoluted_signal_time}")
         print(f"Convoluted Signal Value : {convoluted_signal_value}")
 
-        ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1 - X(K)')
-        ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2 - H(K)')
-        ax1.legend()
-        ax1.set_xlabel("Time")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title(f'Task 7 - Convolution (Time Domain) [Signals]')
-
-        ax2.plot(convoluted_signal_time, convoluted_signal_value, color='red', label='Convoluted Signal')
-        ax2.legend()
-        ax2.set_xlabel("Time")
-        ax2.set_ylabel('Amplitude')
-        ax2.set_title(f'Task 7 - Convolution (Time Domain) [Value]')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_2_plots([signal_time_1, signal_time_2, convoluted_signal_time],
+                            [signal_value_1, signal_value_2, convoluted_signal_value],
+                            ['Signal 1 - X(K)', 'Signal 2 - H(K)', 'Convoluted Signal'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 7 - Convolution (Time Domain) [Signals]',
+                            f'Task 7 - Convolution (Time Domain) [Value]')
 
     def task_8_direct_correlation(self):
-        # # Clear the previous plot
-        # for widget in self.plots_frame.winfo_children():
-        #     widget.destroy()
-        #
-        # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        # fig.subplots_adjust(hspace=0.3)
-        # fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1360,48 +1073,24 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time_1, signal_value_1, signal_periodicity_1 = read_signal_periodicity(signal_file_path_1)
+        signal_time_1, signal_value_1, signal_periodicity_1 = HelperResources.read_signal_periodicity(signal_file_path_1)
         signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
 
-        signal_time_2, signal_value_2, signal_periodicity_2 = read_signal_periodicity(signal_file_path_2)
+        signal_time_2, signal_value_2, signal_periodicity_2 = HelperResources.read_signal_periodicity(signal_file_path_2)
         signal_time_2, signal_value_2 = HelperResources.sort_2_lists(signal_time_2, signal_value_2)
 
         normalized_correlated_signal = direct_correlation_2_signals(signal_value_1, signal_value_2,
                                                                     signal_periodicity_2)
 
-        # ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1')
-        # ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2')
-        # ax1.legend()
-        # ax1.set_xlabel("Time")
-        # ax1.set_ylabel('Amplitude')
-        # ax1.set_title()
-        #
-        # ax2.plot(signal_time_1, normalized_correlated_signal, color='red', label='Correlation')
-        # ax2.legend()
-        # ax2.set_xlabel()
-        # ax2.set_ylabel()
-        # ax2.set_title()
-        #
-        # # Embed the Matplotlib plot in the Tkinter window
-        # canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        # canvas.get_tk_widget().pack()
         self.window_2_plots([signal_time_1, signal_time_2, signal_time_1],
                             [signal_value_1, signal_value_2, normalized_correlated_signal],
-                            ['Signal 1', 'Signal 2', 'Correlation'],
+                            ['Signal 1', 'Signal 2', 'Normalized Correlation'],
                             "Time",
                             'Amplitude',
                             f'Task 8.1 - Correlation (Time Domain) [Signals]',
                             'Task 8.1 - Correlation (Time Domain) [Value]')
 
     def task_8_time_analysis_BONUS(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         """
         perform time delay analysis,
         given two periodic signals and the sampling period,
@@ -1444,33 +1133,15 @@ class GUI:
         print(f"Time Delay (Time-Analysis)          : {time_delay}")
         print("=" * 200)
 
-        ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1')
-        ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2')
-        ax1.legend()
-        ax1.set_xlabel("Time")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title(f'Task 8.2 - Time Analysis [Signals]')
-
-        ax2.plot(signal_time_1, normalized_correlated_signal, color='red', label='Correlation Signal')
-        ax2.legend()
-        ax2.set_xlabel("Time")
-        ax2.set_ylabel('Amplitude')
-        ax2.set_title(
-            f'Task 8.2 - Time Analysis [Correlation]\nTime Delayed = {time_delay}s, FS = {sampling_frequency}Hz, and Index Maximum Absolute Correlation = {index_maximum_absolute_correlation}')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_2_plots([signal_time_1, signal_time_2, signal_time_1],
+                            [signal_value_1, signal_value_2, normalized_correlated_signal],
+                            ['Signal 1', 'Signal 2', 'Normalized Correlation'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 8.2 - Time Analysis [Signals]',
+                            f'Task 8.2 - Time Analysis [Correlation]\nTime Delayed = {time_delay}s, FS = {sampling_frequency}Hz, and Index Maximum Absolute Correlation = {index_maximum_absolute_correlation}')
 
     def task_8_template_matching_BONUS(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         """
         the user will give the paths for two folders of two classes and a test folder,
         using template matching the application will give labels for all signals in test folder
@@ -1559,30 +1230,15 @@ class GUI:
         print(f"Best Match - Normalized_Correlation : {best_match_class_normalized_correlation}")
         print("=" * 200)
 
-        ax1.plot(best_match_class_average, color='green', label='Average Signal')
-        ax1.legend()
-        ax1.set_xlabel("Time")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title(f'Task 8.3 - Template Matching with Tested File and best match {best_match_label}')
-
-        ax2.plot(best_match_class_normalized_correlation, color='orange', label='Normalized Correlation')
-        ax2.legend()
-        ax2.set_xlabel("Time")
-        ax2.set_ylabel('Amplitude')
-        ax2.set_title(f'Task 8.3 - Template Matching with Tested File and best match {best_match_label}')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_2_plots([],
+                            [best_match_class_average, best_match_class_normalized_correlation],
+                            ['Average Signal', 'Normalized Correlation'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 8.3 - Template Matching with Tested File and best match {best_match_label}',
+                            f'Task 8.3 - Template Matching with Tested File and best match {best_match_label}')
 
     def task_9_fast_convolution(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1622,24 +1278,14 @@ class GUI:
         convoluted_signal_value = idft(polar1)
         print(f'convoluted_signal_value : {convoluted_signal_value}')
 
-        plt.plot(output_time, convoluted_signal_value, color='red', label='Convoluted Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 9.1 - Convolution (Frequency Domain)')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([output_time],
+                            [convoluted_signal_value],
+                            ['Convoluted Signal'],
+                            "Time",
+                            'Amplitude',
+                            'Task 9.1 - Convolution (Frequency Domain)')
 
     def task_9_fast_correlation(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.patch.set_facecolor(self.plots_bg_color)
-
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
@@ -1674,16 +1320,12 @@ class GUI:
         normalization_term = 1 / len(signal_value2) * np.sqrt(signal2_sum_square * signal1_sum_square)
         normalized_signal = [a / normalization_term for a in final_cross_correlation]
         print(f'final after normalization : {normalized_signal}')
-
-        plt.plot(signal_time2, normalized_signal, color='red', label='Correlation Signal')
-        plt.legend()
-        plt.xlabel("Time")
-        plt.ylabel('Amplitude')
-        plt.title('Task 9.2 - Correlation (Frequency Domain)')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
+        self.window_1_plots([signal_time2],
+                            [normalized_signal],
+                            ['Correlation'],
+                            "Time",
+                            'Amplitude',
+                            'Task 9.2 - Correlation (Frequency Domain)')
 
     def window_2_plots(self, signal_times, signal_values, legends, x_label, y_label, title_1, title_2):
         # Clear the previous plot
@@ -1703,20 +1345,80 @@ class GUI:
             y_axis = y_label
         if isinstance(x_label, list):
             x_axis = x_label
-        colors = ['green', 'orange', 'blue']
+        colors = ['green', 'orange', 'blue', 'yellow']
 
-        for i in range(number_of_signals-1):
-            ax1.plot(signal_times[i], signal_values[i], color=colors[i], label=legends[i])
+        for i in range(number_of_signals - 1):
+            if not signal_times:
+                ax1.plot(signal_values[i], color=colors[i], label=legends[i])
+            else:
+                ax1.plot(signal_times[i], signal_values[i], color=colors[i], label=legends[i])
         ax1.legend()
         ax1.set_xlabel(x_axis[0])
         ax1.set_ylabel(y_axis[0])
         ax1.set_title(title_1)
 
-        ax2.plot(signal_times[number_of_signals-1], signal_values[number_of_signals-1], color='red', label=legends[number_of_signals-1])
+        if not signal_times:
+            ax2.plot(signal_values[-1], color='red', label=legends[-1])
+        else:
+            ax2.plot(signal_times[-1], signal_values[-1], color='red', label=legends[-1])
         ax2.legend()
         ax2.set_xlabel(x_axis[1])
         ax2.set_ylabel(y_axis[1])
         ax2.set_title(title_2)
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def window_2_plots_freq_domain(self, x_axis, amplitudes, phase_shifts):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        ax1.stem(x_axis, amplitudes)
+        ax1.set_xticks(x_axis)
+        ax1.set_xticklabels(x_axis)
+        ax1.set_xlabel("Frequency Index")
+        ax1.set_ylabel('Amplitude')
+        ax1.set_title('Task 4 - Amplitude vs Frequencies')
+
+        ax2.stem(x_axis, phase_shifts)
+        ax2.set_xticks(x_axis)
+        ax2.set_xticklabels(x_axis)
+        ax2.set_xlabel("Frequency Index")
+        ax2.set_ylabel('Phase Shift (in Degrees)')
+        ax2.set_title('Task 4 - Phase Shift vs Frequencies')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def window_1_plots(self, signal_times, signal_values, legends, x_label, y_label, title):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        number_of_signals = len(legends)
+
+        colors = ['green', 'orange', 'blue', 'yellow', 'red']
+
+        for i in range(number_of_signals):
+            if not signal_times:
+                plt.plot(signal_values[i], color=colors[i], label=legends[i])
+            else:
+                plt.plot(signal_times[i], signal_values[i], color=colors[i], label=legends[i])
+        plt.legend()
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.title(title)
+        plt.grid(True)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)

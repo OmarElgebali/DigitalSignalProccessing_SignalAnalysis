@@ -83,3 +83,19 @@ def read_polar_signal(path):
         data_tuple = (amplitude, phase_shift)
         data_tuples.append(data_tuple)
     return data_tuples
+
+
+def read_signal_periodicity(signal_file_path):
+    with open(signal_file_path, 'r') as file:
+        file.readline()
+        periodicity = int(float(file.readline()))
+        file.readline()
+        lines = file.readlines()
+        signal_time = []
+        signal_value = []
+        for line in lines:
+            parts = line.split()
+            signal_time.append(float(parts[0]))
+            signal_value.append(float(parts[1]))
+    return signal_time, signal_value, periodicity
+
