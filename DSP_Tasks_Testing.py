@@ -771,7 +771,7 @@ class GUI:
         print(f'first value in IDFT: {abs(IDFT_component[3])}')
         return IDFT_component
 
-    def read_signalT4(self, path):
+    def read_polar_signal(self, path):
         with open(path, 'r') as file:
             file.readline()
             file.readline()
@@ -836,7 +836,7 @@ class GUI:
         print("=" * 200)
 
         output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
-        polar_form = self.read_signalT4(output_file_path)
+        polar_form = self.read_polar_signal(output_file_path)
         output_amplitudes = []
         output_phase_shifts = []
         for a, ps in polar_form:
@@ -954,7 +954,7 @@ class GUI:
         input_file_path = 'Task 4/IDFT/Input_Signal_IDFT_A,Phase.txt'
         save_file_path = 'Task 4/idft_out.txt'
 
-        polar = self.read_signalT4(input_file_path)
+        polar = self.read_polar_signal(input_file_path)
         signal_time_domain = self.idft(polar)
         x_indices = [i for i in range(1, len(signal_time_domain) + 1)]
 

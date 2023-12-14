@@ -14,6 +14,25 @@ from math import log2
 from TaskFunctions import Task_6_DerivativeSignal, Task_4_signalcompare
 from TaskFunctions.Task_1_comparesignals import SignalSamplesAreEqual
 
+import HelperResources
+from FourierTransform import dft, idft, fourier_transform
+from Correlation import direct_correlation_2_signals, fast_correlation_2_signals
+
+
+def read_signal_periodicity(signal_file_path):
+    with open(signal_file_path, 'r') as file:
+        file.readline()
+        periodicity = int(float(file.readline()))
+        file.readline()
+        lines = file.readlines()
+        signal_time = []
+        signal_value = []
+        for line in lines:
+            parts = line.split()
+            signal_time.append(float(parts[0]))
+            signal_value.append(float(parts[1]))
+    return signal_time, signal_value, periodicity
+
 
 class GUI:
     def __init__(self):
@@ -139,49 +158,6 @@ class GUI:
         # self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.root.mainloop()
 
-    def sort_2_lists(self, list_1, list_2):
-        combined_lists = list(zip(list_1, list_2))
-        combined_lists.sort(key=lambda l: l[0])
-        x, y = zip(*combined_lists)
-        x = list(x)
-        y = list(y)
-        return x, y
-
-    def extend_signal_calculation(self, signal_t, signal_val, new_max_length):
-        signal_val = signal_val + [0] * (new_max_length - len(signal_val))
-        signal_t.extend(range(len(signal_t), new_max_length))
-        return signal_t, signal_val
-
-    def extend_signals(self, list_signal_times, list_signal_values):
-        signal_lengths = [len(signal) for signal in list_signal_times]
-        max_len = max(signal_lengths)
-        number_of_signals = len(signal_lengths)
-        current_signal = 0
-        while current_signal <= number_of_signals - 1:
-            list_signal_values[current_signal], list_signal_times[current_signal] = self.extend_signal_calculation(
-                list_signal_values[current_signal], list_signal_times[current_signal], max_len)
-            current_signal += 1
-        return list_signal_times, list_signal_values
-
-    def read_only_signal(self, signal_file_path):
-        with open(signal_file_path, 'r') as file:
-            file.readline()
-            file.readline()
-            file.readline()
-            lines = file.readlines()
-            signal_time = []
-            signal_value = []
-            for line in lines:
-                parts = line.split()
-                signal_time.append(float(parts[0]))
-                signal_value.append(float(parts[1]))
-        return signal_time, signal_value
-
-    def round_complex(self, c):
-        real = round(c.real, 2)
-        imag = round(c.imag, 2)
-        return complex(real, imag)
-
     def task_1_1(self):
         file_path = filedialog.askopenfilename(title="Select a Signal Data File")
         if not file_path:
@@ -224,7 +200,7 @@ class GUI:
                 x.append(float(values[0]))  # [T] Sample Index      [F] Frequency
                 y.append(float(values[1]))  # [T] Sample Amplitude  [F] Amplitude
 
-            x, y = self.sort_2_lists(x, y)
+            x, y = HelperResources.sort_2_lists(x, y)
 
             if signal_details[1] == 1:  # [1] Period
                 periodic = 'Periodic'
@@ -377,20 +353,21 @@ class GUI:
         ]
         """
 
-        signal_time_temp, signal_value_temp = self.read_only_signal(file_paths[0])
+        signal_time_temp, signal_value_temp = HelperResources.read_only_signal(file_paths[0])
         signal_times.append(signal_time_temp)
         signal_values.append(signal_value_temp)
         file_paths.pop(0)
 
         for file_path in file_paths:
             signal_number += 1
-            signal_time_temp, signal_value_temp = self.read_only_signal(file_path)
+            signal_time_temp, signal_value_temp = HelperResources.read_only_signal(file_path)
             signal_times.append(signal_time_temp)
             signal_values.append(signal_value_temp)
             if len(signal_times[0]) != len(signal_times[signal_number]):
                 lengths_equal = 0
-            signal_times[signal_number], signal_values[signal_number] = self.sort_2_lists(signal_times[signal_number],
-                                                                                          signal_values[signal_number])
+            signal_times[signal_number], signal_values[signal_number] = HelperResources.sort_2_lists(
+                signal_times[signal_number],
+                signal_values[signal_number])
 
         # Not Equal Length Check
         """
@@ -405,7 +382,7 @@ class GUI:
                 signal_times[current_signal].extend(range(len(signal_times[current_signal]), len(signal_values[max_signal_len_number])))
                 current_signal += 1
             """
-            signal_times, signal_values = self.extend_signals(signal_times, signal_values)
+            signal_times, signal_values = HelperResources.extend_signals(signal_times, signal_values)
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
         # Add Signals
@@ -447,20 +424,20 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File (S2) Not Found!")
             return
 
-        signal_1_time, signal_1_value = self.read_only_signal(signal_1_file_path)
-        signal_2_time, signal_2_value = self.read_only_signal(signal_2_file_path)
+        signal_1_time, signal_1_value = HelperResources.read_only_signal(signal_1_file_path)
+        signal_2_time, signal_2_value = HelperResources.read_only_signal(signal_2_file_path)
 
-        signal_1_time, signal_1_value = self.sort_2_lists(signal_1_time, signal_1_value)
-        signal_2_time, signal_2_value = self.sort_2_lists(signal_2_time, signal_2_value)
+        signal_1_time, signal_1_value = HelperResources.sort_2_lists(signal_1_time, signal_1_value)
+        signal_2_time, signal_2_value = HelperResources.sort_2_lists(signal_2_time, signal_2_value)
 
         # Not Equal Length Check
         if len(signal_1_time) < len(signal_2_time):
-            signal_1_time, signal_1_value = self.extend_signal_calculation(signal_1_time, signal_1_value,
-                                                                           len(signal_2_value))
+            signal_1_time, signal_1_value = HelperResources.extend_signal_calculation(signal_1_time, signal_1_value,
+                                                                                      len(signal_2_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
         elif len(signal_1_time) > len(signal_2_time):
-            signal_2_time, signal_2_value = self.extend_signal_calculation(signal_2_time, signal_2_value,
-                                                                           len(signal_1_value))
+            signal_2_time, signal_2_value = HelperResources.extend_signal_calculation(signal_2_time, signal_2_value,
+                                                                                      len(signal_1_value))
             messagebox.showwarning(title="Warning", message="Signal Lengths are not Equal!")
 
         # Subtract Signals
@@ -497,10 +474,10 @@ class GUI:
 
         factor = simpledialog.askinteger("Factor", "Enter Factor:")
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
 
         signal_value_multiplied = np.array(signal_value) * np.array(factor)
-        signal_time, signal_value_multiplied = self.sort_2_lists(signal_time, signal_value_multiplied)
+        signal_time, signal_value_multiplied = HelperResources.sort_2_lists(signal_time, signal_value_multiplied)
 
         # plt.plot(signal_time, signal_value_multiplied, color='orange')
         plt.scatter(signal_time, signal_value_multiplied)
@@ -526,7 +503,7 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         square_signal = np.array(signal_value) * np.array(signal_value)
         # plt.plot(signal_time, square_signal, color='orange')
         plt.scatter(signal_time, square_signal)
@@ -551,12 +528,13 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = (
+            HelperResources.read_only_signal(signal_file_path))
         old_min_time = min(signal_time)
         old_max_time = max(signal_time)
         shift_value = simpledialog.askfloat("Shifting Value", "Enter Shift Value (+ve or -ve):")
         shifted_signal = np.array(signal_time) + shift_value
-        shifted_signal, signal_value = self.sort_2_lists(shifted_signal, signal_value)
+        shifted_signal, signal_value = HelperResources.sort_2_lists(shifted_signal, signal_value)
         new_min_time = min(shifted_signal)
         new_max_time = max(shifted_signal)
 
@@ -585,7 +563,7 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         scaler_value = simpledialog.askfloat("Normalizing Range", "Press Desired Range\n1. [0, 1]\n2. [-1, 1]")
 
         if scaler_value != 1 and scaler_value != 2:
@@ -624,7 +602,7 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
         accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
 
         # plt.plot(signal_time, square_signal, color='orange')
@@ -647,8 +625,8 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         if messagebox.askyesno(title="Levels or Bits used for Quantization",
                                message="Yes -> # of Levels\nNo  -> # of Bits"):
@@ -739,103 +717,6 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def save_freq_domain_signal(self, amplitudes, phase_shifts, signal_file_path):
-        freq_domain_signal = [(amp, phase) for amp, phase in zip(amplitudes, phase_shifts)]
-        # freq_domain_signal = [(amplitudes[i], phase_shifts[i]) for i in range(len(amplitudes))]
-        with open(signal_file_path, 'w') as file:
-            file.write(f"1\n")
-            file.write(f"0\n")
-            file.write(f"{len(amplitudes)}\n")
-            for amp, phase in freq_domain_signal:
-                file.write(f"{amp} {phase}\n")
-
-    def save_time_domain_signal(self, signal_values, signal_file_path):
-        with open(signal_file_path, 'w') as file:
-            file.write(f"0\n")
-            file.write(f"0\n")
-            file.write(f"{len(signal_values)}\n")
-            for time, value in enumerate(signal_values):
-                file.write(f"{time} {value}\n")
-
-    def dft(self, time_domain_signal):
-        harmonics = []
-        N = len(time_domain_signal)
-        for k in range(N):
-            x_k_n = 0
-            for n, x_n in enumerate(time_domain_signal):
-                power_term = 2 * k * n / N
-                pi_factor = power_term * math.pi
-                img_term = math.cos(pi_factor) - complex(0, math.sin(pi_factor))
-                x_k_n += x_n * img_term
-            harmonics.append(x_k_n)
-
-        print("=" * 200)
-        print(f"N : {N}")
-        print(f"Signal Values   X(n): {time_domain_signal}")
-        print(f"Harmonics       X(k): {harmonics}")
-        print("=" * 200)
-        return harmonics
-
-    def idft(self, freq_domain_signal):
-        signal_value = []
-        for a, theta in freq_domain_signal:
-            real_part = a * cmath.cos(theta)
-            imaginary_part = a * cmath.sin(theta)
-            signal_value.append(complex(real_part, imaginary_part))
-
-        IDFT_component = []
-        signal_length = len(signal_value)
-        n_values = [i for i in range(0, signal_length)]
-        for n in n_values:
-            current_value = 0
-            for k, value in enumerate(signal_value):
-                current_value += (value * pow(math.e, ((1j * 2 * math.pi * n * k) / signal_length)))
-                # print(f'value {k} : {current_value}')
-            # print("-" * 50)
-            IDFT_component.append(self.round_complex(current_value).real * (1 / signal_length))
-
-        print(f'signal_value : {signal_value}')
-        print(f'IDF : {IDFT_component}')
-        print(f'len : {len(IDFT_component)}')
-        print(f'first value in IDFT: {abs(IDFT_component[0])}')
-        print(f'first value in IDFT: {abs(IDFT_component[1])}')
-        print(f'first value in IDFT: {abs(IDFT_component[2])}')
-        print(f'first value in IDFT: {abs(IDFT_component[3])}')
-        return IDFT_component
-
-    def read_signalT4(self, path):
-        with open(path, 'r') as file:
-            file.readline()
-            file.readline()
-            file.readline()
-            lines = file.readlines()
-        data_tuples = []
-        for line in lines:
-            columns = line.strip().split()
-            amplitude_init = columns[0]
-            phase_shift_init = columns[1]
-            amplitude = float(amplitude_init.rstrip('f')) if amplitude_init.endswith('f') else float(amplitude_init)
-            phase_shift = float(phase_shift_init.rstrip('f')) if phase_shift_init.endswith('f') else float(
-                phase_shift_init)
-            data_tuple = (amplitude, phase_shift)
-            data_tuples.append(data_tuple)
-        return data_tuples
-
-    def fourier_transform(self, signal_value, img_factor):
-        harmonics = []
-        N = len(signal_value)
-        for k in range(N):
-            x_k_n = 0
-            for n, x_n in enumerate(signal_value):
-                power_term = 2 * k * n / N
-                pi_factor = power_term * math.pi
-                img_term = math.cos(pi_factor) + img_factor * complex(0, math.sin(pi_factor))
-                x_k_n += x_n * img_term
-            if img_factor > 0:
-                x_k_n = x_k_n.real / N
-            harmonics.append(x_k_n)
-        return harmonics
-
     def task_4_dft(self):
         # Clear the previous plot
         for widget in self.plots_frame.winfo_children():
@@ -850,8 +731,8 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         # sampling_frequency = 4000
         sampling_frequency = simpledialog.askinteger("Sampling Frequency", "Enter a +ve Sampling Frequency in (Hz):")
@@ -862,7 +743,7 @@ class GUI:
         rounding_parameter = 3
         N = len(signal_value)
 
-        harmonics = self.dft(signal_value)
+        harmonics = dft(signal_value)
 
         amplitudes = [abs(x_k_n) for x_k_n in harmonics]
         phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
@@ -871,7 +752,7 @@ class GUI:
         print("=" * 200)
 
         output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
-        polar_form = self.read_signalT4(output_file_path)
+        polar_form = HelperResources.read_polar_signal(output_file_path)
         output_amplitudes = []
         output_phase_shifts = []
         for a, ps in polar_form:
@@ -993,12 +874,12 @@ class GUI:
         if not signal_file_path:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
-        polar = self.read_signalT4(signal_file_path)
-        signal_time_domain = self.idft(polar)
+        polar = HelperResources.read_polar_signal(signal_file_path)
+        signal_time_domain = idft(polar)
         x_indices = [i for i in range(1, len(signal_time_domain) + 1)]
 
         output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
-        _, s_v = self.read_only_signal(output_file_path)
+        _, s_v = HelperResources.read_only_signal(output_file_path)
         SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
 
         # Plot the discrete values
@@ -1025,8 +906,8 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         # sampling_frequency = 4000
         co_number = simpledialog.askinteger("Number of Coefficient", "enter number of coefficient")
@@ -1074,13 +955,13 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         average = sum(signal_value) / len(signal_value)
         signal_value_without_dc = [round(value - average, 3) for value in signal_value]
 
-        self.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_avg.txt')
+        HelperResources.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_avg.txt')
 
         plt.plot(signal_time, signal_value_without_dc, color='orange')
         plt.scatter(signal_time, signal_value_without_dc)
@@ -1105,17 +986,18 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
-        harmonics = self.dft(signal_value)
+        harmonics = dft(signal_value)
         harmonics[0] = complex(0, 0)
         amplitudes = [abs(x_k_n) for x_k_n in harmonics]
         phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
         polar = list(zip(amplitudes, phase_shifts))
-        signal_value_without_dc = self.idft(polar)
+        signal_value_without_dc = idft(polar)
 
-        self.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_harmonics.txt')
+        HelperResources.save_time_domain_signal(signal_value_without_dc,
+                                                'Task 5 Output - remove_dc_using_harmonics.txt')
 
         plt.plot(signal_time, signal_value_without_dc, color='orange')
         plt.scatter(signal_time, signal_value_without_dc)
@@ -1184,8 +1066,8 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         filter_size = simpledialog.askinteger("enter filter size", "enter filter size")
         if filter_size <= 0:
@@ -1230,8 +1112,8 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         first_derivative = [current_value - (signal_value[i - 1] if i != 0 else 0) for i, current_value in
                             enumerate(signal_value)][1:]
@@ -1270,8 +1152,8 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
 
@@ -1304,11 +1186,11 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         new_signal_time = [(-1 * x) for x in signal_time]
-        new_signal_time, new_signal_value = self.sort_2_lists(new_signal_time, signal_value)
+        new_signal_time, new_signal_value = HelperResources.sort_2_lists(new_signal_time, signal_value)
 
         plt.plot(signal_time, signal_value, color='green', label='Original Signal')
         plt.plot(new_signal_time, new_signal_value, color='orange', label='Folded Signal')
@@ -1336,12 +1218,12 @@ class GUI:
 
         k_steps = simpledialog.askinteger("Delaying/Advancing Steps", "# of Steps to Delay (+ve) or Advance (-ve)")
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
         # Folding
         folded_signal_time = [(-1 * x) for x in signal_time]
-        folded_signal_time, folded_signal_value = self.sort_2_lists(folded_signal_time, signal_value)
+        folded_signal_time, folded_signal_value = HelperResources.sort_2_lists(folded_signal_time, signal_value)
 
         # Delaying / Advancing
         new_label = "Delay" if k_steps > 0 else "Advanc"
@@ -1373,17 +1255,18 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time, signal_value = self.read_only_signal(signal_file_path)
-        signal_time, signal_value = self.sort_2_lists(signal_time, signal_value)
+        signal_time, signal_value = HelperResources.read_only_signal(signal_file_path)
+        signal_time, signal_value = HelperResources.sort_2_lists(signal_time, signal_value)
 
-        harmonics = self.dft(signal_value)
+        harmonics = dft(signal_value)
         harmonics[0] = complex(0, 0)
         amplitudes = [abs(x_k_n) for x_k_n in harmonics]
         phase_shifts = [cmath.phase(x_k_n) for x_k_n in harmonics]
         polar = list(zip(amplitudes, phase_shifts))
-        signal_value_without_dc = self.idft(polar)
+        signal_value_without_dc = idft(polar)
 
-        self.save_time_domain_signal(signal_value_without_dc, 'Task 6 Output - remove_dc_using_harmonics.txt')
+        HelperResources.save_time_domain_signal(signal_value_without_dc,
+                                                'Task 6 Output - remove_dc_using_harmonics.txt')
 
         plt.plot(signal_time, signal_value_without_dc, color='orange')
         plt.scatter(signal_time, signal_value_without_dc)
@@ -1418,11 +1301,11 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time_1, signal_value_1 = self.read_only_signal(signal_file_path_1)
-        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+        signal_time_1, signal_value_1 = HelperResources.read_only_signal(signal_file_path_1)
+        signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
 
-        signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
-        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+        signal_time_2, signal_value_2 = HelperResources.read_only_signal(signal_file_path_2)
+        signal_time_2, signal_value_2 = HelperResources.sort_2_lists(signal_time_2, signal_value_2)
 
         min_i = int(signal_time_1[0] + signal_time_2[0])
         max_i = int(signal_time_1[-1] + signal_time_2[-1])
@@ -1458,55 +1341,14 @@ class GUI:
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
         canvas.get_tk_widget().pack()
 
-    def read_signal_periodicity(self, signal_file_path):
-        with open(signal_file_path, 'r') as file:
-            file.readline()
-            periodicity = int(float(file.readline()))
-            file.readline()
-            lines = file.readlines()
-            signal_time = []
-            signal_value = []
-            for line in lines:
-                parts = line.split()
-                signal_time.append(float(parts[0]))
-                signal_value.append(float(parts[1]))
-        return signal_time, signal_value, periodicity
-
-    def direct_correlation_2_signals(self, signal_value_1, signal_value_2, periodicity):
-        def shift_left_signal(signal_v, is_periodic):
-            prev_first_element = signal_v.pop(0)
-            signal_v.append(prev_first_element if is_periodic else 0)
-            return signal_v
-
-        summation_square_of_list = lambda signal: sum([x1 * x1 for x1 in signal])
-        calc_normalization_term = lambda signal_1, signal_2, length: math.sqrt(
-            summation_square_of_list(signal_1) * summation_square_of_list(signal_2)) / length
-
-        N = len(signal_value_1)
-        print("=" * 200)
-        print(f"Length (N)                  : {N}")
-        normalization_term = calc_normalization_term(signal_value_1, signal_value_2, N)
-        print(f"Normalization Term          : {normalization_term}")
-        normalized_correlated_signal = []
-        for i in range(N):
-            r_12 = np.sum([a * b for a, b in zip(signal_value_1, signal_value_2)]) / N
-            if periodicity:
-                norm_12 = normalization_term
-            else:
-                norm_12 = calc_normalization_term(signal_value_1, signal_value_2, N)
-            normalized_correlated_signal.append(r_12 / norm_12)
-            signal_value_2 = shift_left_signal(signal_value_2, periodicity)
-        print(f"Normalized Correlated Signal: {normalized_correlated_signal}")
-        return normalized_correlated_signal
-
     def task_8_direct_correlation(self):
-        # Clear the previous plot
-        for widget in self.plots_frame.winfo_children():
-            widget.destroy()
-
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
-        fig.subplots_adjust(hspace=0.3)
-        fig.patch.set_facecolor(self.plots_bg_color)
+        # # Clear the previous plot
+        # for widget in self.plots_frame.winfo_children():
+        #     widget.destroy()
+        #
+        # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        # fig.subplots_adjust(hspace=0.3)
+        # fig.patch.set_facecolor(self.plots_bg_color)
 
         signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
         if not signal_file_path_1:
@@ -1518,62 +1360,38 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time_1, signal_value_1, signal_periodicity_1 = self.read_signal_periodicity(signal_file_path_1)
-        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+        signal_time_1, signal_value_1, signal_periodicity_1 = read_signal_periodicity(signal_file_path_1)
+        signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
 
-        signal_time_2, signal_value_2, signal_periodicity_2 = self.read_signal_periodicity(signal_file_path_2)
-        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+        signal_time_2, signal_value_2, signal_periodicity_2 = read_signal_periodicity(signal_file_path_2)
+        signal_time_2, signal_value_2 = HelperResources.sort_2_lists(signal_time_2, signal_value_2)
 
-        normalized_correlated_signal = self.direct_correlation_2_signals(signal_value_1, signal_value_2,
-                                                                         signal_periodicity_2)
+        normalized_correlated_signal = direct_correlation_2_signals(signal_value_1, signal_value_2,
+                                                                    signal_periodicity_2)
 
-        ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1')
-        ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2')
-        ax1.legend()
-        ax1.set_xlabel("Time")
-        ax1.set_ylabel('Amplitude')
-        ax1.set_title(f'Task 8.2 - Correlation (Time Domain) [Signals]')
-
-        ax2.plot(signal_time_1, normalized_correlated_signal, color='red', label='Correlation')
-        ax2.legend()
-        ax2.set_xlabel("Time")
-        ax2.set_ylabel('Amplitude')
-        ax2.set_title('Task 8.1 - Correlation (Time Domain) [Value]')
-
-        # Embed the Matplotlib plot in the Tkinter window
-        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
-        canvas.get_tk_widget().pack()
-
-    def fast_correlation_2_signals(self, signal_value_1, signal_value_2):
-        summation_square_of_list = lambda signal: sum([x1 * x1 for x1 in signal])
-
-        N = len(signal_value_1)
-        print("=" * 200)
-        print(f"Length (N)                  : {N}")
-
-        harmonics_signal_1 = self.fourier_transform(signal_value_1, -1)
-        harmonics_signal_2 = self.fourier_transform(signal_value_2, -1)
-        conjugate_signal_1 = [x_k.conjugate() for x_k in harmonics_signal_1]
-        print(f"Conjugate Signal-1          : {conjugate_signal_1}")
-        print(f"HarmonicS Signal-2          : {harmonics_signal_2}")
-
-        harmonic_multiplication = [x1_k * x2_k for x1_k, x2_k in zip(conjugate_signal_1, harmonics_signal_2)]
-        print(f"Harmonic Multiplication     : {harmonic_multiplication}")
-
-        idft_of_harmonic_multiplication = self.fourier_transform(harmonic_multiplication, 1)
-        correlated_signal = [round(x_n) / N for x_n in idft_of_harmonic_multiplication]
-        print(f"Correlated Signal           : {correlated_signal}")
-
-        summation_power_1 = summation_square_of_list(signal_value_1)
-        summation_power_2 = summation_square_of_list(signal_value_2)
-        normalization_term = math.sqrt(summation_power_1 * summation_power_2) / N
-        print(f"Normalization Term          : {normalization_term}")
-
-        normalized_correlated_signal = [r_1_2 / normalization_term for r_1_2 in correlated_signal]
-        print(f"Normalized Correlated Signal: {normalized_correlated_signal}")
-        print("=" * 200)
-
-        return normalized_correlated_signal
+        # ax1.plot(signal_time_1, signal_value_1, color='green', label='Signal 1')
+        # ax1.plot(signal_time_2, signal_value_2, color='orange', label='Signal 2')
+        # ax1.legend()
+        # ax1.set_xlabel("Time")
+        # ax1.set_ylabel('Amplitude')
+        # ax1.set_title()
+        #
+        # ax2.plot(signal_time_1, normalized_correlated_signal, color='red', label='Correlation')
+        # ax2.legend()
+        # ax2.set_xlabel()
+        # ax2.set_ylabel()
+        # ax2.set_title()
+        #
+        # # Embed the Matplotlib plot in the Tkinter window
+        # canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        # canvas.get_tk_widget().pack()
+        self.window_2_plots([signal_time_1, signal_time_2, signal_time_1],
+                            [signal_value_1, signal_value_2, normalized_correlated_signal],
+                            ['Signal 1', 'Signal 2', 'Correlation'],
+                            "Time",
+                            'Amplitude',
+                            f'Task 8.1 - Correlation (Time Domain) [Signals]',
+                            'Task 8.1 - Correlation (Time Domain) [Value]')
 
     def task_8_time_analysis_BONUS(self):
         # Clear the previous plot
@@ -1605,13 +1423,13 @@ class GUI:
             messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
             return
 
-        signal_time_1, signal_value_1 = self.read_only_signal(signal_file_path_1)
-        signal_time_1, signal_value_1 = self.sort_2_lists(signal_time_1, signal_value_1)
+        signal_time_1, signal_value_1 = HelperResources.read_only_signal(signal_file_path_1)
+        signal_time_1, signal_value_1 = HelperResources.sort_2_lists(signal_time_1, signal_value_1)
 
-        signal_time_2, signal_value_2 = self.read_only_signal(signal_file_path_2)
-        signal_time_2, signal_value_2 = self.sort_2_lists(signal_time_2, signal_value_2)
+        signal_time_2, signal_value_2 = HelperResources.read_only_signal(signal_file_path_2)
+        signal_time_2, signal_value_2 = HelperResources.sort_2_lists(signal_time_2, signal_value_2)
 
-        normalized_correlated_signal = self.fast_correlation_2_signals(signal_value_1, signal_value_2)
+        normalized_correlated_signal = fast_correlation_2_signals(signal_value_1, signal_value_2)
 
         print("=" * 200)
         print(f"Sampling Frequency                  : {sampling_frequency}")
@@ -1716,11 +1534,11 @@ class GUI:
 
         test_signal = template_matching_read_file(test_file_path)
 
-        normalized_correlated_class_1 = self.fast_correlation_2_signals(class_1_average, test_signal)
+        normalized_correlated_class_1 = fast_correlation_2_signals(class_1_average, test_signal)
         absolute_normalized_correlated_class_1 = [abs(corr) for corr in normalized_correlated_class_1]
         maximum_absolute_correlation_class_1 = max(absolute_normalized_correlated_class_1)
 
-        normalized_correlated_class_2 = self.fast_correlation_2_signals(class_2_average, test_signal)
+        normalized_correlated_class_2 = fast_correlation_2_signals(class_2_average, test_signal)
         absolute_normalized_correlated_class_2 = [abs(corr) for corr in normalized_correlated_class_2]
         maximum_absolute_correlation_class_2 = max(absolute_normalized_correlated_class_2)
 
@@ -1776,12 +1594,12 @@ class GUI:
             return
 
         # signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
-        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
-        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
+        signal_time1, signal_value1 = HelperResources.read_only_signal(signal_file_path_1)
+        signal_time1, signal_value1 = HelperResources.sort_2_lists(signal_time1, signal_value1)
 
         # signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
-        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
-        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
+        signal_time2, signal_value2 = HelperResources.read_only_signal(signal_file_path_2)
+        signal_time2, signal_value2 = HelperResources.sort_2_lists(signal_time2, signal_value2)
 
         min_index = signal_time1[0] + signal_time2[0]
         max_index = signal_time1[-1] + signal_time2[-1]
@@ -1792,8 +1610,8 @@ class GUI:
         signal_value1 = np.pad(signal_value1, (0, number_of_elements - len(signal_value1)))
         signal_value2 = np.pad(signal_value2, (0, number_of_elements - len(signal_value2)))
 
-        signal1_freq_domain = self.dft(signal_value1)
-        signal2_freq_domain = self.dft(signal_value2)
+        signal1_freq_domain = dft(signal_value1)
+        signal2_freq_domain = dft(signal_value2)
 
         output = [a * b for a, b in zip(signal1_freq_domain, signal2_freq_domain)]
 
@@ -1801,7 +1619,7 @@ class GUI:
         phase_shift = [cmath.phase(angle) for angle in output]
 
         polar1 = list(zip(amplitude, phase_shift))
-        convoluted_signal_value = self.idft(polar1)
+        convoluted_signal_value = idft(polar1)
         print(f'convoluted_signal_value : {convoluted_signal_value}')
 
         plt.plot(output_time, convoluted_signal_value, color='red', label='Convoluted Signal')
@@ -1832,14 +1650,14 @@ class GUI:
             messagebox.showerror(title="Error", message="Signal Data File Not Found!")
             return
 
-        signal_time1, signal_value1 = self.read_only_signal(signal_file_path_1)
-        signal_time1, signal_value1 = self.sort_2_lists(signal_time1, signal_value1)
+        signal_time1, signal_value1 = HelperResources.read_only_signal(signal_file_path_1)
+        signal_time1, signal_value1 = HelperResources.sort_2_lists(signal_time1, signal_value1)
 
-        signal_time2, signal_value2 = self.read_only_signal(signal_file_path_2)
-        signal_time2, signal_value2 = self.sort_2_lists(signal_time2, signal_value2)
+        signal_time2, signal_value2 = HelperResources.read_only_signal(signal_file_path_2)
+        signal_time2, signal_value2 = HelperResources.sort_2_lists(signal_time2, signal_value2)
 
-        signal1_freq_domain = self.dft(signal_value1)
-        signal2_freq_domain = self.dft(signal_value2)
+        signal1_freq_domain = dft(signal_value1)
+        signal2_freq_domain = dft(signal_value2)
 
         output = [a * b for a, b in zip(np.conj(signal1_freq_domain), signal2_freq_domain)]
         print(f'conj :   {np.conj(signal1_freq_domain)}')
@@ -1847,7 +1665,7 @@ class GUI:
         phase_shift = [cmath.phase(angle) for angle in output]
 
         polar1 = list(zip(amplitude, phase_shift))
-        signal_time_domain = self.idft(polar1)
+        signal_time_domain = idft(polar1)
         final_cross_correlation = [int(a) * 1 / len(signal_value2) for a in signal_time_domain]
         print(f'correlation  : {final_cross_correlation}')
 
@@ -1862,6 +1680,43 @@ class GUI:
         plt.xlabel("Time")
         plt.ylabel('Amplitude')
         plt.title('Task 9.2 - Correlation (Frequency Domain)')
+
+        # Embed the Matplotlib plot in the Tkinter window
+        canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
+        canvas.get_tk_widget().pack()
+
+    def window_2_plots(self, signal_times, signal_values, legends, x_label, y_label, title_1, title_2):
+        # Clear the previous plot
+        for widget in self.plots_frame.winfo_children():
+            widget.destroy()
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(self.screen_width / 100, self.screen_height / 110))
+        fig.subplots_adjust(hspace=0.3)
+        fig.patch.set_facecolor(self.plots_bg_color)
+
+        number_of_signals = len(legends)
+
+        x_axis = [x_label, x_label]
+        y_axis = [y_label, y_label]
+
+        if isinstance(y_label, list):
+            y_axis = y_label
+        if isinstance(x_label, list):
+            x_axis = x_label
+        colors = ['green', 'orange', 'blue']
+
+        for i in range(number_of_signals-1):
+            ax1.plot(signal_times[i], signal_values[i], color=colors[i], label=legends[i])
+        ax1.legend()
+        ax1.set_xlabel(x_axis[0])
+        ax1.set_ylabel(y_axis[0])
+        ax1.set_title(title_1)
+
+        ax2.plot(signal_times[number_of_signals-1], signal_values[number_of_signals-1], color='red', label=legends[number_of_signals-1])
+        ax2.legend()
+        ax2.set_xlabel(x_axis[1])
+        ax2.set_ylabel(y_axis[1])
+        ax2.set_title(title_2)
 
         # Embed the Matplotlib plot in the Tkinter window
         canvas = FigureCanvasTkAgg(fig, master=self.plots_frame)
