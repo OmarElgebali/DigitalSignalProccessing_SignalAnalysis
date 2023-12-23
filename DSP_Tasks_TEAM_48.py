@@ -1460,7 +1460,7 @@ class GUI:
 
             sampling_frequency = simpledialog.askinteger("Sampling Frequency",
                                                          "Enter a +ve Sampling Frequency in (Hz):")
-            if sampling_frequency < 0:
+            if sampling_frequency <= 0:
                 messagebox.showerror(title="Error", message="Sampling Frequency must be non-negative")
                 return
 
