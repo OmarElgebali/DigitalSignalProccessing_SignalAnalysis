@@ -1695,7 +1695,7 @@ class GUI:
 
         if TestCases:
             output_file_path = "Task 9/Fast Correlation/Corr_Output.txt"
-            Task_9_CompareSignal.Compare_Signals(output_file_path, signal_time1, normalized_signal)
+            Task_9_CompareSignal.Compare_Signals(output_file_path, signal_time1, final_cross_correlation)
 
         self.window_1_plots([signal_time2],
                             [normalized_signal],
