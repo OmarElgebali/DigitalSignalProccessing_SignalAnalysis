@@ -386,7 +386,7 @@ class GUI:
         fig = plt.figure(figsize=(self.screen_width / 100, self.screen_height / 110))
         fig.patch.set_facecolor(self.plots_bg_color)
 
-        output_path = "Task 1/CosOutput.txt"
+        output_path = "TestCases/Task 1/CosOutput.txt"
         name = "Cosine"
         wave_type = 2
         amplitude = 3
@@ -394,7 +394,7 @@ class GUI:
         sampling_frequency = 500
         phase_shift = 2.35619449019235
         if messagebox.askyesno(title="Test Signal", message="Yes -> Sine Test\nNo  -> Cosine Test"):
-            output_path = "Task 1/SinOutput.txt"
+            output_path = "TestCases/Task 1/SinOutput.txt"
             name = "Sin"
             wave_type = 1
             analog_frequency = 360
@@ -438,13 +438,13 @@ class GUI:
 
     def task_2_1_addition(self):
         if TestCases:
-            output_path = "Task 2/output_signals/signal1+signal3.txt"
-            signal_2_file_path = "Task 2/input_signals/signal3.txt"
+            output_path = "TestCases/Task 2/output_signals/signal1+signal3.txt"
+            signal_2_file_path = "TestCases/Task 2/input_signals/signal3.txt"
             if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 + S2)\nNo  -> Signal 3 (S1 + S3)"):
-                output_path = "Task 2/output_signals/Signal1+signal2.txt"
-                signal_2_file_path = "Task 2/input_signals/Signal2.txt"
+                output_path = "TestCases/Task 2/output_signals/Signal1+signal2.txt"
+                signal_2_file_path = "TestCases/Task 2/input_signals/Signal2.txt"
 
-            signal_1_file_path = "Task 2/input_signals/Signal1.txt"
+            signal_1_file_path = "TestCases/Task 2/input_signals/Signal1.txt"
             file_paths = [signal_1_file_path, signal_2_file_path]
         else:
             # Select Multiple Files
@@ -533,13 +533,13 @@ class GUI:
 
     def task_2_2_subtraction(self):
         if TestCases:
-            output_path = "Task 2/output_signals/signal1-signal3.txt"
-            signal_2_file_path = "Task 2/input_signals/signal3.txt"
+            output_path = "TestCases/Task 2/output_signals/signal1-signal3.txt"
+            signal_2_file_path = "TestCases/Task 2/input_signals/signal3.txt"
             if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 2 (S1 - S2)\nNo  -> Signal 3 (S1 - S3)"):
-                output_path = "Task 2/output_signals/signal1-signal2.txt"
-                signal_2_file_path = "Task 2/input_signals/Signal2.txt"
+                output_path = "TestCases/Task 2/output_signals/signal1-signal2.txt"
+                signal_2_file_path = "TestCases/Task 2/input_signals/Signal2.txt"
 
-            signal_1_file_path = "Task 2/input_signals/Signal1.txt"
+            signal_1_file_path = "TestCases/Task 2/input_signals/Signal1.txt"
         else:
             signal_1_file_path = filedialog.askopenfilename(title="Select Signal Data File (S1)")
             if not signal_1_file_path:
@@ -587,13 +587,13 @@ class GUI:
 
     def task_2_3_multiplication(self):
         if TestCases:
-            output_path = "Task 2/output_signals/MultiplySignalByConstant-signal2 - by 10.txt"
-            signal_file_path = "Task 2/input_signals/Signal2.txt"
+            output_path = "TestCases/Task 2/output_signals/MultiplySignalByConstant-signal2 - by 10.txt"
+            signal_file_path = "TestCases/Task 2/input_signals/Signal2.txt"
             factor = 10
             if messagebox.askyesno(title="Test Signal",
                                    message="Yes -> Signal 1 (Factor = 5)\nNo  -> Signal 2 (Factor = 10)"):
-                output_path = "Task 2/output_signals/MultiplySignalByConstant-Signal1 - by 5.txt"
-                signal_file_path = "Task 2/input_signals/Signal1.txt"
+                output_path = "TestCases/Task 2/output_signals/MultiplySignalByConstant-Signal1 - by 5.txt"
+                signal_file_path = "TestCases/Task 2/input_signals/Signal1.txt"
                 factor = 5
 
         else:
@@ -621,7 +621,7 @@ class GUI:
 
     def task_2_4_squaring(self):
         if TestCases:
-            signal_file_path = "Task 2/input_signals/Signal1.txt"
+            signal_file_path = "TestCases/Task 2/input_signals/Signal1.txt"
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -632,7 +632,7 @@ class GUI:
         square_signal = np.array(signal_value) * np.array(signal_value)
 
         if TestCases:
-            SignalSamplesAreEqual("Task 2/output_signals/Output squaring signal 1.txt", None, square_signal)
+            SignalSamplesAreEqual("TestCases/Task 2/output_signals/Output squaring signal 1.txt", None, square_signal)
 
         self.window_1_plots([signal_time],
                             [square_signal],
@@ -650,12 +650,12 @@ class GUI:
         fig.patch.set_facecolor(self.plots_bg_color)
 
         if TestCases:
-            signal_file_path = "Task 2/input_signals/Input Shifting.txt"
+            signal_file_path = "TestCases/Task 2/input_signals/Input Shifting.txt"
             shift_value = -500
-            output_path = "Task 2/output_signals/output shifting by minus 500.txt"
+            output_path = "TestCases/Task 2/output_signals/output shifting by minus 500.txt"
             if messagebox.askyesno(title="Shifting Value", message="Yes -> +500\nNo  -> -500"):
                 shift_value = 500
-                output_path = "Task 2/output_signals/output shifting by add 500.txt"
+                output_path = "TestCases/Task 2/output_signals/output shifting by add 500.txt"
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -687,12 +687,12 @@ class GUI:
 
     def task_2_6_normalization(self):
         if TestCases:
-            signal_file_path = "Task 2/input_signals/Signal2.txt"
-            output_path = "Task 2/output_signals/normlize signal 2 -- output.txt"
+            signal_file_path = "TestCases/Task 2/input_signals/Signal2.txt"
+            output_path = "TestCases/Task 2/output_signals/normlize signal 2 -- output.txt"
             scaler_value = 1
             if messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1 (-1 , 1)\nNo  -> Signal 2 (0 , 1)"):
-                output_path = "Task 2/output_signals/normalize of signal 1 -- output.txt"
-                signal_file_path = "Task 2/input_signals/Signal1.txt"
+                output_path = "TestCases/Task 2/output_signals/normalize of signal 1 -- output.txt"
+                signal_file_path = "TestCases/Task 2/input_signals/Signal1.txt"
                 scaler_value = 2
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
@@ -728,7 +728,7 @@ class GUI:
 
     def task_2_7_accumulation(self):
         if TestCases:
-            signal_file_path = "Task 2/input_signals/Signal1.txt"
+            signal_file_path = "TestCases/Task 2/input_signals/Signal1.txt"
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -739,7 +739,7 @@ class GUI:
         accumulate_signal = [sum(signal_value[:i + 1]) for i in range(len(signal_value))]
 
         if TestCases:
-            SignalSamplesAreEqual("Task 2/output_signals/output accumulation for signal1.txt", None, accumulate_signal)
+            SignalSamplesAreEqual("TestCases/Task 2/output_signals/output accumulation for signal1.txt", None, accumulate_signal)
 
         self.window_1_plots([signal_time],
                             [accumulate_signal],
@@ -750,12 +750,12 @@ class GUI:
 
     def task_3_quantize(self):
         if TestCases:
-            signal_file_path = "Task 3/Test 2/Quan2_input.txt"
+            signal_file_path = "TestCases/Task 3/Test 2/Quan2_input.txt"
             bits = 2
             L = 4
             is_test_1 = messagebox.askyesno(title="Test Signal", message="Yes -> Signal 1\nNo  -> Signal 2")
             if is_test_1:
-                signal_file_path = "Task 3/Test 1/Quan1_input.txt"
+                signal_file_path = "TestCases/Task 3/Test 1/Quan1_input.txt"
                 bits = 3
                 L = 8
         else:
@@ -836,10 +836,10 @@ class GUI:
         tree.pack()
         if TestCases:
             if is_test_1:
-                output_path = "Task 3/Test 1/Quan1_Out.txt"
+                output_path = "TestCases/Task 3/Test 1/Quan1_Out.txt"
                 QuantizationTest1(output_path, encoded_signal, quantized_signal)
             else:
-                output_path = "Task 3/Test 2/Quan2_Out.txt"
+                output_path = "TestCases/Task 3/Test 2/Quan2_Out.txt"
                 QuantizationTest2(output_path, interval_index, encoded_signal, quantized_signal, errors)
 
         self.window_2_plots([signal_time, signal_time],
@@ -852,7 +852,7 @@ class GUI:
 
     def task_4_dft(self):
         if TestCases:
-            signal_file_path = 'Task 4/DFT/input_Signal_DFT.txt'
+            signal_file_path = 'TestCases/Task 4/DFT/input_Signal_DFT.txt'
             sampling_frequency = 4
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
@@ -880,7 +880,7 @@ class GUI:
         print("=" * 200)
 
         if TestCases:
-            output_file_path = 'Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
+            output_file_path = 'TestCases/Task 4/DFT/Output_Signal_DFT_A,Phase.txt'
             polar_form = HelperResources.read_polar_signal(output_file_path)
             output_amplitudes = []
             output_phase_shifts = []
@@ -956,7 +956,7 @@ class GUI:
 
     def task_4_idft(self):
         if TestCases:
-            signal_file_path = 'Task 4/IDFT/Input_Signal_IDFT_A,Phase.txt'
+            signal_file_path = 'TestCases/Task 4/IDFT/Input_Signal_IDFT_A,Phase.txt'
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -970,7 +970,7 @@ class GUI:
         if TestCases:
             # save_file_path = 'Task 4/idft_out.txt'
             # HelperResources.save_time_domain_signal(signal_time_domain, save_file_path)
-            output_file_path = 'Task 4/IDFT/Output_Signal_IDFT.txt'
+            output_file_path = 'TestCases/Task 4/IDFT/Output_Signal_IDFT.txt'
             _, s_v = HelperResources.read_only_signal(output_file_path)
             SignalSamplesAreEqual(output_file_path, x_indices, signal_time_domain)
 
@@ -983,7 +983,7 @@ class GUI:
 
     def task_5_dct(self):
         if TestCases:
-            signal_file_path = 'Task 5/DCT/DCT_input.txt'
+            signal_file_path = 'TestCases/Task 5/DCT/DCT_input.txt'
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -1028,12 +1028,12 @@ class GUI:
                 file.write(f"{x}\t{y}\n")
 
         if TestCases:
-            output_file_path = 'Task 5/DCT/DCT_output.txt'
+            output_file_path = 'TestCases/Task 5/DCT/DCT_output.txt'
             Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, dct)
 
     def task_5_remove_dc_using_avg(self):
         if TestCases:
-            signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+            signal_file_path = 'TestCases/Task 5/Remove DC component/DC_component_input.txt'
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -1049,7 +1049,7 @@ class GUI:
         HelperResources.save_time_domain_signal(signal_value_without_dc, 'Task 5 Output - remove_dc_using_avg.txt')
 
         if TestCases:
-            output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+            output_file_path = 'TestCases/Task 5/Remove DC component/DC_component_output.txt'
             Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
 
         self.window_1_plots([signal_time, signal_time],
@@ -1061,7 +1061,7 @@ class GUI:
 
     def task_5_remove_dc_using_harmonics(self):
         if TestCases:
-            signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+            signal_file_path = 'TestCases/Task 5/Remove DC component/DC_component_input.txt'
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -1082,7 +1082,7 @@ class GUI:
                                                 'Task 5 Output - remove_dc_using_harmonics.txt')
 
         if TestCases:
-            output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+            output_file_path = 'TestCases/Task 5/Remove DC component/DC_component_output.txt'
             Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
 
         self.window_1_plots([signal_time, signal_time],
@@ -1138,11 +1138,11 @@ class GUI:
 
     def task_6_smoothing(self):  ## >>>>>>>>>>>>>>>>> WITHOUT PADDING <<<<<<<<<<<<<<<<<<<<<<<
         if TestCases:
-            signal_file_path = 'Task 6/Moving Average/MovAvgTest2.txt'
+            signal_file_path = 'TestCases/Task 6/Moving Average/MovAvgTest2.txt'
             filter_size = 5
             if messagebox.askyesno(title="Test Signal",
                                    message="Yes -> Test Case 1 with Filter Size = 3\nNo  -> Test Case 2 with Filter Size = 5"):
-                signal_file_path = 'Task 6/Moving Average/MovAvgTest1.txt'
+                signal_file_path = 'TestCases/Task 6/Moving Average/MovAvgTest1.txt'
                 filter_size = 3
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
@@ -1220,7 +1220,7 @@ class GUI:
 
     def task_6_delay_advance_signal(self):
         if TestCases:
-            signal_file_path = 'Task 6/Shifting and Folding/input_fold.txt'
+            signal_file_path = 'TestCases/Task 6/Shifting and Folding/input_fold.txt'
             k_steps = 2
 
         else:
@@ -1247,7 +1247,7 @@ class GUI:
 
     def task_6_folding(self):
         if TestCases:
-            signal_file_path = 'Task 6/Shifting and Folding/input_fold.txt'
+            signal_file_path = 'TestCases/Task 6/Shifting and Folding/input_fold.txt'
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -1261,7 +1261,7 @@ class GUI:
         new_signal_time, new_signal_value = HelperResources.sort_2_lists(new_signal_time, signal_value)
 
         if TestCases:
-            output_file_path = 'Task 6/Shifting and Folding/Output_fold.txt'
+            output_file_path = 'TestCases/Task 6/Shifting and Folding/Output_fold.txt'
             Task_6_Shift_Fold_Signal.Shift_Fold_Signal(output_file_path, new_signal_time, new_signal_value)
 
         self.window_1_plots([signal_time, new_signal_time],
@@ -1273,13 +1273,13 @@ class GUI:
 
     def task_6_delay_advance_folded_signal(self):
         if TestCases:
-            signal_file_path = "Task 6/Shifting and Folding/input_fold.txt"
-            output_file_path = "Task 6/Shifting and Folding/Output_ShiftFoldedby-500.txt"
+            signal_file_path = "TestCases/Task 6/Shifting and Folding/input_fold.txt"
+            output_file_path = "TestCases/Task 6/Shifting and Folding/Output_ShiftFoldedby-500.txt"
             k_steps = -500
             is_test_500 = messagebox.askyesno(title="Test Signal",
                                               message="Yes -> Delay with 500\nNo  -> Advance with -500")
             if is_test_500:
-                output_file_path = "Task 6/Shifting and Folding/Output_ShifFoldedby500.txt"
+                output_file_path = "TestCases/Task 6/Shifting and Folding/Output_ShifFoldedby500.txt"
                 k_steps = 500
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
@@ -1314,7 +1314,7 @@ class GUI:
 
     def task_6_remove_dc_in_freqdomain(self):
         if TestCases:
-            signal_file_path = 'Task 5/Remove DC component/DC_component_input.txt'
+            signal_file_path = 'TestCases/Task 5/Remove DC component/DC_component_input.txt'
         else:
             signal_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path:
@@ -1335,7 +1335,7 @@ class GUI:
                                                 'Task 6 Output - remove_dc_using_harmonics.txt')
 
         if TestCases:
-            output_file_path = 'Task 5/Remove DC component/DC_component_output.txt'
+            output_file_path = 'TestCases/Task 5/Remove DC component/DC_component_output.txt'
             Task_5_comparesignal2.SignalSamplesAreEqual(output_file_path, signal_value_without_dc)
 
         self.window_1_plots([signal_time, signal_time],
@@ -1351,8 +1351,8 @@ class GUI:
             return signal_v[signal_t.index(index)] if index in signal_t else 0
 
         if TestCases:
-            signal_file_path_1 = "Task 7/Convolution/Input_conv_Sig1.txt"
-            signal_file_path_2 = "Task 7/Convolution/Input_conv_Sig2.txt"
+            signal_file_path_1 = "TestCases/Task 7/Convolution/Input_conv_Sig1.txt"
+            signal_file_path_2 = "TestCases/Task 7/Convolution/Input_conv_Sig2.txt"
         else:
             signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path_1:
@@ -1400,8 +1400,8 @@ class GUI:
 
     def task_8_direct_correlation(self):
         if TestCases:
-            signal_file_path_1 = "Task 8/Correlation/Corr_input signal1.txt"
-            signal_file_path_2 = "Task 8/Correlation/Corr_input signal2.txt"
+            signal_file_path_1 = "TestCases/Task 8/Correlation/Corr_input signal1.txt"
+            signal_file_path_2 = "TestCases/Task 8/Correlation/Corr_input signal2.txt"
         else:
             signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path_1:
@@ -1425,7 +1425,7 @@ class GUI:
                                                                     signal_periodicity_2)
 
         if TestCases:
-            output_file_path = "Task 8/Correlation/CorrOutput.txt"
+            output_file_path = "TestCases/Task 8/Correlation/CorrOutput.txt"
             Task_8_CompareSignal.Compare_Signals(output_file_path, signal_time_1, normalized_correlated_signal)
 
         self.window_2_plots([signal_time_1, signal_time_2, signal_time_1],
@@ -1444,8 +1444,8 @@ class GUI:
         """
 
         if TestCases:
-            signal_file_path_1 = "Task 8/Time analysis/TD_input signal1.txt"
-            signal_file_path_2 = "Task 8/Time analysis/TD_input signal2.txt"
+            signal_file_path_1 = "TestCases/Task 8/Time analysis/TD_input signal1.txt"
+            signal_file_path_2 = "TestCases/Task 8/Time analysis/TD_input signal2.txt"
             sampling_frequency = 100
         else:
             signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
@@ -1526,8 +1526,8 @@ class GUI:
             return class_signals
 
         if TestCases:
-            folder_path_1 = 'Task 8/Template Matching/Class 1'
-            folder_path_2 = 'Task 8/Template Matching/Class 2'
+            folder_path_1 = 'TestCases/Task 8/Template Matching/Class 1'
+            folder_path_2 = 'TestCases/Task 8/Template Matching/Class 2'
         else:
             folder_path_1 = filedialog.askdirectory(title="Select Signals Folder (Class-1)")
             if not folder_path_1:
@@ -1555,9 +1555,9 @@ class GUI:
         print(f"Class 2 - Average       : {class_2_average}")
 
         if TestCases:
-            test_file_path = 'Task 8/Template Matching/Test Signals/Test2.txt'
+            test_file_path = 'TestCases/Task 8/Template Matching/Test Signals/Test2.txt'
             if messagebox.askyesno(title="Test Case", message="Yes -> Test Case 1\nNo  -> Test Case 2"):
-                test_file_path = 'Task 8/Template Matching/Test Signals/Test1.txt'
+                test_file_path = 'TestCases/Task 8/Template Matching/Test Signals/Test1.txt'
         else:
             test_file_path = filedialog.askopenfilename(title="Select Signal Data File")
             if not test_file_path:
@@ -1601,8 +1601,8 @@ class GUI:
 
     def task_9_fast_convolution(self):
         if TestCases:
-            signal_file_path_1 = "Task 9/Fast Convolution/Input_conv_Sig1.txt"
-            signal_file_path_2 = "Task 9/Fast Convolution/Input_conv_Sig2.txt"
+            signal_file_path_1 = "TestCases/Task 9/Fast Convolution/Input_conv_Sig1.txt"
+            signal_file_path_2 = "TestCases/Task 9/Fast Convolution/Input_conv_Sig2.txt"
         else:
             signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path_1:
@@ -1655,8 +1655,8 @@ class GUI:
 
     def task_9_fast_correlation(self):
         if TestCases:
-            signal_file_path_1 = "Task 9/Fast Correlation/Corr_input signal1.txt"
-            signal_file_path_2 = "Task 9/Fast Correlation/Corr_input signal2.txt"
+            signal_file_path_1 = "TestCases/Task 9/Fast Correlation/Corr_input signal1.txt"
+            signal_file_path_2 = "TestCases/Task 9/Fast Correlation/Corr_input signal2.txt"
         else:
             signal_file_path_1 = filedialog.askopenfilename(title="Select Signal Data File")
             if not signal_file_path_1:
@@ -1694,7 +1694,7 @@ class GUI:
         print(f'final after normalization : {normalized_signal}')
 
         if TestCases:
-            output_file_path = "Task 9/Fast Correlation/Corr_Output.txt"
+            output_file_path = "TestCases/Task 9/Fast Correlation/Corr_Output.txt"
             Task_9_CompareSignal.Compare_Signals(output_file_path, signal_time1, final_cross_correlation)
 
         self.window_1_plots([signal_time2],
