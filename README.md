@@ -36,6 +36,6 @@ This feature implements the fast method for convoluting and correlating two sign
 
 - **Correlation.py:** A module containing the Correlation fast (Frequency Domain) and direct (Time Domain) methods.
 
-- **\TaskFunctions:** The Folder has test functions for each feature described.
+- **TaskFunctions/:** The Folder has test functions for each feature described.
 
-- **\TestCases:** The Folder includes test cases for each feature described.
+- **TestCases/:** The Folder includes test cases for each feature described.
